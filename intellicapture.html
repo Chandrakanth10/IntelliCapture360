@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntelliCapture — Campaign Intake Workflow</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {sans:['Outfit','Inter','system-ui','sans-serif']},
+        }
+      }
+    }
+  </script>
+  <style>
+    * { font-family:'Outfit','Inter','system-ui',sans-serif; }
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    @keyframes slideFwd{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes slideBack{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes scaleIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
+    @keyframes checkDraw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+    @keyframes progressPulse{0%,100%{opacity:1}50%{opacity:.7}}
+    .anim-fade{animation:fadeIn .35s ease-out both}
+    .anim-slide-r{animation:slideRight .25s ease-out both}
+    .anim-fwd{animation:slideFwd .3s cubic-bezier(.25,.1,.25,1) both}
+    .anim-back{animation:slideBack .3s cubic-bezier(.25,.1,.25,1) both}
+    .anim-scale{animation:scaleIn .25s ease-out both}
+    .scrollbar-thin::-webkit-scrollbar{width:4px}
+    .scrollbar-thin::-webkit-scrollbar-track{background:transparent}
+    .scrollbar-thin::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px}
+    .no-scrollbar::-webkit-scrollbar{display:none}
+    .no-scrollbar{-ms-overflow-style:none;scrollbar-width:none}
+    .pipe-seg{transition:all .2s ease}.pipe-seg:hover{filter:brightness(1.1);transform:scaleY(1.05)}
+    .field-error{border-color:#e11d48!important;box-shadow:0 0 0 3px rgba(225,29,72,.12)!important}
+    .field-success{border-color:#10b981!important;box-shadow:0 0 0 3px rgba(16,185,129,.12)!important}
+    select{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");background-position:right 8px center;background-repeat:no-repeat;background-size:20px;appearance:none;padding-right:32px}
+    .card-focus{transition:border-color .15s ease,box-shadow .15s ease}
+    .card-focus:focus-within{border-color:rgba(99,102,241,.35);box-shadow:0 0 0 3px rgba(99,102,241,.14)}
+    .check-anim{stroke-dasharray:24;stroke-dashoffset:0;animation:checkDraw .3s ease-out}
+    .progress-bar{transition:width .4s cubic-bezier(.25,.1,.25,1)}
+    .kbd{font-size:10px;padding:1px 5px;border-radius:3px;border:1px solid #e2e8f0;background:#f8fafc;color:#64748b;font-family:inherit}
+    .chip-toggle{transition:all .15s ease}
+    .chip-toggle:hover{background:#f1f5f9;border-color:#cbd5e1}
+    .chip-toggle.active{background:#eef2ff;border-color:#a5b4fc;color:#4f46e5}
+    .chip-toggle.active:hover{background:#e0e7ff}
+    .intake-map .card-focus{box-shadow:0 1px 2px rgba(15,23,42,.06),0 10px 24px rgba(15,23,42,.04);border-color:#dbe3ee;background:#fff;border-radius:.75rem}
+    .intake-map .card-focus>div:first-child{background:#f8fafc;border-bottom-color:#e2e8f0}
+    .intake-map .card-focus>div:last-child{padding-top:18px;padding-bottom:18px}
+    .intake-shell-footer{background:rgba(255,255,255,.92);backdrop-filter:blur(6px)}
+  </style>
+</head>
+<body class="bg-gray-50 overflow-hidden h-screen">
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback,useMemo,Fragment}=React;
+
+const STAGES=[
+  {key:'intake',label:'Intake Submitted',color:'bg-slate-400',text:'text-slate-700',bg:'bg-slate-50',hex:'#94a3b8'},
+  {key:'review',label:'Under Review',color:'bg-amber-400',text:'text-amber-700',bg:'bg-amber-50',hex:'#fbbf24'},
+  {key:'planning',label:'Planning',color:'bg-blue-400',text:'text-blue-700',bg:'bg-blue-50',hex:'#60a5fa'},
+  {key:'strategy',label:'Strategy',color:'bg-violet-400',text:'text-violet-700',bg:'bg-violet-50',hex:'#a78bfa'},
+  {key:'creative',label:'Creative Dev',color:'bg-pink-400',text:'text-pink-700',bg:'bg-pink-50',hex:'#f472b6'},
+  {key:'execution',label:'Execution',color:'bg-orange-400',text:'text-orange-700',bg:'bg-orange-50',hex:'#fb923c'},
+  {key:'live',label:'Live',color:'bg-emerald-400',text:'text-emerald-700',bg:'bg-emerald-50',hex:'#34d399'},
+];
+const BUS=['Divisions','DINE','Corporate','Pharmacy','Own Brands'];
+const BANNERS=['Safeway','Vons','Albertsons','Jewel-Osco',"Shaw's",'Acme','Tom Thumb','Randalls'];
+const MKT_RES={'Integrated Marketing':'Lauren Hannigan','ESE':'Lisa Smith','Brand Marketing':'David Park','Customer Engagement':'Sarah Johnson'};
+const CH_OPTS=['CRM','Digital Merch','Local Pages','Paid Media','In-Store','Circular','Media Collective'];
+const CH_LEADS={'CRM':'Jennifer Martinez','Digital Merch':'Robert Kim','Local Pages':'Amanda Foster','Paid Media':'Chris Thompson','In-Store':'Diana Ramirez','Circular':'Brian Walsh','Media Collective':'Nicole Patel'};
+const MKT_CH=['Email','Push','SMS','In-Store','Web/App Home Pages'];
+const PRI_CLS={High:'bg-red-50 text-red-700 border-red-200',Medium:'bg-amber-50 text-amber-700 border-amber-200',Low:'bg-sky-50 text-sky-700 border-sky-200'};
+const MEDIA_FIELDS={'Vendor Style Guide':'vendorGuide','ISAN Scripts':'isanScripts','AMC Guidance':'amcGuidance'};
+const parseDate=(s)=>{const[y,m,d]=(s||'').split('-').map(Number);return{y,m:m-1,d}};
+
+const CAMPS=[
+  {id:1,name:'Q1 Stock Up Sale',desc:'Major quarterly stock-up promotion targeting all loyalty members with deep discounts on pantry essentials.',bu:'Divisions',banners:['Safeway','Vons','Albertsons','Jewel-Osco'],by:{n:'Michael Chen',l:'mchen42'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'High',roi:'$2.4M',roiT:'Revenue',q:'Q1',p:'P3',w:'W2',date:'2026-03-15',ch:['CRM','Digital Merch','In-Store','Circular'],mch:['Email','Push','In-Store'],ct:'New',stage:'creative',days:3,created:'2026-01-28',aud:'All loyalty members, high-value shoppers',status:'On Track'},
+  {id:2,name:'March Madness Promo',desc:'Basketball-themed promotional campaign with game-day snack bundles and party supplies.',bu:'DINE',banners:['Safeway','Vons'],by:{n:'Sarah Park',l:'spark15'},mr:'Brand Marketing',rep:'David Park',pri:'Medium',roi:'$850K',roiT:'Revenue',q:'Q1',p:'P3',w:'W1',date:'2026-03-08',ch:['CRM','Paid Media','Digital Merch'],mch:['Email','Push','Web/App Home Pages'],ct:'Existing',stage:'planning',days:5,created:'2026-02-01',aud:'Sports enthusiasts, party shoppers',status:'On Track'},
+  {id:3,name:'Fresh For Spring',desc:'Seasonal produce and fresh department campaign highlighting organic and locally sourced items.',bu:'Own Brands',banners:['Albertsons','Safeway','Vons'],by:{n:'Lisa Wong',l:'lwong88'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'High',roi:'$1.8M',roiT:'Revenue',q:'Q1',p:'P4',w:'W1',date:'2026-03-22',ch:['CRM','In-Store','Digital Merch','Local Pages'],mch:['Email','In-Store','Web/App Home Pages'],ct:'New',stage:'execution',days:1,created:'2026-01-15',aud:'Health-conscious shoppers, organic buyers',status:'On Track'},
+  {id:4,name:'Pharmacy Wellness Week',desc:'Week-long pharmacy promotion with free health screenings and vitamin discounts.',bu:'Pharmacy',banners:['Safeway','Albertsons','Jewel-Osco'],by:{n:'James Rivera',l:'jrivera22'},mr:'Customer Engagement',rep:'Sarah Johnson',pri:'Medium',roi:'$420K',roiT:'Engagement',q:'Q1',p:'P2',w:'W3',date:'2026-02-28',ch:['CRM','In-Store','Local Pages'],mch:['Email','Push','SMS','In-Store'],ct:'New',stage:'review',days:4,created:'2026-02-10',aud:'Pharmacy customers, health-focused segments',status:'Pending Info'},
+  {id:5,name:'Own Brands Discovery',desc:'Awareness campaign for private label product line expansion into snacks and beverages.',bu:'Own Brands',banners:['All Banners'],by:{n:'Tom Bradley',l:'tbradley7'},mr:'Brand Marketing',rep:'David Park',pri:'Low',roi:'$600K',roiT:'Engagement',q:'Q2',p:'P1',w:'W1',date:'2026-04-05',ch:['Digital Merch','Paid Media'],mch:['Web/App Home Pages','Push'],ct:'New',stage:'intake',days:2,created:'2026-02-16',aud:'Value shoppers, brand explorers',status:'New'},
+  {id:6,name:'Summer BBQ Kickoff',desc:'Memorial Day weekend BBQ campaign with grilling essentials, outdoor dining, and seasonal beverages.',bu:'Divisions',banners:['Safeway','Vons','Tom Thumb','Randalls'],by:{n:'Karen Mitchell',l:'kmitch33'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'High',roi:'$3.1M',roiT:'Revenue',q:'Q2',p:'P1',w:'W2',date:'2026-05-20',ch:['CRM','In-Store','Circular','Paid Media','Digital Merch'],mch:['Email','Push','SMS','In-Store','Web/App Home Pages'],ct:'New',stage:'strategy',days:6,created:'2026-02-05',aud:'Families, outdoor enthusiasts',status:'On Track'},
+  {id:7,name:'Back to School Savings',desc:'Back-to-school lunchbox essentials and family meal solutions campaign.',bu:'Corporate',banners:['All Banners'],by:{n:'Amy Rodriguez',l:'arodrig9'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'Medium',roi:'$1.2M',roiT:'Revenue',q:'Q3',p:'P1',w:'W1',date:'2026-07-15',ch:['CRM','Digital Merch','Circular'],mch:['Email','Push','Web/App Home Pages'],ct:'Carry Forward',stage:'planning',days:8,created:'2026-01-20',aud:'Families with school-age children',status:'On Track'},
+  {id:8,name:'Digital Coupon Blitz',desc:'Flash digital coupon event with exclusive app-only deals and double fuel points.',bu:'DINE',banners:['Safeway','Vons','Albertsons'],by:{n:'Derek Nguyen',l:'dnguyen5'},mr:'ESE',rep:'Lisa Smith',pri:'High',roi:'$950K',roiT:'Revenue',q:'Q1',p:'P2',w:'W1',date:'2026-02-08',ch:['CRM','Digital Merch'],mch:['Email','Push','SMS','Web/App Home Pages'],ct:'Existing',stage:'live',days:10,created:'2026-01-10',aud:'App users, digital-first shoppers',status:'Live'},
+  {id:9,name:'Flu Season Prep',desc:'Preventive health campaign promoting flu shots, immune boosters, and wellness products.',bu:'Pharmacy',banners:['Safeway','Albertsons',"Shaw's"],by:{n:'Patricia Lee',l:'plee44'},mr:'Customer Engagement',rep:'Sarah Johnson',pri:'Medium',roi:'$380K',roiT:'Engagement',q:'Q3',p:'P2',w:'W1',date:'2026-09-01',ch:['CRM','In-Store','Local Pages'],mch:['Email','SMS','In-Store'],ct:'Evergreen',stage:'intake',days:1,created:'2026-02-17',aud:'All customers, seniors, families',status:'New'},
+  {id:10,name:'Holiday Gift Guide',desc:'Curated gift basket and holiday entertaining guide with premium product selections.',bu:'Corporate',banners:['All Banners'],by:{n:'Robert Chang',l:'rchang18'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'High',roi:'$4.2M',roiT:'Revenue',q:'Q4',p:'P1',w:'W1',date:'2026-11-15',ch:['CRM','Digital Merch','In-Store','Circular','Paid Media'],mch:['Email','Push','Web/App Home Pages','In-Store'],ct:'Existing',stage:'review',days:3,created:'2026-02-12',aud:'Gift shoppers, premium segment',status:'On Track'},
+  {id:11,name:'Weekly Value Drops',desc:'Ongoing weekly value campaign with rotating deep discounts on everyday essentials.',bu:'Divisions',banners:['All Banners'],by:{n:'Steve Brown',l:'sbrown62'},mr:'ESE',rep:'Lisa Smith',pri:'Low',roi:'$1.5M',roiT:'Revenue',q:'Q1',p:'P1',w:'W1',date:'2026-01-05',ch:['CRM','Digital Merch'],mch:['Email','Web/App Home Pages'],ct:'Evergreen',stage:'live',days:44,created:'2025-12-15',aud:'All loyalty members',status:'Live'},
+  {id:12,name:'Loyalty Double Points',desc:'Limited-time double fuel points promotion for loyalty card holders.',bu:'Corporate',banners:['Safeway','Vons','Albertsons','Jewel-Osco'],by:{n:'Michelle Torres',l:'mtorres3'},mr:'Customer Engagement',rep:'Sarah Johnson',pri:'Medium',roi:'$780K',roiT:'Engagement',q:'Q1',p:'P3',w:'W3',date:'2026-03-18',ch:['CRM','Digital Merch','In-Store'],mch:['Email','Push','In-Store'],ct:'Existing',stage:'creative',days:5,created:'2026-02-03',aud:'Loyalty members, fuel rewards users',status:'On Track'},
+  {id:13,name:'Organic & Natural Month',desc:'Month-long celebration of organic and natural products with tastings.',bu:'Own Brands',banners:['Safeway','Vons','Albertsons'],by:{n:'Jennifer Adams',l:'jadams27'},mr:'Brand Marketing',rep:'David Park',pri:'Medium',roi:'$920K',roiT:'Revenue',q:'Q2',p:'P2',w:'W1',date:'2026-05-01',ch:['CRM','In-Store','Digital Merch','Local Pages'],mch:['Email','In-Store','Web/App Home Pages'],ct:'New',stage:'strategy',days:4,created:'2026-02-08',aud:'Organic buyers, health-conscious shoppers',status:'On Track'},
+  {id:14,name:'Deli Fresh Launch',desc:'Launch campaign for new artisan deli line with sampling events.',bu:'DINE',banners:['Safeway','Jewel-Osco','Acme'],by:{n:'Kevin Park',l:'kpark55'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'High',roi:'$1.1M',roiT:'Revenue',q:'Q1',p:'P4',w:'W2',date:'2026-03-28',ch:['CRM','In-Store','Local Pages','Digital Merch'],mch:['Email','Push','In-Store'],ct:'New',stage:'planning',days:3,created:'2026-02-13',aud:'Deli customers, food enthusiasts',status:'On Track'},
+  {id:15,name:'Pet Care Awareness',desc:'Pet care product promotion with partner brand collaborations.',bu:'Own Brands',banners:['Safeway','Vons'],by:{n:'Diana Foster',l:'dfoster8'},mr:'Brand Marketing',rep:'David Park',pri:'Low',roi:'$340K',roiT:'Engagement',q:'Q2',p:'P3',w:'W1',date:'2026-06-10',ch:['CRM','Digital Merch'],mch:['Email','Web/App Home Pages'],ct:'New',stage:'intake',days:1,created:'2026-02-17',aud:'Pet owners',status:'New'},
+  {id:16,name:'Easter Celebration',desc:'Easter holiday campaign with seasonal bakery, candy promotions, and meal solutions.',bu:'Divisions',banners:['All Banners'],by:{n:'Nancy Kim',l:'nkim91'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'High',roi:'$2.8M',roiT:'Revenue',q:'Q1',p:'P4',w:'W1',date:'2026-04-01',ch:['CRM','In-Store','Circular','Digital Merch','Paid Media'],mch:['Email','Push','SMS','In-Store','Web/App Home Pages'],ct:'Existing',stage:'review',days:2,created:'2026-02-14',aud:'Families, holiday shoppers',status:'On Track'},
+  {id:17,name:'Cinco de Mayo Fiesta',desc:'Cultural celebration featuring Hispanic food brands, recipes, and party supplies.',bu:'DINE',banners:['Safeway','Vons','Albertsons','Tom Thumb','Randalls'],by:{n:'Maria Gonzalez',l:'mgonz14'},mr:'Brand Marketing',rep:'David Park',pri:'Medium',roi:'$720K',roiT:'Revenue',q:'Q2',p:'P2',w:'W2',date:'2026-05-03',ch:['CRM','In-Store','Local Pages','Paid Media'],mch:['Email','Push','In-Store'],ct:'Existing',stage:'strategy',days:3,created:'2026-02-09',aud:'Hispanic community, party shoppers',status:'On Track'},
+  {id:18,name:'Memorial Day Weekend',desc:'Memorial Day sale with outdoor grilling, summer entertaining, and patriotic themes.',bu:'Corporate',banners:['All Banners'],by:{n:'Bill Thompson',l:'bthom29'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'High',roi:'$2.1M',roiT:'Revenue',q:'Q2',p:'P3',w:'W1',date:'2026-05-22',ch:['CRM','In-Store','Circular','Digital Merch','Paid Media'],mch:['Email','Push','SMS','In-Store','Web/App Home Pages'],ct:'New',stage:'planning',days:2,created:'2026-02-15',aud:'All customers, families',status:'On Track'},
+];
+
+/* ═══ ICONS ═══ */
+const I=({n,s=16,c=''})=>{
+  const p={
+    grid:<><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></>,
+    menu:<><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>,
+    bell:<><path d="M18 8a6 6 0 00-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M10.73 20a2 2 0 002.54 0"/></>,
+    plus:<><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+    kanban:<><rect x="4" y="3" width="4" height="18" rx="1"/><rect x="10" y="3" width="4" height="13" rx="1"/><rect x="16" y="3" width="4" height="16" rx="1"/></>,
+    cal:<><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>,
+    search:<><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></>,
+    x:<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    check:<><polyline points="20 6 9 17 4 12"/></>,
+    upload:<><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></>,
+    chevR:<><polyline points="9 18 15 12 9 6"/></>,
+    chevL:<><polyline points="15 18 9 12 15 6"/></>,
+    clock:<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
+    trendUp:<><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></>,
+    file:<><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></>,
+    layers:<><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></>,
+    eye:<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>,
+    flag:<><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></>,
+    send:<><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></>,
+    bar:<><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></>,
+    trash:<><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></>,
+    edit:<><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></>,
+    alert:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
+    user:<><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
+    settings:<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33h.01a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51h.01a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.01a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></>,
+    logout:<><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></>,
+    info:<><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></>,
+    target:<><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></>,
+    zap:<><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></>,
+    hash:<><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></>,
+    globe:<><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></>,
+    briefcase:<><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></>,
+    sparkle:<><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></>,
+  };
+  return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={c}>{p[n]}</svg>;
+};
+const Badge=({children,cls})=><span className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium border ${cls}`}>{children}</span>;
+const FieldErr=({show,msg})=>show?<p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1"><I n="alert" s={11} c="text-rose-500"/>{msg||'Required'}</p>:null;
+
+/* ═══ FORM CARD SECTION ═══ */
+const Card=({title,desc,children,className='',complete,icon})=>(
+  <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm card-focus overflow-hidden ${className}`}>
+    {title&&<div className="px-5 py-3 border-b border-slate-100 flex items-start justify-between">
+      <div className="flex items-start gap-3">
+        {icon&&<div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5"><I n={icon} s={15} c="text-slate-400"/></div>}
+        <div><h3 className="text-[14px] font-semibold text-slate-900 leading-tight">{title}</h3>{desc&&<p className="text-[12px] text-slate-500 mt-1 leading-relaxed">{desc}</p>}</div>
+      </div>
+      {complete&&<div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="check-anim"><polyline points="20 6 9 17 4 12"/></svg></div>}
+    </div>}
+    <div className="px-5 py-4 space-y-4">{children}</div>
+  </div>
+);
+
+/* ═══ TOOLTIP ═══ */
+const Tip=({text,children})=>{
+  const [show,setShow]=useState(false);
+  return <span className="relative inline-flex" onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)}>
+    {children}
+    {show&&<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 text-white text-[11px] rounded-lg shadow-lg whitespace-nowrap z-50 leading-relaxed max-w-[240px] text-center">{text}<span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"/></span>}
+  </span>;
+};
+
+/* ═══ DETAIL PANEL ═══ */
+const DetailPanel=({camp,onClose})=>{
+  useEffect(()=>{const h=(e)=>{if(e.key==='Escape')onClose()};document.addEventListener('keydown',h);document.body.style.overflow='hidden';return()=>{document.removeEventListener('keydown',h);document.body.style.overflow=''};},[onClose]);
+  if(!camp)return null;const si=STAGES.findIndex(s=>s.key===camp.stage);const stg=STAGES[si];
+  return <>
+    <div className="fixed inset-0 bg-black/20 z-40 backdrop-blur-[1px]" onClick={onClose}/>
+    <div className="fixed right-0 top-0 bottom-0 w-[460px] bg-white border-l border-slate-200 z-50 anim-slide-r overflow-y-auto scrollbar-thin">
+      <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-3.5 flex items-center justify-between z-10">
+        <h2 className="text-sm font-semibold text-slate-900 truncate pr-4">{camp.name}</h2>
+        <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded transition-colors"><I n="x" s={16}/></button>
+      </div>
+      <div className="p-5 space-y-5">
+        <div className="flex items-center gap-2">
+          <Badge cls={PRI_CLS[camp.pri]}>{camp.pri}</Badge>
+          <Badge cls={`${stg.bg} ${stg.text} border-transparent`}>{stg.label}</Badge>
+          <span className="text-[11px] text-slate-400 ml-auto">{camp.days}d in stage</span>
+        </div>
+        <p className="text-[13px] text-slate-600 leading-relaxed">{camp.desc}</p>
+        <Card title="Pipeline Progress" icon="layers"><div className="space-y-0">{STAGES.map((s,i)=>(<div key={s.key} className="flex items-start gap-2.5"><div className="flex flex-col items-center"><div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${i<si?'bg-emerald-100 text-emerald-600':i===si?s.color+' text-white':'bg-slate-100 text-slate-400'}`}>{i<si?<I n="check" s={12}/>:i+1}</div>{i<STAGES.length-1&&<div className={`w-px h-4 ${i<si?'bg-emerald-200':'bg-slate-100'}`}/>}</div><span className={`text-[13px] pt-0.5 ${i<=si?'font-medium text-slate-900':'text-slate-400'}`}>{s.label}</span></div>))}</div></Card>
+        <Card title="Details" icon="briefcase"><div className="grid grid-cols-2 gap-3">{[['Business Unit',camp.bu],['ROI',camp.roi],['Launch',camp.date],['Quarter',`${camp.q} ${camp.p} ${camp.w}`],['Requested By',camp.by.n],['Team',camp.mr],['Representative',camp.rep],['Type',camp.ct]].map(([k,v])=><div key={k}><span className="text-[10px] font-medium text-slate-400 uppercase tracking-wide">{k}</span><p className="text-[13px] font-medium text-slate-800 mt-0.5">{v}</p></div>)}</div></Card>
+        <Card title="Banners & Channels" icon="globe"><div className="flex flex-wrap gap-1 mb-3">{(camp.banners||[]).map(b=><span key={b} className="text-[11px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded font-medium">{b}</span>)}</div><div className="flex flex-wrap gap-1">{(camp.ch||[]).map(c=><span key={c} className="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded">{c}</span>)}</div></Card>
+        <Card title="Activity" icon="clock"><div className="space-y-2.5">{[{a:'Campaign submitted',w:camp.by.n,d:camp.created},{a:`Assigned to ${camp.rep}`,w:'System',d:camp.created},{a:`Moved to ${stg.label}`,w:camp.rep,d:'2026-02-18'}].map((l,i)=><div key={i} className="flex items-start gap-2.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 flex-shrink-0"/><div><p className="text-[13px] text-slate-700">{l.a}</p><p className="text-[11px] text-slate-400">{l.w} &middot; {l.d}</p></div></div>)}</div></Card>
+      </div>
+    </div>
+  </>;
+};
+
+/* ═══ DASHBOARD ═══ */
+const Dashboard=({campaigns,onSelect})=>{
+  const [filter,setFilter]=useState('all');const [search,setSearch]=useState('');
+  const counts=useMemo(()=>{const c={};STAGES.forEach(s=>c[s.key]=0);campaigns.forEach(x=>c[x.stage]=(c[x.stage]||0)+1);return c},[campaigns]);
+  const total=campaigns.length;const active=counts.planning+counts.strategy+counts.creative+counts.execution;const pending=counts.intake+counts.review;const live=counts.live;
+  const filtered=useMemo(()=>{let f=filter==='all'?campaigns:campaigns.filter(c=>c.stage===filter);if(search.trim()){const q=search.toLowerCase();f=f.filter(c=>c.name.toLowerCase().includes(q)||c.bu.toLowerCase().includes(q)||c.rep.toLowerCase().includes(q));}return f},[campaigns,filter,search]);
+  const stats=[{l:'Total Campaigns',v:total,t:'+12%',up:true,color:'bg-indigo-500',icon:'layers'},{l:'Active',v:active,t:'+3',up:true,color:'bg-violet-500',icon:'bar'},{l:'Pending Review',v:pending,t:'-2',up:false,color:'bg-amber-500',icon:'clock'},{l:'Live',v:live,t:'Stable',up:null,color:'bg-emerald-500',icon:'flag'}];
+  return <div className="space-y-5 anim-fade">
+    <div><h1 className="text-lg font-semibold text-slate-900">Dashboard</h1><p className="text-[13px] text-slate-500 mt-0.5">Feb 18, 2026 &middot; {total} campaigns</p></div>
+    <div className="grid grid-cols-4 gap-3">{stats.map((s,i)=><Card key={s.l} className="!p-0"><div className="p-4"><div className="flex items-start justify-between"><div><p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">{s.l}</p><p className="text-2xl font-semibold text-slate-900 mt-1">{s.v}</p></div><div className={`w-8 h-8 ${s.color} rounded-md flex items-center justify-center`}><I n={s.icon} s={14} c="text-white"/></div></div>{s.up!==null&&<p className={`text-[11px] mt-1.5 font-medium ${s.up?'text-emerald-600':'text-amber-600'}`}>{s.t} vs last quarter</p>}{s.up===null&&<p className="text-[11px] mt-1.5 text-slate-400">{s.t}</p>}</div></Card>)}</div>
+    <Card title="Pipeline" icon="bar"><div className="flex rounded-lg overflow-hidden h-10">{STAGES.map(s=>{const cnt=counts[s.key]||0;if(!cnt)return null;return <div key={s.key} className={`pipe-seg ${s.color} flex items-center justify-center cursor-pointer relative group`} style={{width:`${Math.max((cnt/total)*100,8)}%`}} onClick={()=>setFilter(filter===s.key?'all':s.key)}><span className="text-[10px] font-bold text-white">{cnt}</span><div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20">{s.label}: {cnt}</div></div>})}</div><div className="flex mt-2.5 gap-3 flex-wrap">{STAGES.map(s=><button key={s.key} onClick={()=>setFilter(filter===s.key?'all':s.key)} className={`flex items-center gap-1.5 text-[11px] transition-all ${filter===s.key?'font-semibold '+s.text:'text-slate-400 hover:text-slate-600'}`}><div className={`w-2 h-2 rounded-full ${s.color}`}/>{s.label}</button>)}{filter!=='all'&&<button onClick={()=>setFilter('all')} className="text-[11px] text-indigo-600 font-medium hover:underline ml-auto">Clear</button>}</div></Card>
+    <Card className="!p-0">
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between gap-3">
+        <span className="text-[13px] font-semibold text-slate-900">{filter==='all'?'All Campaigns':STAGES.find(s=>s.key===filter)?.label} ({filtered.length})</span>
+        <div className="relative w-56"><I n="search" s={14} c="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"/><input className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-[13px] focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all" placeholder="Search..." value={search} onChange={e=>setSearch(e.target.value)}/>{search&&<button onClick={()=>setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><I n="x" s={12}/></button>}</div>
+      </div>
+      <div className="overflow-auto max-h-[360px] scrollbar-thin">
+        {filtered.length===0?<div className="py-12 text-center"><p className="text-[13px] text-slate-400">No campaigns found</p></div>:
+        <table className="w-full"><thead className="sticky top-0 bg-slate-50/95"><tr className="text-[10px] font-medium text-slate-500 uppercase tracking-wider"><th className="text-left px-4 py-2.5">Campaign</th><th className="text-left px-3 py-2.5">BU</th><th className="text-left px-3 py-2.5">Priority</th><th className="text-left px-3 py-2.5">Status</th><th className="text-left px-3 py-2.5">Launch</th><th className="text-left px-3 py-2.5">Lead</th><th className="px-2 py-2.5"></th></tr></thead>
+        <tbody className="divide-y divide-slate-50">{filtered.map((c,i)=>{const stg=STAGES.find(s=>s.key===c.stage);return <tr key={c.id} className="hover:bg-indigo-50/30 cursor-pointer transition-colors" onClick={()=>onSelect(c)}><td className="px-4 py-2.5"><p className="text-[13px] font-medium text-slate-900">{c.name}</p><p className="text-[11px] text-slate-400 truncate max-w-[220px]">{c.desc}</p></td><td className="px-3 py-2.5"><span className="text-[11px] text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{c.bu}</span></td><td className="px-3 py-2.5"><Badge cls={PRI_CLS[c.pri]}>{c.pri}</Badge></td><td className="px-3 py-2.5"><Badge cls={`${stg.bg} ${stg.text} border-transparent`}>{stg.label}</Badge></td><td className="px-3 py-2.5 text-[13px] text-slate-600">{c.date}</td><td className="px-3 py-2.5 text-[11px] text-slate-500">{c.rep}</td><td className="px-2 py-2.5"><I n="chevR" s={14} c="text-slate-300"/></td></tr>})}</tbody></table>}
+      </div>
+    </Card>
+  </div>;
+};
+
+/* ═══ INTAKE FORM ═══ */
+const INIT_FD={projectName:'',projectDesc:'',bu:'',banners:[],byName:'',byLdap:'',mr:'',rep:'',pri:'',roiType:'Revenue',roiVal:'',quarter:'',period:'',week:'',targetDate:'',chSupport:[],mktCh:[],campType:'',audBanner:'',segDef:'',targetCriteria:'',merchFiles:[],brandAssets:'',creativeType:'',creativeFiles:[],vendorGuide:null,isanScripts:null,amcGuidance:null};
+
+const IntakeForm=({onSubmit})=>{
+  const STEPS=[
+    {name:'Project Basics',desc:'Campaign name and objective',icon:'hash'},
+    {name:'Organization & Requester',desc:'Business unit, banners, requester details',icon:'briefcase'},
+    {name:'Assignment',desc:'Team ownership and representative',icon:'target'},
+    {name:'Priority',desc:'Urgency and expected impact',icon:'zap'},
+    {name:'Launch Timing',desc:'Quarter, period, week, and target date',icon:'cal'},
+    {name:'Channels',desc:'Distribution and messaging channels',icon:'globe'},
+    {name:'Campaign Type & Audience',desc:'Type, banner, segment, and targeting',icon:'target'},
+    {name:'Merchandising',desc:'Upload files and extract campaign data',icon:'file'},
+    {name:'Assets & Creative',desc:'Media files and creative development',icon:'sparkle'},
+    {name:'Review & Submit',desc:'Verify and confirm your submission',icon:'eye'},
+  ];
+  const [step,setStep]=useState(0);
+  const [dir,setDir]=useState(1);
+  const [submitted,setSubmitted]=useState(false);
+  const [isSubmitting,setIsSubmitting]=useState(false);
+  const [fd,setFd]=useState({...INIT_FD});
+  const [attempted,setAttempted]=useState(new Set());
+  const [touched,setTouched]=useState({});
+  const contentRef=useRef(null);
+  const submitTimerRef=useRef(null);
+  const upd=(k,v)=>setFd(p=>({...p,[k]:v}));
+  const togArr=(k,v)=>setFd(p=>({...p,[k]:p[k].includes(v)?p[k].filter(x=>x!==v):[...p[k],v]}));
+  const togBanner=(b)=>{if(b==='All'){setFd(p=>({...p,banners:p.banners.length===BANNERS.length?[]:[...BANNERS]}));return;}togArr('banners',b);};
+  const mrRef=useRef(fd.mr);
+  useEffect(()=>{if(fd.mr!==mrRef.current){mrRef.current=fd.mr;upd('rep',MKT_RES[fd.mr]||'')}},[fd.mr]);
+  useEffect(()=>{contentRef.current?.scrollTo({top:0,behavior:'smooth'})},[step]);
+  useEffect(()=>()=>{if(submitTimerRef.current)clearTimeout(submitTimerRef.current);},[]);
+  const intakeDate=useMemo(
+    ()=>new Intl.DateTimeFormat('en-US',{month:'long',day:'numeric',year:'numeric'}).format(new Date()),
+    []
+  );
+  const hasValue=(v)=>typeof v==='string'?v.trim().length>0:!!v;
+  const err=(f)=>attempted.has(step)&&!hasValue(f);
+  const errA=(f)=>attempted.has(step)&&(!f||f.length===0);
+
+  /* per-step validation */
+  const stepValid=(s)=>{
+    if(s===0)return hasValue(fd.projectName);
+    if(s===1)return hasValue(fd.bu)&&fd.banners.length>0&&hasValue(fd.byName);
+    if(s===2)return hasValue(fd.mr);
+    if(s===3)return hasValue(fd.pri);
+    if(s===5)return fd.chSupport.length>0;
+    if(s===6)return hasValue(fd.campType);
+    if(s===8)return hasValue(fd.creativeType);
+    return true;
+  };
+  const validate=()=>stepValid(step);
+  const isCurrentStepValid=validate();
+
+  const STEP_REQUIREMENTS=[
+    [
+      {label:'Project Name',done:hasValue(fd.projectName)},
+    ],
+    [
+      {label:'Business Unit',done:hasValue(fd.bu)},
+      {label:'At least one Banner',done:fd.banners.length>0},
+      {label:'Requester Full Name',done:hasValue(fd.byName)},
+    ],
+    [
+      {label:'Marketing Resource',done:hasValue(fd.mr)},
+    ],
+    [
+      {label:'Priority Level',done:hasValue(fd.pri)},
+    ],
+    [],
+    [
+      {label:'Channel Support',done:fd.chSupport.length>0},
+    ],
+    [
+      {label:'Campaign Type',done:hasValue(fd.campType)},
+    ],
+    [],
+    [
+      {label:'Creative Development Type',done:hasValue(fd.creativeType)},
+    ],
+    [],
+  ];
+  const currentReqs=STEP_REQUIREMENTS[step]||[];
+  const missingReqs=currentReqs.filter(req=>!req.done);
+
+  /* step completion for stepper UI */
+  const isStepComplete=(s)=>{
+    if(s>=step)return false;
+    return stepValid(s);
+  };
+
+  /* progress percentage */
+  const progress=useMemo(()=>{
+    const weights=[0,11,22,33,44,55,66,77,88,100];
+    return weights[step]||0;
+  },[step]);
+
+  const goTo=(target)=>{
+    if(target===step)return;
+    setDir(target>step?1:-1);
+    setStep(target);
+  };
+  const next=()=>{if(isCurrentStepValid){setDir(1);setStep(step+1)}else setAttempted(p=>new Set([...p,step]))};
+  const prev=()=>{if(step>0){setDir(-1);setStep(step-1)}};
+  const submit=()=>{
+    if(isSubmitting)return;
+    setIsSubmitting(true);
+    submitTimerRef.current=setTimeout(()=>{
+      setSubmitted(true);
+      onSubmit?.(fd);
+      setIsSubmitting(false);
+      submitTimerRef.current=null;
+    },800);
+  };
+  const simUpload=(f)=>{if(f==='merchFiles')upd('merchFiles',['Q1_StockUp_Merch_Sheet.xlsx']);else if(f==='creativeFiles')upd('creativeFiles',['Campaign_Creative_v1.psd']);else upd(f,'uploaded')};
+  const rmFile=(f)=>{if(f==='merchFiles'||f==='creativeFiles')upd(f,[]);else upd(f,null)};
+
+  /* ─── input helpers ─── */
+  const ic=(hasErr,hasSuccess)=>`w-full px-3.5 py-[10px] bg-slate-50 border rounded-lg text-[14px] text-slate-800 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition-all ${hasErr?'field-error':hasSuccess?'field-success':'border-slate-200 hover:border-slate-300'}`;
+  const lc="flex items-center gap-1.5 text-[12px] font-semibold text-slate-700 mb-1.5";
+  const hint="text-[12px] text-slate-400 mt-1.5 leading-relaxed";
+  const hasMedia=fd.chSupport.includes('Media Collective');
+  const chLeads=fd.chSupport.map(c=>({ch:c,lead:CH_LEADS[c]||'TBD'}));
+  const priorityOpts=[
+    {
+      v:'High',
+      desc:'Launch-critical',
+      activeCard:'bg-red-50 border-red-300 ring-1 ring-red-200',
+      activeDot:'bg-red-500',
+      activeLabel:'text-red-700',
+      activeHint:'text-red-600',
+    },
+    {
+      v:'Medium',
+      desc:'Standard timeline',
+      activeCard:'bg-amber-50 border-amber-300 ring-1 ring-amber-200',
+      activeDot:'bg-amber-500',
+      activeLabel:'text-amber-700',
+      activeHint:'text-amber-600',
+    },
+    {
+      v:'Low',
+      desc:'Flexible timing',
+      activeCard:'bg-sky-50 border-sky-300 ring-1 ring-sky-200',
+      activeDot:'bg-sky-500',
+      activeLabel:'text-sky-700',
+      activeHint:'text-sky-600',
+    },
+  ];
+
+  /* ─── field with label, hint, error ─── */
+  const Field=({label,required,hintText,tooltip,error,errorMsg,children,className=''})=>(
+    <div className={className}>
+      <label className={lc}>
+        {label}{required&&<span className="text-rose-500 text-[11px]">*</span>}
+        {tooltip&&<Tip text={tooltip}><span className="text-slate-300 hover:text-slate-500 cursor-help transition-colors"><I n="info" s={13}/></span></Tip>}
+      </label>
+      {children}
+      {hintText&&!error&&<p className={hint}>{hintText}</p>}
+      <FieldErr show={error} msg={errorMsg}/>
+    </div>
+  );
+
+  /* ─── upload zone ─── */
+  const UpZ=({field,label,accept,hintText})=>{
+    const up=Array.isArray(fd[field])?fd[field].length>0:!!fd[field];
+    if(up){
+      const fl=Array.isArray(fd[field])?fd[field]:[label];
+      return <div className="bg-emerald-50/50 border border-emerald-200 rounded-lg p-3.5 flex items-center gap-3 group">
+        <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0"><I n="file" s={16} c="text-emerald-600"/></div>
+        <div className="flex-1 min-w-0"><p className="text-[13px] font-medium text-emerald-800 truncate">{fl[0]}</p><p className="text-[11px] text-emerald-600">Uploaded successfully</p></div>
+        <button onClick={e=>{e.stopPropagation();rmFile(field)}} className="p-1.5 hover:bg-red-50 rounded-md text-slate-400 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"><I n="trash" s={14}/></button>
+      </div>;
+    }
+    return <div onClick={()=>simUpload(field)} className="border-2 border-dashed border-slate-200 rounded-lg p-6 text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/20 transition-all group">
+      <div className="w-10 h-10 rounded-lg bg-slate-100 group-hover:bg-indigo-100 flex items-center justify-center mx-auto mb-2.5 transition-colors"><I n="upload" s={18} c="text-slate-400 group-hover:text-indigo-500 transition-colors"/></div>
+      <p className="text-[13px] font-medium text-slate-600 group-hover:text-indigo-700">Click to upload {label.toLowerCase()}</p>
+      <p className="text-[11px] text-slate-400 mt-1">{accept||'Any file type'}</p>
+      {hintText&&<p className="text-[11px] text-slate-400 mt-0.5">{hintText}</p>}
+    </div>;
+  };
+
+  /* ─── chip toggle for multi-select ─── */
+  const ChipGroup=({options,selected,onToggle,errState,columns})=>{
+    const gridColsClass=
+      columns===2?'grid-cols-2':
+      columns===3?'grid-cols-3':
+      columns===4?'grid-cols-4':'';
+    return (
+    <div className={`${columns?`grid ${gridColsClass}`:'flex flex-wrap'} gap-2 ${errState?'ring-1 ring-rose-500/20 rounded-lg p-1':''}`}>
+      {options.map(o=>{
+        const active=selected.includes(o);
+        return <button key={o} type="button" onClick={()=>onToggle(o)}
+          className={`chip-toggle inline-flex items-center gap-2 px-3.5 py-2.5 border rounded-lg text-[13px] font-medium ${active?'active':''}`}>
+          <div className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center transition-all ${active?'bg-indigo-500 border-indigo-500':'border-slate-300'}`}>
+            {active&&<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+          </div>
+          {o}
+        </button>;
+      })}
+    </div>
+    );
+  };
+
+  if(submitted)return <div className="flex items-center justify-center py-20 anim-scale"><div className="text-center max-w-md">
+    <div className="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4"><I n="check" s={28} c="text-emerald-600"/></div>
+    <h2 className="text-xl font-semibold text-slate-900">Campaign Submitted</h2>
+    <p className="text-[14px] text-slate-500 mt-2 leading-relaxed"><strong>"{fd.projectName}"</strong> has been submitted successfully. A confirmation email will be sent to all stakeholders.</p>
+    <p className="text-[12px] text-slate-400 mt-3 font-mono">Reference: IC-2026-{String(CAMPS.length+1).padStart(4,'0')}</p>
+    <button onClick={()=>{setSubmitted(false);setIsSubmitting(false);setStep(0);setDir(1);setFd({...INIT_FD});setAttempted(new Set());setTouched({})}} className="mt-6 px-6 py-2.5 bg-indigo-500 text-white rounded-lg text-[14px] font-medium hover:bg-indigo-600 transition-colors">Submit Another Campaign</button>
+  </div></div>;
+
+  const renderStep=()=>{
+    switch(step){
+      case 0:return <>
+        <Card title="Campaign Information" desc="Give your campaign a clear, descriptive name that your team will recognize." icon="hash" complete={isStepComplete(0)&&fd.projectName}>
+          <Field label="Intake Date" tooltip="Auto-generated based on today's date">
+            <input className={ic(false)+' !bg-slate-100 !text-slate-500 !cursor-not-allowed'} disabled value={intakeDate}/>
+          </Field>
+          <Field label="Project Name" required hintText="Use a descriptive name like 'Q2 Fresh Produce Sale - Email + In-Store'" error={err(fd.projectName)} errorMsg="Campaign name is required">
+            <input className={ic(err(fd.projectName),touched.projectName&&fd.projectName)} placeholder="Enter campaign name..." value={fd.projectName} onChange={e=>upd('projectName',e.target.value)} onBlur={()=>setTouched(p=>({...p,projectName:true}))}/>
+          </Field>
+          <Field label="Project Description" hintText="Include the objective, scope, and expected outcomes.">
+            <textarea className={ic(false)} rows={3} placeholder="Describe the campaign objective, target audience, and key deliverables..." value={fd.projectDesc} onChange={e=>upd('projectDesc',e.target.value)}/>
+          </Field>
+        </Card>
+      </>;
+
+      case 1:return <>
+        <Card title="Organization" desc="Which business unit is requesting this campaign and which banners are involved?" icon="briefcase">
+          <Field label="Business Unit" required tooltip="The division or department sponsoring this campaign" error={err(fd.bu)} errorMsg="Select a business unit">
+            <select className={ic(err(fd.bu))} value={fd.bu} onChange={e=>upd('bu',e.target.value)}><option value="">Select business unit...</option>{BUS.map(b=><option key={b}>{b}</option>)}</select>
+          </Field>
+          <Field label="Banner(s)" required hintText="Select all retail banners where this campaign will run." error={errA(fd.banners)} errorMsg="Select at least one banner">
+            <div className={`flex flex-wrap gap-2 ${errA(fd.banners)?'ring-1 ring-rose-500/20 rounded-lg p-1':''}`}>
+              <button type="button" onClick={()=>togBanner('All')}
+                className={`chip-toggle inline-flex items-center gap-2 px-3.5 py-2.5 border rounded-lg text-[13px] font-semibold ${fd.banners.length===BANNERS.length?'active':''}`}>
+                <div className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center transition-all ${fd.banners.length===BANNERS.length?'bg-indigo-500 border-indigo-500':'border-slate-300'}`}>
+                  {fd.banners.length===BANNERS.length&&<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                </div>
+                All Banners
+              </button>
+              {BANNERS.map(b=>{
+                const active=fd.banners.includes(b);
+                return <button key={b} type="button" onClick={()=>togBanner(b)}
+                  className={`chip-toggle inline-flex items-center gap-2 px-3.5 py-2.5 border rounded-lg text-[13px] font-medium ${active?'active':''}`}>
+                  <div className={`w-4 h-4 rounded border-[1.5px] flex items-center justify-center transition-all ${active?'bg-indigo-500 border-indigo-500':'border-slate-300'}`}>
+                    {active&&<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  </div>
+                  {b}
+                </button>;
+              })}
+            </div>
+          </Field>
+        </Card>
+        <Card title="Requester" desc="Who is submitting this campaign request?" icon="user">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Full Name" required error={err(fd.byName)} errorMsg="Name is required">
+              <input className={ic(err(fd.byName))} placeholder="e.g., Sarah Johnson" value={fd.byName} onChange={e=>upd('byName',e.target.value)}/>
+            </Field>
+            <Field label="LDAP ID" tooltip="Your corporate directory identifier" hintText="Used for routing and approvals.">
+              <input className={ic(false)} placeholder="e.g., sjohn42" value={fd.byLdap} onChange={e=>upd('byLdap',e.target.value)}/>
+            </Field>
+          </div>
+        </Card>
+      </>;
+
+      case 2:return <>
+        <Card title="Team Assignment" desc="Which marketing team will own and execute this campaign?" icon="target" complete={isStepComplete(2)&&fd.mr}>
+          <Field label="Marketing Resource" required tooltip="The functional team responsible for campaign execution" error={err(fd.mr)} errorMsg="Select a marketing team">
+            <select className={ic(err(fd.mr))} value={fd.mr} onChange={e=>upd('mr',e.target.value)}><option value="">Select team...</option>{Object.keys(MKT_RES).map(m=><option key={m}>{m}</option>)}</select>
+          </Field>
+          {fd.rep&&<div className="flex items-center gap-3.5 bg-indigo-50/60 border border-indigo-100 rounded-xl px-5 py-4 anim-scale">
+            <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0"><span className="text-[11px] font-bold text-indigo-600">{fd.rep.split(' ').map(x=>x[0]).join('')}</span></div>
+            <div className="flex-1"><p className="text-[11px] font-medium text-indigo-500 uppercase tracking-wide">Auto-assigned Representative</p><p className="text-[14px] font-semibold text-indigo-800">{fd.rep}</p></div>
+            <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          </div>}
+          <Field label="Marketing Resource Representative" hintText="Auto-populated based on team selection above.">
+            <input className={ic(false)+' !bg-slate-100 !text-slate-500 !cursor-not-allowed'} disabled value={fd.rep||'Select a team first'} placeholder="Auto-filled..."/>
+          </Field>
+        </Card>
+      </>;
+
+      case 3:return <>
+        <Card title="Prioritization" desc="Set the urgency level and expected business impact." icon="zap">
+          <Field label="Priority Level" required error={err(fd.pri)} errorMsg="Select a priority level">
+            <div className={`grid grid-cols-3 gap-2.5 ${err(fd.pri)?'ring-1 ring-rose-500/20 rounded-lg p-1':''}`}>
+              {priorityOpts.map(p=><button key={p.v} type="button" onClick={()=>upd('pri',p.v)}
+                className={`px-4 py-3 rounded-xl border-2 text-left transition-all ${fd.pri===p.v?p.activeCard:'border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <div className={`w-2.5 h-2.5 rounded-full ${fd.pri===p.v?p.activeDot:'bg-slate-300'}`}/>
+                  <span className={`text-[14px] font-semibold ${fd.pri===p.v?p.activeLabel:'text-slate-700'}`}>{p.v}</span>
+                </div>
+                <p className={`text-[11px] ml-[18px] ${fd.pri===p.v?p.activeHint:'text-slate-400'}`}>{p.desc}</p>
+              </button>)}
+            </div>
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="ROI Type" tooltip="How will this campaign's success be measured?">
+              <div className="flex gap-2">{['Revenue','Engagement'].map(t=><button key={t} type="button" onClick={()=>upd('roiType',t)} className={`flex-1 px-3.5 py-2.5 rounded-lg border-2 text-[13px] font-medium transition-all ${fd.roiType===t?'bg-indigo-50 border-indigo-300 text-indigo-700':'text-slate-500 border-slate-200 hover:bg-slate-50 hover:border-slate-300'}`}>{t}</button>)}</div>
+            </Field>
+            <Field label="Expected Value" hintText={fd.roiType==='Revenue'?'Dollar amount or range':'Engagement metric'}>
+              <input className={ic(false)} placeholder={fd.roiType==='Revenue'?'e.g., $1.5M':'e.g., 50K users'} value={fd.roiVal} onChange={e=>upd('roiVal',e.target.value)}/>
+            </Field>
+          </div>
+        </Card>
+      </>;
+
+      case 4:return <>
+        <Card title="Launch Timing" desc="When should this campaign go live? Specify the marketing period and target date." icon="cal">
+          <div className="grid grid-cols-4 gap-3">
+            <Field label="Quarter"><select className={ic(false)} value={fd.quarter} onChange={e=>upd('quarter',e.target.value)}><option value="">--</option>{['Q1','Q2','Q3','Q4'].map(q=><option key={q}>{q}</option>)}</select></Field>
+            <Field label="Period" tooltip="Albertsons 13-period fiscal calendar"><select className={ic(false)} value={fd.period} onChange={e=>upd('period',e.target.value)}><option value="">--</option>{Array.from({length:13},(_,i)=>`P${i+1}`).map(p=><option key={p}>{p}</option>)}</select></Field>
+            <Field label="Week"><select className={ic(false)} value={fd.week} onChange={e=>upd('week',e.target.value)}><option value="">--</option>{['W1','W2','W3','W4'].map(w=><option key={w}>{w}</option>)}</select></Field>
+            <Field label="Target Date" hintText="Exact launch date"><input type="date" className={ic(false)} value={fd.targetDate} onChange={e=>upd('targetDate',e.target.value)}/></Field>
+          </div>
+        </Card>
+      </>;
+
+      case 5:return <>
+        <Card title="Channel Support" desc="Which distribution channels will be used to reach your audience?" icon="globe">
+          <Field label="Channels" required hintText="Select all channels needed for this campaign." error={errA(fd.chSupport)} errorMsg="Select at least one channel">
+            <ChipGroup options={CH_OPTS} selected={fd.chSupport} onToggle={v=>togArr('chSupport',v)} errState={errA(fd.chSupport)}/>
+          </Field>
+          {chLeads.length>0&&<div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide mb-3 flex items-center gap-1.5"><I n="user" s={12} c="text-slate-400"/>Auto-assigned Channel Leads</p>
+            <div className="grid grid-cols-2 gap-2">{chLeads.map(({ch,lead})=><div key={ch} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-slate-100">
+              <div className="w-6 h-6 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0"><span className="text-[8px] font-bold text-indigo-600">{lead.split(' ').map(x=>x[0]).join('')}</span></div>
+              <div className="min-w-0"><p className="text-[12px] font-medium text-slate-700 truncate">{lead}</p><p className="text-[10px] text-slate-400">{ch}</p></div>
+            </div>)}</div>
+          </div>}
+        </Card>
+        <Card title="Marketing Channels" desc="Which messaging formats will be used for campaign execution?" icon="send">
+          <ChipGroup options={MKT_CH} selected={fd.mktCh} onToggle={v=>togArr('mktCh',v)}/>
+        </Card>
+      </>;
+
+      case 6:return <>
+        <Card title="Campaign Type & Audience" desc="Define the campaign classification and target audience." icon="target">
+          <Field label="Campaign Type" required tooltip="New: first-time campaign. Existing: returning campaign. Carry Forward: extension. Evergreen: always-on." error={err(fd.campType)} errorMsg="Select a campaign type">
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                {v:'New',desc:'First-time campaign',icon:'plus'},
+                {v:'Existing',desc:'Returning campaign',icon:'layers'},
+                {v:'Carry Forward',desc:'Extended from prior',icon:'chevR'},
+                {v:'Evergreen',desc:'Always-on program',icon:'flag'}
+              ].map(t=><button key={t.v} type="button" onClick={()=>upd('campType',t.v)}
+                className={`px-3 py-3 rounded-xl border-2 text-center transition-all ${fd.campType===t.v?'bg-indigo-50 border-indigo-300 text-indigo-700':'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50'}`}>
+                <I n={t.icon} s={16} c={`mx-auto mb-1.5 ${fd.campType===t.v?'text-indigo-500':'text-slate-400'}`}/>
+                <p className="text-[13px] font-semibold">{t.v}</p>
+                <p className={`text-[10px] mt-0.5 ${fd.campType===t.v?'text-indigo-500':'text-slate-400'}`}>{t.desc}</p>
+              </button>)}
+            </div>
+          </Field>
+          <div className="border-t border-slate-100 pt-5">
+            <p className="text-[12px] font-semibold text-slate-500 uppercase tracking-wide mb-3">Audience Targeting</p>
+            <div className="space-y-4">
+              <Field label="Target Banner" hintText="Primary banner for audience selection">
+                <select className={ic(false)} value={fd.audBanner} onChange={e=>upd('audBanner',e.target.value)}><option value="">Select...</option>{BANNERS.map(b=><option key={b}>{b}</option>)}</select>
+              </Field>
+              <Field label="Segment Definition" hintText="Describe the customer segments to target (e.g., high-value loyalty members, lapsed buyers).">
+                <textarea className={ic(false)} rows={2} placeholder="Define target audience segments..." value={fd.segDef} onChange={e=>upd('segDef',e.target.value)}/>
+              </Field>
+              <Field label="Targeting Criteria" hintText="Any specific inclusion/exclusion rules, geographic filters, or behavioral triggers.">
+                <textarea className={ic(false)} rows={2} placeholder="Specify targeting criteria..." value={fd.targetCriteria} onChange={e=>upd('targetCriteria',e.target.value)}/>
+              </Field>
+            </div>
+          </div>
+        </Card>
+      </>;
+
+      case 7:return <>
+        <Card title="Merchandising" desc="Upload vendor or BU merchandising files. Data will be auto-extracted upon upload." icon="file">
+          <UpZ field="merchFiles" label="Merchandising files" accept=".xlsx, .csv, .pdf" hintText="Max 25 MB per file"/>
+          {fd.merchFiles.length>0&&<div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-4 anim-scale">
+            <p className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wide mb-3 flex items-center gap-1.5"><I n="zap" s={12} c="text-emerald-600"/>Auto-extracted Data</p>
+            <div className="grid grid-cols-2 gap-2.5 text-[13px]">
+              {[['Merch Status','Accepted','check'],['UPC List','3 items','hash'],['U Offer IDs','UOF-2026-0451, 0452','file'],['4x Offer IDs','4X-2026-0891','file'],['Stock Up Event','SU-2026-Q1-003','flag']].map(([k,v,icon])=>
+                <div key={k} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-emerald-100">
+                  <I n={icon} s={13} c="text-emerald-500"/>
+                  <div><p className="text-[10px] text-emerald-600 font-medium">{k}</p><p className="text-[12px] font-semibold text-emerald-800">{v}</p></div>
+                </div>
+              )}
+            </div>
+          </div>}
+        </Card>
+      </>;
+
+      case 8:return <>
+        {hasMedia?<Card title="Media Collective Assets" desc="Required when Media Collective channel is selected. Upload vendor materials and guidance documents." icon="layers" className="!border-violet-200">
+          <div className="space-y-4">{Object.entries(MEDIA_FIELDS).map(([label,key])=><div key={key}><label className="text-[13px] font-medium text-violet-700 mb-2 block">{label}</label><UpZ field={key} label={label}/></div>)}</div>
+        </Card>
+        :<Card icon="layers">
+          <div className="text-center py-4">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-2"><I n="layers" s={18} c="text-slate-400"/></div>
+            <p className="text-[14px] font-medium text-slate-500">Media Collective not required</p>
+            <p className="text-[12px] text-slate-400 mt-1">Enable Media Collective in Channel Support (Step 6) to upload vendor materials.</p>
+          </div>
+        </Card>}
+        <Card title="Brand & Creative" desc="Provide brand assets and specify the creative development type." icon="sparkle">
+          <Field label="Brand Assets" hintText="Paste a link to your VisID or brand guidelines. Optional but recommended.">
+            <input className={ic(false)} placeholder="https://visid.albertsons.com/..." value={fd.brandAssets} onChange={e=>upd('brandAssets',e.target.value)}/>
+          </Field>
+          <Field label="Creative Development Type" required tooltip="In-Store: physical displays, signage, etc. Digital: email, web, app assets." error={err(fd.creativeType)} errorMsg="Select a creative type">
+            <div className="grid grid-cols-3 gap-2.5">
+              {['In-Store','Digital','Both'].map(t=><button key={t} type="button" onClick={()=>upd('creativeType',t)}
+                className={`px-4 py-3 rounded-xl border-2 text-center transition-all ${fd.creativeType===t?'bg-indigo-50 border-indigo-300 text-indigo-700 font-semibold':'border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50 font-medium'} text-[13px]`}>
+                {t}
+              </button>)}
+            </div>
+          </Field>
+          <Field label="Creative Files" hintText="Upload design files, mockups, or reference materials.">
+            <UpZ field="creativeFiles" label="Creative files" accept=".psd, .ai, .png, .jpg, .pdf"/>
+          </Field>
+        </Card>
+      </>;
+
+      case 9:{
+        const clean=v=>{if(!v||v==='')return null;if(Array.isArray(v)&&!v.length)return null;return String(v)};
+        const reqBy=fd.byName?(fd.byLdap?`${fd.byName} (${fd.byLdap})`:fd.byName):null;
+        const secs=[
+          [0,'Project Basics','hash',[['Campaign Name',fd.projectName],['Description',clean(fd.projectDesc)]]],
+          [1,'Organization & Requester','briefcase',[['Business Unit',fd.bu],['Banners',fd.banners.length?fd.banners.join(', '):null],['Requested By',reqBy]]],
+          [2,'Assignment','target',[['Marketing Team',fd.mr],['Representative',fd.rep]]],
+          [3,'Priority','zap',[['Priority',fd.pri],['ROI',clean(fd.roiVal)?`${fd.roiType}: ${fd.roiVal}`:fd.roiType]]],
+          [4,'Launch Timing','cal',[['Launch Window',[fd.quarter,fd.period,fd.week].filter(Boolean).join(' ')||null],['Target Date',clean(fd.targetDate)]]],
+          [5,'Channels','globe',[['Distribution Channels',fd.chSupport.length?fd.chSupport.join(', '):null],['Marketing Channels',fd.mktCh.length?fd.mktCh.join(', '):null]]],
+          [6,'Campaign Type & Audience','target',[['Type',fd.campType],['Target Banner',clean(fd.audBanner)],['Segment',clean(fd.segDef)],['Targeting Criteria',clean(fd.targetCriteria)]]],
+          [7,'Merchandising','file',[['Merch Files',fd.merchFiles.length?`${fd.merchFiles.length} file(s) uploaded`:null]]],
+          [8,'Assets & Creative','sparkle',[['Creative Type',clean(fd.creativeType)],['Brand Assets',clean(fd.brandAssets)],['Creative Files',fd.creativeFiles.length?`${fd.creativeFiles.length} file(s) uploaded`:null]]]
+        ];
+        return <>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0"><I n="eye" s={16} c="text-amber-600"/></div>
+            <div><p className="text-[14px] font-semibold text-amber-800">Review before submitting</p><p className="text-[12px] text-amber-600 mt-0.5">Double-check all details below. Click <strong>Edit</strong> on any section to make changes.</p></div>
+          </div>
+          {secs.map(([si,t,icon,items])=>{
+            const filled=items.filter(([_,v])=>v);
+            if(!filled.length)return null;
+            return <div key={t} className="bg-white rounded-xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+              <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-2.5">
+                  <I n={icon} s={14} c="text-slate-400"/>
+                  <span className="text-[13px] font-semibold text-slate-700">{t}</span>
+                </div>
+                <button onClick={()=>goTo(si)} className="text-[12px] text-indigo-600 font-medium hover:text-indigo-700 flex items-center gap-1 hover:underline"><I n="edit" s={12}/>Edit</button>
+              </div>
+              <div className="px-5 py-4">
+                <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
+                  {filled.map(([k,v])=><div key={k}>
+                    <dt className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">{k}</dt>
+                    <dd className="text-[13px] text-slate-800 font-medium mt-0.5 leading-relaxed">{v}</dd>
+                  </div>)}
+                </dl>
+              </div>
+            </div>;
+          })}
+        </>;
+      }
+    }
+  };
+
+  return <div className="h-full min-h-0 flex flex-col">
+    <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[284px_minmax(0,1fr)] gap-4">
+      {/* ═══ STEP TIMELINE ═══ */}
+      <aside className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 xl:p-4 shadow-[0_2px_14px_rgba(15,23,42,0.04)] overflow-y-auto scrollbar-thin">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Steps</p>
+          <span className="text-[11px] font-semibold text-indigo-600 rounded-md border border-indigo-100 bg-indigo-50 px-2 py-1">{progress}%</span>
+        </div>
+        <div className="relative">
+          <div className="absolute left-[19px] top-2 bottom-2 w-px bg-slate-200"/>
+          <div className="relative space-y-2 pr-0.5 pb-1">
+            {STEPS.map((s,i)=>{
+              const isCurrent=i===step;
+              const isDone=i<step&&isStepComplete(i);
+              const isClickable=i<step;
+              return <button key={i} type="button" onClick={()=>{if(isClickable)goTo(i)}} className={`w-full min-h-[58px] rounded-lg border px-2 py-2 flex items-start gap-2.5 text-left transition-all ${
+                isCurrent?'bg-indigo-50 border-indigo-100':
+                isDone?'bg-emerald-50/60 border-emerald-100':
+                'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+              } ${isClickable?'cursor-pointer':'cursor-default'}`}>
+                <span className={`w-8 h-8 rounded-full border flex items-center justify-center text-[12px] font-semibold flex-shrink-0 mt-0.5 ${
+                  isDone?'bg-emerald-50 border-emerald-300 text-emerald-600':
+                  isCurrent?'bg-indigo-600 border-indigo-600 text-white':
+                  'bg-white border-slate-300 text-slate-500'
+                }`}>
+                  {isDone?<I n="check" s={13}/>:i+1}
+                </span>
+                <span className="pt-0.5 min-w-0">
+                  <span className={`block text-[13px] leading-[1.15] ${isCurrent?'text-slate-900 font-semibold':'text-slate-700 font-medium'}`}>{s.name}</span>
+                  <span className={`block text-[10px] mt-1 leading-[1.15] ${isCurrent?'text-slate-500':'text-slate-400'}`}>{s.desc}</span>
+                </span>
+              </button>;
+            })}
+          </div>
+        </div>
+
+      </aside>
+
+      {/* ═══ STEP CONTENT ═══ */}
+      <section className="min-w-0 rounded-xl border border-slate-200 bg-white flex flex-col overflow-hidden shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+        <div className="px-4 py-3 md:px-5 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-500 flex-shrink-0">
+              <I n={STEPS[step].icon} s={15}/>
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-[17px] font-semibold text-slate-900 leading-tight">{STEPS[step].name}</h3>
+              <p className="text-[12px] text-slate-500 mt-0.5 truncate">{STEPS[step].desc}</p>
+            </div>
+            <span className="ml-auto text-[11px] font-medium text-slate-500 rounded-full border border-slate-200 px-2.5 py-1 whitespace-nowrap">Step {step+1} of {STEPS.length}</span>
+          </div>
+        </div>
+
+        <div ref={contentRef} className="flex-1 overflow-y-auto scrollbar-thin px-4 py-4 md:px-5">
+          <div key={step} className={`intake-map space-y-5 pb-2 ${dir>=0?'anim-fwd':'anim-back'}`}>{renderStep()}</div>
+        </div>
+      </section>
+    </div>
+
+    <div className="intake-shell-footer sticky bottom-0 mt-2.5 rounded-lg border border-slate-200 px-3.5 py-2.5 flex items-center shadow-[0_2px_12px_rgba(15,23,42,0.04)]">
+      {!isCurrentStepValid&&attempted.has(step)&&currentReqs.length>0&&<span className="text-[12px] text-rose-500 flex items-center gap-1 mr-auto"><I n="alert" s={12}/>{missingReqs.length} required {missingReqs.length===1?'field':'fields'} remaining</span>}
+      {(isCurrentStepValid||!attempted.has(step)||currentReqs.length===0)&&<span className="mr-auto text-[12px] text-slate-400 hidden sm:inline">Press <kbd className="kbd">Enter</kbd> to continue</span>}
+      <div className="flex items-center gap-2">
+        <button type="button" onClick={prev} disabled={step===0} className={`px-3 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ${step>0?'border-slate-200 text-slate-600 hover:bg-slate-50':'border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed'}`}>Prev</button>
+        {step<9&&<button type="button" data-next-btn onClick={next} disabled={!isCurrentStepValid} className={`px-3.5 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ${isCurrentStepValid?'bg-indigo-600 text-white hover:bg-indigo-700':'bg-indigo-200 text-white cursor-not-allowed'}`}>Next</button>}
+        {step===9&&<button type="button" onClick={submit} disabled={isSubmitting} className={`px-3.5 py-1.5 rounded-lg text-[13px] font-semibold transition-colors ${isSubmitting?'bg-emerald-200 text-white cursor-wait':'bg-emerald-600 text-white hover:bg-emerald-700'}`}>{isSubmitting?'Creating...':'Create Campaign'}</button>}
+      </div>
+    </div>
+  </div>;
+};
+
+/* ═══ TRACKER ═══ */
+const Tracker=({campaigns,onSelect})=>(
+  <div className="anim-fade"><div className="mb-4"><h1 className="text-lg font-semibold text-slate-900">Campaign Tracker</h1><p className="text-[13px] text-slate-500">{campaigns.length} campaigns across {STAGES.length} stages</p></div>
+  <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-thin" style={{minHeight:'calc(100vh - 200px)'}}>
+    {STAGES.map(stg=>{const items=campaigns.filter(c=>c.stage===stg.key);return <div key={stg.key} className="min-w-[240px] w-[240px] flex-shrink-0"><div className="flex items-center gap-2 mb-2.5 px-0.5"><div className={`w-2.5 h-2.5 rounded-full ${stg.color}`}/><span className="text-[13px] font-semibold text-slate-700">{stg.label}</span><span className="text-[11px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-medium ml-auto">{items.length}</span></div><div className="space-y-2">{items.map((c,i)=><div key={c.id} onClick={()=>onSelect(c)} className="bg-white p-3 rounded-lg border border-slate-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.04)] cursor-pointer hover:shadow-md hover:border-slate-300 transition-all"><p className="text-[13px] font-medium text-slate-900 leading-tight">{c.name}</p><p className="text-[11px] text-slate-400 mt-1">{c.bu}</p><div className="flex items-center justify-between mt-2.5"><Badge cls={PRI_CLS[c.pri]}>{c.pri}</Badge><span className="text-[11px] text-slate-400 flex items-center gap-1"><I n="clock" s={11}/>{c.days}d</span></div><div className="mt-2 pt-2 border-t border-slate-50 flex items-center gap-1.5"><div className="w-4 h-4 rounded-full bg-indigo-100 flex items-center justify-center"><span className="text-[8px] font-bold text-indigo-600">{c.rep.split(' ').map(x=>x[0]).join('')}</span></div><span className="text-[11px] text-slate-500">{c.rep}</span>{c.status==='Pending Info'&&<span className="ml-auto text-[10px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded font-medium">Needs Info</span>}</div></div>)}{items.length===0&&<div className="p-5 text-center text-[11px] text-slate-300 border border-dashed border-slate-200 rounded-lg">No campaigns</div>}</div></div>})}
+  </div></div>
+);
+
+/* ═══ CALENDAR ═══ */
+const Calendar=({campaigns,onSelect})=>{
+  const [cur,setCur]=useState(new Date(2026,2));const yr=cur.getFullYear(),mo=cur.getMonth();
+  const firstDay=new Date(yr,mo,1).getDay();const dim=new Date(yr,mo+1,0).getDate();
+  const days=[];for(let i=0;i<firstDay;i++)days.push(null);for(let i=1;i<=dim;i++)days.push(i);while(days.length%7)days.push(null);
+  const byDate={};campaigns.forEach(c=>{const p=parseDate(c.date);if(p.m===mo&&p.y===yr){if(!byDate[p.d])byDate[p.d]=[];byDate[p.d].push(c)}});
+  const mos=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const td=new Date();const isToday=d=>d&&td.getDate()===d&&td.getMonth()===mo&&td.getFullYear()===yr;
+  const cnt=Object.values(byDate).flat().length;
+  return <div className="anim-fade"><div className="flex items-center justify-between mb-4"><div><h1 className="text-lg font-semibold text-slate-900">Planning Calendar</h1><p className="text-[13px] text-slate-500">{cnt} campaign{cnt!==1?'s':''} in {mos[mo]}</p></div><div className="flex items-center gap-1 bg-white border border-slate-200 rounded-md p-0.5"><button onClick={()=>setCur(new Date(yr,mo-1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors"><I n="chevL" s={14}/></button><span className="text-[13px] font-semibold text-slate-900 px-3 min-w-[140px] text-center">{mos[mo]} {yr}</span><button onClick={()=>setCur(new Date(yr,mo+1))} className="p-1.5 hover:bg-slate-100 rounded transition-colors"><I n="chevR" s={14}/></button></div></div>
+  <Card className="!p-0 overflow-hidden"><div className="grid grid-cols-7">{['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=><div key={d} className="px-2 py-2 text-center text-[10px] font-medium text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100">{d}</div>)}</div><div className="grid grid-cols-7">{days.map((day,i)=><div key={i} className={`min-h-[96px] p-1.5 border-b border-r border-slate-100/60 transition-colors ${day?'hover:bg-indigo-50/20':''} ${!day?'bg-slate-50/40':''}`}>{day&&<><span className={`text-[11px] font-medium inline-block ${isToday(day)?'bg-indigo-500 text-white w-5 h-5 rounded-full flex items-center justify-center':'text-slate-500 ml-0.5'}`}>{day}</span><div className="mt-0.5 space-y-0.5">{(byDate[day]||[]).map(c=>{const stg=STAGES.find(s=>s.key===c.stage);return <div key={c.id} onClick={()=>onSelect(c)} className={`text-[10px] font-medium px-1.5 py-0.5 rounded cursor-pointer truncate transition-all hover:ring-1 hover:ring-offset-1 ${stg.bg} ${stg.text}`} title={c.name}>{c.name}</div>})}</div></>}</div>)}</div></Card>
+  {cnt===0&&<div className="mt-4 text-center py-6 bg-white rounded-lg border border-slate-200"><p className="text-[13px] text-slate-400">No launches in {mos[mo]}</p></div>}
+  </div>;
+};
+
+/* ═══ TOP NAV ═══ */
+const TopNav=()=>{
+  const [mobileActionsOpen,setMobileActionsOpen]=useState(false);
+  const [notifOpen,setNotifOpen]=useState(false);
+  const [profileOpen,setProfileOpen]=useState(false);
+  const notifRef=useRef(null);
+  const profileRef=useRef(null);
+  const notifications=[
+    {id:1,title:'Pipeline alert',msg:'2 campaigns waiting for review',time:'3m ago'},
+    {id:2,title:'Asset upload complete',msg:'Fresh For Spring files processed',time:'11m ago'},
+    {id:3,title:'Launch approaching',msg:'Q1 Stock Up Sale in 3 days',time:'Today'},
+  ];
+
+  useEffect(()=>{
+    const onDocClick=(e)=>{
+      if(notifRef.current&&!notifRef.current.contains(e.target))setNotifOpen(false);
+      if(profileRef.current&&!profileRef.current.contains(e.target))setProfileOpen(false);
+    };
+    const onEsc=(e)=>{if(e.key==='Escape'){setNotifOpen(false);setProfileOpen(false);}};
+    document.addEventListener('mousedown',onDocClick);
+    document.addEventListener('keydown',onEsc);
+    return()=>{
+      document.removeEventListener('mousedown',onDocClick);
+      document.removeEventListener('keydown',onEsc);
+    };
+  },[]);
+
+  return <header className="sticky top-0 flex w-full bg-white border-gray-200 z-40 lg:border-b">
+    <div className="flex flex-col items-center justify-between flex-grow lg:flex-row lg:px-6">
+      <div className="flex items-center justify-end w-full gap-2 px-3 py-3 border-b border-gray-200 sm:gap-4 lg:hidden">
+        <button type="button" onClick={()=>setMobileActionsOpen(v=>!v)} className="flex items-center justify-center w-10 h-10 text-slate-700 rounded-lg hover:bg-slate-100 lg:hidden">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+        </button>
+      </div>
+
+      <div className={`${mobileActionsOpen?'flex':'hidden'} items-center justify-between w-full gap-4 px-5 py-4 lg:flex lg:justify-end lg:px-0 lg:py-3`}>
+        <div className="flex items-center gap-3">
+          <div ref={notifRef} className="relative">
+            <button type="button" className="relative flex items-center justify-center text-slate-500 transition-colors bg-white border border-slate-200 rounded-full hover:text-slate-700 h-11 w-11 hover:bg-slate-100" onClick={()=>{setNotifOpen(v=>!v);setProfileOpen(false);}}>
+              <span className="absolute right-0 top-0.5 z-10 h-2 w-2 rounded-full bg-orange-400"/>
+              <I n="bell" s={18}/>
+            </button>
+            <div className={`absolute right-0 mt-[17px] flex w-[340px] max-w-[calc(100vw-1.25rem)] flex-col rounded-2xl border border-slate-200 bg-white p-3 shadow-xl transition-all origin-top-right ${notifOpen?'opacity-100 visible translate-y-0':'opacity-0 invisible -translate-y-1 pointer-events-none'}`}>
+              <div className="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                <h5 className="text-[16px] font-semibold text-slate-800">Notifications</h5>
+                <button type="button" onClick={()=>setNotifOpen(false)} className="text-slate-500 hover:text-slate-700"><I n="x" s={16}/></button>
+              </div>
+              <ul className="flex flex-col max-h-72 overflow-y-auto scrollbar-thin">
+                {notifications.map((n)=><li key={n.id}>
+                  <button type="button" className="w-full text-left flex gap-3 rounded-lg border-b border-slate-100 p-3 hover:bg-slate-50">
+                    <span className="mt-1.5 h-2 w-2 rounded-full bg-indigo-500 flex-shrink-0"/>
+                    <span className="block">
+                      <span className="mb-1 block text-[13px] text-slate-600"><span className="font-medium text-slate-800">{n.title}</span> · {n.msg}</span>
+                      <span className="text-[11px] text-slate-400">{n.time}</span>
+                    </span>
+                  </button>
+                </li>)}
+              </ul>
+              <button type="button" className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-[12px] font-medium text-slate-700 hover:bg-slate-50">View all notifications</button>
+            </div>
+          </div>
+        </div>
+
+        <div ref={profileRef} className="relative">
+          <button type="button" onClick={()=>{setProfileOpen(v=>!v);setNotifOpen(false);}} className="flex items-center text-slate-700">
+            <span className="mr-3 overflow-hidden rounded-full h-11 w-11 bg-indigo-500/15 flex items-center justify-center"><span className="text-[11px] font-semibold text-indigo-700">CW</span></span>
+            <span className="hidden sm:block mr-1 font-medium text-[13px]">Carol</span>
+            <svg className={`stroke-slate-500 transition-transform duration-200 ${profileOpen?'rotate-180':''}`} width="18" height="20" viewBox="0 0 18 20" fill="none"><path d="M4.3125 8.65625L9 13.3437L13.6875 8.65625" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </button>
+          <div className={`absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-slate-200 bg-white p-3 shadow-xl transition-all origin-top-right ${profileOpen?'opacity-100 visible translate-y-0':'opacity-0 invisible -translate-y-1 pointer-events-none'}`}>
+            <div>
+              <span className="block font-medium text-slate-700 text-[13px]">Carol Williams</span>
+              <span className="mt-0.5 block text-[11px] text-slate-500">Marketing Director</span>
+            </div>
+            <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-slate-200">
+              <li><button type="button" className="w-full flex items-center gap-3 px-3 py-2 font-medium text-slate-700 rounded-lg text-[13px] hover:bg-slate-100"><I n="user" s={15}/>My Profile</button></li>
+              <li><button type="button" className="w-full flex items-center gap-3 px-3 py-2 font-medium text-slate-700 rounded-lg text-[13px] hover:bg-slate-100"><I n="settings" s={15}/>Account Settings</button></li>
+            </ul>
+            <button type="button" className="w-full flex items-center gap-3 px-3 py-2 mt-3 font-medium text-rose-600 rounded-lg text-[13px] hover:bg-rose-50"><I n="logout" s={15}/>Sign out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>;
+};
+
+/* ═══ SIDEBAR ═══ */
+const Sidebar=({view,onNavigate,isExpanded,isHovered,setIsHovered,isMobileOpen,onCloseMobile})=>{
+  const mainNav=[{id:'dashboard',icon:'grid',label:'Dashboard'},{id:'intake',icon:'plus',label:'New Campaign'}];
+  const otherNav=[{id:'tracker',icon:'kanban',label:'Tracker'},{id:'calendar',icon:'cal',label:'Calendar'}];
+  const showText=isExpanded||isHovered||isMobileOpen;
+  const itemCls=(active)=>`group relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-[13px] transition-colors ${active?'bg-indigo-50 text-indigo-600':'text-slate-700 hover:bg-slate-100'} ${!showText?'lg:justify-center':''}`;
+  const iconCls=(active)=>active?'text-indigo-600':'text-slate-500';
+
+  const renderGroup=(title,items)=>(
+    <nav className="mb-6">
+      <h2 className={`mb-4 text-[11px] uppercase tracking-[0.12em] text-slate-400 ${!showText?'lg:text-center':''}`}>{showText?title:'•'}</h2>
+      <ul className="flex flex-col gap-2">
+        {items.map(item=>{
+          const active=view===item.id;
+          return <li key={item.id}>
+            <button type="button" onClick={()=>onNavigate(item.id)} className={itemCls(active)}>
+              <span className={iconCls(active)}><I n={item.icon} s={18}/></span>
+              {showText&&<span>{item.label}</span>}
+            </button>
+          </li>;
+        })}
+      </ul>
+    </nav>
+  );
+
+  return <>
+    <div className={`fixed inset-0 bg-slate-900/40 z-40 lg:hidden ${isMobileOpen?'block':'hidden'}`} onClick={onCloseMobile}/>
+    <aside className={`fixed mt-16 lg:mt-0 top-0 px-5 left-0 bg-white text-slate-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-slate-200 ${showText?'w-[290px]':'w-[90px]'} ${isMobileOpen?'translate-x-0':'-translate-x-full'} lg:translate-x-0`} onMouseEnter={()=>{if(!isExpanded)setIsHovered(true)}} onMouseLeave={()=>setIsHovered(false)}>
+      <div className={`py-8 flex ${showText?'justify-start':'lg:justify-center'}`}>
+        {showText?<div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center"><span className="text-white text-[10px] font-bold">IC</span></div>
+          <div><p className="text-[14px] font-semibold text-slate-900">IntelliCapture</p><p className="text-[11px] text-slate-500">Campaign Workflow</p></div>
+        </div>:<div className="w-9 h-9 rounded-xl bg-indigo-500 flex items-center justify-center"><span className="text-white text-[10px] font-bold">IC</span></div>}
+      </div>
+
+      <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear pb-6">
+        {renderGroup('Main Menu',mainNav)}
+        {renderGroup('Operations',otherNav)}
+      </div>
+
+      {showText&&<div className="mb-6 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+        <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Workspace</p>
+        <p className="text-[13px] font-medium text-slate-800 mt-1">Campaign Planning Hub</p>
+        <p className="text-[11px] text-slate-500 mt-0.5">18 active campaigns this quarter.</p>
+      </div>}
+    </aside>
+  </>;
+};
+
+/* ═══ APP ═══ */
+const App=()=>{
+  const [view,setView]=useState('dashboard');
+  const [selected,setSelected]=useState(null);
+  const [campaigns]=useState(CAMPS);
+  const [toast,setToast]=useState(null);
+  const [formDirty,setFormDirty]=useState(false);
+  const [isExpanded,setIsExpanded]=useState(true);
+  const [isHovered,setIsHovered]=useState(false);
+  const [isMobileOpen,setIsMobileOpen]=useState(false);
+  const mainRef=useRef(null);
+  const sidebarOpen=isExpanded||isHovered;
+
+  const handleSubmit=(fd)=>{setFormDirty(false);setToast(`"${fd.projectName}" submitted`);setTimeout(()=>setToast(null),4000)};
+  const navigate=(t)=>{
+    if(view==='intake'&&formDirty&&!window.confirm('Unsaved changes will be lost. Leave?'))return;
+    setView(t);
+    setFormDirty(false);
+    setIsMobileOpen(false);
+    mainRef.current?.scrollTo({top:0});
+  };
+  const handleToggleSidebar=()=>{
+    if(window.innerWidth>=1024)setIsExpanded(v=>!v);
+    else setIsMobileOpen(v=>!v);
+  };
+
+  useEffect(()=>{
+    const onResize=()=>{if(window.innerWidth>=1024)setIsMobileOpen(false)};
+    window.addEventListener('resize',onResize);
+    return()=>window.removeEventListener('resize',onResize);
+  },[]);
+
+  /* keyboard: Enter to advance form step */
+  useEffect(()=>{
+    const h=(e)=>{
+      if(e.key==='Enter'&&view==='intake'&&!e.shiftKey&&e.target.tagName!=='TEXTAREA'&&e.target.tagName!=='BUTTON'){
+        e.preventDefault();
+        document.querySelector('[data-next-btn]')?.click();
+      }
+    };
+    document.addEventListener('keydown',h);
+    return()=>document.removeEventListener('keydown',h);
+  },[view]);
+
+  return <div className="h-screen overflow-hidden bg-gray-50">
+    <Sidebar view={view} onNavigate={navigate} isExpanded={isExpanded} isHovered={isHovered} setIsHovered={setIsHovered} isMobileOpen={isMobileOpen} onCloseMobile={()=>setIsMobileOpen(false)}/>
+    <div className={`h-screen flex flex-col transition-all duration-300 ease-in-out ${sidebarOpen?'lg:ml-[290px]':'lg:ml-[90px]'} ${isMobileOpen?'ml-0':''}`}>
+      <TopNav/>
+      <main ref={mainRef} className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="p-4 mx-auto max-w-screen-2xl md:p-6">
+          {view==='dashboard'&&<Dashboard campaigns={campaigns} onSelect={c=>setSelected(c)}/>}
+          {view==='intake'&&<div className="anim-fade h-[calc(100vh-148px)] flex flex-col min-h-0" onInput={()=>{if(!formDirty)setFormDirty(true)}}><div className="mb-3 shrink-0"><h1 className="text-lg font-semibold text-slate-900">New Campaign Request</h1><p className="text-[13px] text-slate-500">Complete the intake form to submit a new marketing campaign for review.</p></div><div className="flex-1 min-h-0"><IntakeForm onSubmit={handleSubmit}/></div></div>}
+          {view==='tracker'&&<Tracker campaigns={campaigns} onSelect={c=>setSelected(c)}/>}
+          {view==='calendar'&&<Calendar campaigns={campaigns} onSelect={c=>setSelected(c)}/>}
+        </div>
+      </main>
+    </div>
+    {selected&&<DetailPanel camp={selected} onClose={()=>setSelected(null)}/>}
+    {toast&&<div className="fixed bottom-5 right-5 bg-emerald-600 text-white pl-4 pr-2.5 py-2.5 rounded-lg shadow-lg text-[13px] font-medium anim-scale z-50 flex items-center gap-2.5"><I n="check" s={14}/><span>{toast}</span><button onClick={()=>setToast(null)} className="p-0.5 hover:bg-white/20 rounded transition-colors ml-1"><I n="x" s={12}/></button></div>}
+  </div>;
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
