@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { I, STAGES, parseDate } from '../shared/campaignShared';
-
-const CURRENT_USER = 'Lauren Hannigan';
+import { CURRENT_USER, I, STAGES, parseDate } from '../shared/campaignShared';
 const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 const PRI = {
@@ -74,7 +72,7 @@ const MyTasks = ({ campaigns, onSelect }) => {
   const [sortDir, setSortDir] = useState('asc');
   const [search, setSearch] = useState('');
 
-  const mine = campaigns.filter((c) => c.rep === CURRENT_USER);
+  const mine = campaigns.filter((c) => c.rep === CURRENT_USER.name);
   const scoped = scope === 'mine' ? mine : campaigns;
 
   // Apply search
@@ -124,7 +122,7 @@ const MyTasks = ({ campaigns, onSelect }) => {
         <div>
           <h1 className="text-[15px] font-semibold text-[#f8f8f8]">Campaigns</h1>
           <p className="text-[12px] text-[#666]">
-            {scope === 'mine' ? `${mine.length} campaigns assigned to ${CURRENT_USER}` : `${campaigns.length} total campaigns`}
+            {scope === 'mine' ? `${mine.length} campaigns assigned to ${CURRENT_USER.name}` : `${campaigns.length} total campaigns`}
           </p>
         </div>
         <div className="flex items-center gap-3">

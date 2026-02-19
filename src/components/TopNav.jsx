@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { I } from '../shared/campaignShared';
+import { CURRENT_USER, I } from '../shared/campaignShared';
 
 const TopNav = () => {
   const [mobileActionsOpen, setMobileActionsOpen] = useState(false);
@@ -111,9 +111,9 @@ const TopNav = () => {
               className="flex items-center text-slate-700 rounded-md hover:bg-slate-100 px-2 py-1 transition-colors"
             >
               <span className="mr-2 overflow-hidden rounded-md h-7 w-7 bg-indigo-500/15 flex items-center justify-center">
-                <span className="text-[10px] font-semibold text-indigo-700">CW</span>
+                <span className="text-[10px] font-semibold text-indigo-700">{CURRENT_USER.initials}</span>
               </span>
-              <span className="hidden sm:block mr-1 font-medium text-[13px]">Carol</span>
+              <span className="hidden sm:block mr-1 font-medium text-[13px]">{CURRENT_USER.name.split(' ')[0]}</span>
               <svg
                 className={`stroke-slate-500 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
                 width="16"
@@ -138,8 +138,8 @@ const TopNav = () => {
               }`}
             >
               <div className="px-2 pb-2">
-                <span className="block font-medium text-slate-700 text-[13px]">Carol Williams</span>
-                <span className="mt-0.5 block text-[11px] text-slate-500">Marketing Director</span>
+                <span className="block font-medium text-slate-700 text-[13px]">{CURRENT_USER.name}</span>
+                <span className="mt-0.5 block text-[11px] text-slate-500">{CURRENT_USER.title}</span>
               </div>
               <ul className="flex flex-col gap-0.5 pt-2 pb-2 border-t border-slate-200">
                 <li>

@@ -5,11 +5,12 @@ import Sidebar from './components/Sidebar';
 import TopNav from './components/TopNav';
 import CalendarPage from './pages/CalendarPage';
 import CampaignDetailPage from './pages/CampaignDetailPage';
+import CompletedPage from './pages/CompletedPage';
 import DashboardPage from './pages/DashboardPage';
 import IntakePage from './pages/IntakePage';
 import MyTasksPage from './pages/MyTasksPage';
 import TrackerPage from './pages/TrackerPage';
-import { CAMPS, I, STAGES, STAGE_APPROVALS } from './shared/campaignShared';
+import { CAMPS, CURRENT_USER, I, STAGES, STAGE_APPROVALS } from './shared/campaignShared';
 
 const VIEW_TO_PATH = {
   dashboard: '/dashboard',
@@ -17,6 +18,7 @@ const VIEW_TO_PATH = {
   tracker: '/tracker',
   calendar: '/calendar',
   mytasks: '/my-tasks',
+  completed: '/completed',
 };
 
 function resolveViewFromPath(pathname) {
@@ -42,6 +44,10 @@ function resolveViewFromPath(pathname) {
 
   if (clean === '/my-tasks') {
     return 'mytasks';
+  }
+
+  if (clean === '/completed') {
+    return 'completed';
   }
 
   if (clean.startsWith('/campaign/')) {
@@ -96,6 +102,9 @@ export default function App() {
       { id: 3, author: 'Lauren Hannigan', text: "Great results so far. Let's keep the energy going into next week.", date: '2026-02-17T08:50:00' },
     ],
   });
+  const [briefings, setBriefings] = useState({
+    8: { type: 'uploaded', fileName: 'Q1_Digital_Coupon_Briefing.pdf', uploadedBy: 'Lisa Smith', uploadedDate: 'Feb 12, 2026' },
+  });
   const [toast, setToast] = useState(null);
   const [formDirty, setFormDirty] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -106,8 +115,37 @@ export default function App() {
 
   const handleSubmit = (fd) => {
     setFormDirty(false);
+    const newId = campaigns.length > 0 ? Math.max(...campaigns.map((c) => c.id)) + 1 : 1;
+    const today = new Date().toISOString().slice(0, 10);
+    const newCampaign = {
+      id: newId,
+      name: fd.projectName,
+      desc: fd.projectDesc || 'New campaign submitted via intake form.',
+      bu: fd.bu || 'Corporate',
+      banners: fd.banners.length ? fd.banners : ['All Banners'],
+      by: { n: fd.byName || CURRENT_USER.name, l: fd.byLdap || '' },
+      mr: fd.mr || 'Integrated Marketing',
+      rep: fd.rep || CURRENT_USER.name,
+      pri: fd.pri || 'Medium',
+      roi: fd.roiRevenue || '$0',
+      roiT: fd.roiEngagement ? 'Engagement' : 'Revenue',
+      q: fd.quarter || 'Q1',
+      p: fd.period || 'P1',
+      w: fd.week || 'W1',
+      date: fd.targetDate || today,
+      ch: fd.chSupport.length ? fd.chSupport : ['CRM'],
+      mch: fd.mktCh.length ? fd.mktCh : ['Email'],
+      ct: fd.campType || 'New',
+      stage: 'intake',
+      days: 0,
+      created: today,
+      aud: fd.segDef || 'All customers',
+      status: 'New',
+    };
+    setCampaigns((prev) => [...prev, newCampaign]);
     setToast(`"${fd.projectName}" submitted`);
     setTimeout(() => setToast(null), 4000);
+    return newId;
   };
 
   const fmtNow = () => {
@@ -124,7 +162,7 @@ export default function App() {
   const addSystemComment = (cid, text) => {
     setComments((prev) => ({
       ...prev,
-      [cid]: [...(prev[cid] || []), { id: Date.now(), author: 'Lauren Hannigan', text, date: new Date().toISOString() }],
+      [cid]: [...(prev[cid] || []), { id: Date.now(), author: CURRENT_USER.name, text, date: new Date().toISOString() }],
     }));
   };
 
@@ -135,7 +173,7 @@ export default function App() {
     const item = stageApprovals.find((a) => a.key === approvalKey);
     setApprovals((prev) => ({
       ...prev,
-      [campaignId]: { ...(prev[campaignId] || {}), [approvalKey]: { by: 'Lauren Hannigan', date: fmtNow() } },
+      [campaignId]: { ...(prev[campaignId] || {}), [approvalKey]: { by: CURRENT_USER.name, date: fmtNow() } },
     }));
     addSystemComment(campaignId, `✅ Approved "${item?.label || approvalKey}": ${comment}`);
     setToast(`Approved: ${item?.label || approvalKey}`);
@@ -288,6 +326,10 @@ export default function App() {
                         setFormDirty(true);
                       }
                     }}
+                    onViewCampaign={(id) => {
+                      setFormDirty(false);
+                      routerNavigate(`/campaign/${id}`, { state: { from: 'Intake' } });
+                    }}
                   />
                 }
               />
@@ -304,6 +346,16 @@ export default function App() {
                 element={<MyTasksPage campaigns={campaigns} onSelect={(campaign) => setSelected(campaign)} />}
               />
               <Route
+                path="/completed"
+                element={
+                  <CompletedPage
+                    campaigns={campaigns}
+                    briefings={briefings}
+                    onSelect={(id) => routerNavigate(`/campaign/${id}`, { state: { from: 'Completed' } })}
+                  />
+                }
+              />
+              <Route
                 path="/campaign/:id"
                 element={
                   <CampaignDetailPage
@@ -312,6 +364,24 @@ export default function App() {
                     onApprove={handleApprove}
                     onReject={handleReject}
                     onAdvanceStage={handleAdvanceStage}
+                    briefings={briefings}
+                    onUploadBriefing={(campId, fileName) => {
+                      setBriefings((prev) => ({
+                        ...prev,
+                        [campId]: { type: 'uploaded', fileName, uploadedBy: CURRENT_USER.name, uploadedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) },
+                      }));
+                      setToast('Briefing document uploaded');
+                      setTimeout(() => setToast(null), 4000);
+                    }}
+                    onRemoveBriefing={(campId) => {
+                      setBriefings((prev) => {
+                        const next = { ...prev };
+                        delete next[campId];
+                        return next;
+                      });
+                      setToast('Team briefing removed — showing AI-generated brief');
+                      setTimeout(() => setToast(null), 4000);
+                    }}
                     comments={(() => {
                       const match = location.pathname.match(/\/campaign\/(\d+)/);
                       return match ? (comments[Number(match[1])] || []) : [];
@@ -324,7 +394,7 @@ export default function App() {
                         const list = prev[cid] || [];
                         return {
                           ...prev,
-                          [cid]: [...list, { id: Date.now(), author: 'Lauren Hannigan', text, date: new Date().toISOString() }],
+                          [cid]: [...list, { id: Date.now(), author: CURRENT_USER.name, text, date: new Date().toISOString() }],
                         };
                       });
                     }}
@@ -347,13 +417,13 @@ export default function App() {
               const list = prev[selected.id] || [];
               return {
                 ...prev,
-                [selected.id]: [...list, { id: Date.now(), author: 'Lauren Hannigan', text, date: new Date().toISOString() }],
+                [selected.id]: [...list, { id: Date.now(), author: CURRENT_USER.name, text, date: new Date().toISOString() }],
               };
             });
           }}
           onViewDetail={() => {
             const id = selected.id;
-            const labels = { dashboard: 'Dashboard', tracker: 'Tracker', calendar: 'Calendar', mytasks: 'Campaigns' };
+            const labels = { dashboard: 'Dashboard', tracker: 'Tracker', calendar: 'Calendar', mytasks: 'Campaigns', completed: 'Completed' };
             setSelected(null);
             routerNavigate(`/campaign/${id}`, { state: { from: labels[view] || 'Dashboard' } });
           }}

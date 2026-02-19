@@ -3,11 +3,14 @@ import { I } from '../shared/campaignShared';
 const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobileOpen, onCloseMobile }) => {
   const overviewNav = [
     { id: 'dashboard', icon: 'grid', label: 'Dashboard' },
-    { id: 'mytasks', icon: 'briefcase', label: 'My Tasks' },
+    { id: 'mytasks', icon: 'briefcase', label: 'Active Campaigns' },
   ];
-  const workNav = [
+  const campaignNav = [
     { id: 'tracker', icon: 'kanban', label: 'Tracker' },
     { id: 'calendar', icon: 'cal', label: 'Calendar' },
+  ];
+  const resultsNav = [
+    { id: 'completed', icon: 'check', label: 'Completed' },
   ];
   const actionsNav = [
     { id: 'intake', icon: 'plus', label: 'New Campaign' },
@@ -89,7 +92,9 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear px-3 pb-6">
           {renderGroup('Overview', overviewNav)}
           <div className="mx-2.5 mb-5 border-t border-[#2a2a2a]" />
-          {renderGroup('Workspace', workNav)}
+          {renderGroup('Campaigns', campaignNav)}
+          <div className="mx-2.5 mb-5 border-t border-[#2a2a2a]" />
+          {renderGroup('Results', resultsNav)}
           <div className="mx-2.5 mb-5 border-t border-[#2a2a2a]" />
           {renderGroup('Actions', actionsNav)}
         </div>

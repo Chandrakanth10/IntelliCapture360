@@ -94,7 +94,7 @@ const ChipGroup=({options,selected,onToggle,errState,columns})=>{
   );
 };
 
-const IntakeForm=({onSubmit})=>{
+const IntakeForm=({onSubmit,onViewCampaign})=>{
   const STEPS=[
     {name:'Project Basics',desc:'Campaign name and objective',icon:'hash'},
     {name:'Organization & Requester',desc:'Business unit, banners, requester details',icon:'briefcase'},
@@ -111,6 +111,7 @@ const IntakeForm=({onSubmit})=>{
   const [dir,setDir]=useState(1);
   const [submitted,setSubmitted]=useState(false);
   const [isSubmitting,setIsSubmitting]=useState(false);
+  const [newCampaignId,setNewCampaignId]=useState(null);
   const [fd,setFd]=useState({...INIT_FD});
   const [attempted,setAttempted]=useState(new Set());
   const [touched,setTouched]=useState({});
@@ -182,8 +183,9 @@ const IntakeForm=({onSubmit})=>{
     if(isSubmitting)return;
     setIsSubmitting(true);
     submitTimerRef.current=setTimeout(()=>{
+      const returnedId = onSubmit?.(fd);
+      setNewCampaignId(returnedId || null);
       setSubmitted(true);
-      onSubmit?.(fd);
       setIsSubmitting(false);
       submitTimerRef.current=null;
     },800);
@@ -204,7 +206,10 @@ const IntakeForm=({onSubmit})=>{
     <h2 className="text-lg font-semibold text-[#f8f8f8]">Campaign Submitted</h2>
     <p className="text-[13px] text-[#999] mt-2 leading-relaxed"><strong className="text-[#ededed]">"{fd.projectName}"</strong> has been submitted successfully. A confirmation email will be sent to all stakeholders.</p>
     <p className="text-[11px] text-[#666] mt-3 font-mono">Reference: IC-2026-{String(CAMPS.length+1).padStart(4,'0')}</p>
-    <button onClick={()=>{setSubmitted(false);setIsSubmitting(false);setStep(0);setDir(1);setFd({...INIT_FD});setAttempted(new Set());setTouched({})}} className="mt-5 px-5 py-2 rounded-md text-[13px] font-medium transition-colors" style={{background:'#3ECF8E',color:'#0a1f15'}} onMouseEnter={e=>e.currentTarget.style.background='#38b97e'} onMouseLeave={e=>e.currentTarget.style.background='#3ECF8E'}>Submit Another Campaign</button>
+    <div className="flex items-center justify-center gap-3 mt-5">
+      {newCampaignId&&<button onClick={()=>onViewCampaign?.(newCampaignId)} className="px-5 py-2 rounded-md text-[13px] font-semibold transition-colors" style={{background:'#3ECF8E',color:'#0a1f15'}} onMouseEnter={e=>e.currentTarget.style.background='#38b97e'} onMouseLeave={e=>e.currentTarget.style.background='#3ECF8E'}>View Campaign →</button>}
+      <button onClick={()=>{setSubmitted(false);setIsSubmitting(false);setNewCampaignId(null);setStep(0);setDir(1);setFd({...INIT_FD});setAttempted(new Set());setTouched({})}} className="px-5 py-2 rounded-md text-[13px] font-medium transition-colors" style={{border:'1px solid #363636',color:'#ccc'}} onMouseEnter={e=>e.currentTarget.style.background='#252525'} onMouseLeave={e=>e.currentTarget.style.background=''}>Submit Another</button>
+    </div>
   </div></div>;
 
   const renderStep=()=>{
@@ -628,14 +633,14 @@ const IntakeForm=({onSubmit})=>{
 };
 
 
-export default function IntakePage({ onSubmit, onInput }) {
+export default function IntakePage({ onSubmit, onInput, onViewCampaign }) {
   return <div className="anim-fade h-[calc(100vh-148px)] flex flex-col min-h-0" onInput={onInput}>
     <div className="mb-4 shrink-0">
       <h1 className="text-[15px] font-semibold text-[#f8f8f8]">New Campaign Request</h1>
       <p className="text-[12px] text-[#666]">Complete the intake form to submit a new marketing campaign for review.</p>
     </div>
     <div className="flex-1 min-h-0">
-      <IntakeForm onSubmit={onSubmit} />
+      <IntakeForm onSubmit={onSubmit} onViewCampaign={onViewCampaign} />
     </div>
   </div>;
 }

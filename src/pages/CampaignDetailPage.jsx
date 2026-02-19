@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { CAMPS, CH_LEADS, I, STAGES, STAGE_APPROVALS } from '../shared/campaignShared';
+import { CAMPS, CH_LEADS, CURRENT_USER, I, STAGES, STAGE_APPROVALS } from '../shared/campaignShared';
 
 /* ═══ MOCK EXTENDED FORM DATA ═══ */
 const EXT = {
@@ -449,7 +449,116 @@ const EmptyState = ({ text }) => (
   </div>
 );
 
-const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onReject, onAdvanceStage, comments = [], onAddComment }) => {
+/* ═══ BRIEFING CONTENT COMPONENT ═══ */
+export const BriefingContent = ({ brief }) => (
+  <div className="space-y-5">
+    {/* Executive Summary */}
+    <div>
+      <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-2">Executive Summary</h4>
+      <p className="text-[12px] text-[#b0c0b8] leading-[1.7]">{brief.executiveSummary}</p>
+    </div>
+
+    {/* Performance Highlights */}
+    <div>
+      <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-3">Performance Highlights</h4>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {brief.kpis.map((kpi) => (
+          <div key={kpi.label} className="rounded-lg bg-[#0a1510] border border-[#1a3a2a] p-3">
+            <span className="text-[10px] text-[#557a66] uppercase tracking-wide">{kpi.label}</span>
+            <p className="text-[18px] font-bold mt-1" style={{ color: kpi.color }}>{kpi.value}</p>
+            <span className="text-[10px] font-medium text-[#3ECF8E]">{kpi.trend} vs target</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Channel Breakdown */}
+    {brief.channelBreakdown.length > 0 && (
+      <div>
+        <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-3">Channel Breakdown</h4>
+        <div className="space-y-2">
+          {brief.channelBreakdown.map((ch) => (
+            <div key={ch.channel} className="flex items-center gap-3 px-3 py-2.5 rounded-md bg-[#0a1510] border border-[#1a3a2a]">
+              <span className="text-[12px] font-medium text-[#ccc] flex-1">{ch.channel}</span>
+              <span className="text-[11px] text-[#668a76]">{ch.impressions} imp</span>
+              <span className="text-[11px] text-[#668a76]">{ch.ctr} CTR</span>
+              <span className="text-[11px] font-medium text-[#3ECF8E]">{ch.contribution}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Key Learnings */}
+    <div>
+      <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-2">Key Learnings</h4>
+      <ul className="space-y-2">
+        {brief.learnings.map((item, i) => (
+          <li key={i} className="flex items-start gap-2.5 text-[12px] text-[#b0c0b8] leading-relaxed">
+            <span className="w-5 h-5 rounded-full bg-[#3ECF8E15] border border-[#3ECF8E25] flex items-center justify-center shrink-0 mt-0.5 text-[9px] font-bold text-[#3ECF8E]">{i + 1}</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* Recommendations */}
+    <div>
+      <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-2">Recommendations</h4>
+      <ul className="space-y-2">
+        {brief.recommendations.map((item, i) => (
+          <li key={i} className="flex items-start gap-2.5 text-[12px] text-[#b0c0b8] leading-relaxed">
+            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#3ECF8E] shrink-0" />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+);
+
+/* ═══ AI BRIEFING GENERATOR ═══ */
+export const generateBriefing = (camp) => {
+  // Derive realistic mock KPIs from campaign fields
+  const roiStr = (camp.roi || '$0').replace(/[^0-9.]/g, '');
+  const roiNum = parseFloat(roiStr) || 1;
+  const scale = roiNum >= 1 ? roiNum : roiNum * 1000; // normalize to thousands
+  const impressions = `${(scale * 1.2 + 0.5).toFixed(1)}M`;
+  const ctr = `${(2.1 + (camp.id % 3) * 0.8).toFixed(1)}%`;
+  const conversions = `${Math.round(scale * 42 + 1200).toLocaleString()}`;
+  const roi = `${(scale * 0.38 + 12).toFixed(0)}%`;
+
+  const channels = (camp.ch || []);
+  const channelBreakdown = channels.map((ch, i) => ({
+    channel: ch,
+    impressions: `${((scale * 0.3 + i * 0.2) + 0.1).toFixed(1)}M`,
+    ctr: `${(1.8 + i * 0.5).toFixed(1)}%`,
+    contribution: `${Math.round(100 / channels.length)}%`,
+  }));
+
+  return {
+    executiveSummary: `The ${camp.name} campaign successfully launched on ${camp.date} targeting ${camp.aud || 'the defined audience segment'}. The campaign leveraged ${channels.length} support channel${channels.length !== 1 ? 's' : ''} across ${(camp.banners || []).length} banner${(camp.banners || []).length !== 1 ? 's' : ''} with a projected ROI of ${camp.roi}. Performance metrics indicate strong engagement across digital and in-store touchpoints, with key conversion goals trending ahead of forecast.`,
+    kpis: [
+      { label: 'Impressions', value: impressions, trend: '+14%', color: '#3ECF8E' },
+      { label: 'Click-Through Rate', value: ctr, trend: '+0.3pp', color: '#60a5fa' },
+      { label: 'Conversions', value: conversions, trend: '+22%', color: '#fbbf24' },
+      { label: 'Return on Spend', value: roi, trend: '+8%', color: '#a78bfa' },
+    ],
+    channelBreakdown,
+    learnings: [
+      `Push notification timing between 11am-1pm drove ${(1.5 + camp.id % 3 * 0.3).toFixed(1)}x higher engagement than evening sends.`,
+      `${channels[0] || 'CRM'} channel outperformed projections by ${18 + camp.id % 5 * 3}%, suggesting stronger audience affinity than initial segmentation indicated.`,
+      `Cross-channel attribution showed ${(35 + camp.id % 4 * 5)}% of conversions involved 2+ touchpoints, reinforcing the omnichannel approach.`,
+    ],
+    recommendations: [
+      `Increase ${channels[0] || 'CRM'} budget allocation by 15-20% for follow-up campaigns based on strong performance metrics.`,
+      `Refine audience segmentation to focus on the high-converting cohort identified during the campaign (${camp.aud || 'core segment'}).`,
+      `Consider extending the campaign cadence from ${camp.days} days to ${camp.days + 7} days for future iterations to capture late-funnel conversions.`,
+    ],
+  };
+};
+
+const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onReject, onAdvanceStage, briefings = {}, onUploadBriefing, onRemoveBriefing, comments = [], onAddComment }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -461,6 +570,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
   const [actionModal, setActionModal] = useState(null); // { type: 'approve'|'reject', key, label }
   const [actionComment, setActionComment] = useState('');
   const [rejectStage, setRejectStage] = useState('');
+  const [showAiBrief, setShowAiBrief] = useState(false);
 
   const camp = campaigns.find((c) => c.id === Number(id));
 
@@ -541,6 +651,100 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
           <p className="text-[12px] text-[#b0b0c0] leading-[1.7]">{AI_SUMMARIES[camp.id] || genSummary(camp)}</p>
         </div>
       </div>
+
+      {/* Briefing Document — only for live campaigns */}
+      {camp.stage === 'live' && (() => {
+        const briefing = briefings[camp.id];
+        const hasUpload = briefing?.type === 'uploaded';
+        const aiBrief = generateBriefing(camp);
+
+        return (
+          <div className="rounded-lg overflow-hidden mb-5" style={{ background: hasUpload ? '#161616' : 'linear-gradient(135deg, #0f1f1a, #111a16)', border: `1px solid ${hasUpload ? '#2a2a2a' : '#1a3a2a'}` }}>
+            {/* Header */}
+            <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: `1px solid ${hasUpload ? '#2a2a2a' : '#1a3a2a'}` }}>
+              <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3ECF8E20, #34d39920)' }}>
+                <I n="file" s={11} c="text-[#3ECF8E]" />
+              </div>
+              <span className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider">Briefing Document</span>
+              <span className="text-[10px] text-[#555] ml-auto">
+                {hasUpload ? 'Team upload available' : 'AI-Generated \u00B7 No team briefing uploaded'}
+              </span>
+            </div>
+
+            <div className="px-5 py-4">
+              {hasUpload ? (
+                /* ─── State B: Team Uploaded ─── */
+                <div className="space-y-4">
+                  {/* File card */}
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#1e1e1e] border border-[#2a2a2a] group/file">
+                    <button
+                      onClick={() => setPreviewFile({ name: briefing.fileName, size: 'PDF', date: briefing.uploadedDate, category: 'Briefing Document' })}
+                      className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer text-left"
+                    >
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors group-hover/file:border-[#3ECF8E40]" style={{ background: '#3ECF8E15', border: '1px solid #3ECF8E25' }}>
+                        <I n="file" s={18} c="text-[#3ECF8E]" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-medium text-[#ededed] truncate group-hover/file:text-white transition-colors">{briefing.fileName}</p>
+                        <p className="text-[11px] text-[#555] mt-0.5">
+                          Uploaded by {briefing.uploadedBy} &middot; {briefing.uploadedDate}
+                        </p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setPreviewFile({ name: briefing.fileName, size: 'PDF', date: briefing.uploadedDate, category: 'Briefing Document' })}
+                      className="px-3 py-1.5 rounded-md text-[11px] font-medium bg-[#3ECF8E15] text-[#3ECF8E] hover:bg-[#3ECF8E25] border border-[#3ECF8E30] transition-colors shrink-0 flex items-center gap-1.5"
+                    >
+                      <I n="eye" s={12} />
+                      View
+                    </button>
+                    <button
+                      onClick={() => onRemoveBriefing?.(camp.id)}
+                      className="px-3 py-1.5 rounded-md text-[11px] font-medium bg-[#f8717115] text-[#f87171] hover:bg-[#f8717125] border border-[#f8717130] transition-colors shrink-0"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  {/* AI toggle */}
+                  <button
+                    onClick={() => setShowAiBrief(!showAiBrief)}
+                    className="flex items-center gap-2 text-[11px] font-medium text-[#a78bfa] hover:text-[#c4b5fd] transition-colors"
+                  >
+                    <I n="sparkle" s={12} />
+                    {showAiBrief ? 'Hide AI-Generated Brief' : 'View AI-Generated Brief'}
+                    <I n="chevR" s={10} c={`transition-transform ${showAiBrief ? 'rotate-90' : ''}`} />
+                  </button>
+
+                  {showAiBrief && (
+                    <div className="rounded-lg p-4 space-y-5" style={{ background: 'linear-gradient(135deg, #0f1f1a, #111a16)', border: '1px solid #1a3a2a' }}>
+                      <BriefingContent brief={aiBrief} camp={camp} />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* ─── State A: AI-Generated ─── */
+                <div className="space-y-5">
+                  <BriefingContent brief={aiBrief} camp={camp} />
+
+                  <div className="pt-2 border-t border-[#1a3a2a]">
+                    <button
+                      onClick={() => {
+                        const name = `${camp.name.replace(/\s+/g, '_')}_Briefing.pdf`;
+                        onUploadBriefing?.(camp.id, name);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[12px] font-semibold bg-[#3ECF8E] text-[#0a1f15] hover:bg-[#38b97e] transition-colors"
+                    >
+                      <I n="upload" s={14} c="text-[#0a1f15]" />
+                      Upload Team Briefing
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Two-column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_540px] gap-5">
@@ -660,7 +864,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                           {stageItems.map((a) => {
                             const approval = doneMap[a.key];
                             const isDone = !!approval;
-                            const canAct = current && !isDone && !future && a.assignee === 'Lauren Hannigan';
+                            const canAct = current && !isDone && !future && a.assignee === CURRENT_USER.name;
                             return (
                               <div key={a.key} className="flex items-start gap-2.5 py-1.5">
                                 {isDone ? (

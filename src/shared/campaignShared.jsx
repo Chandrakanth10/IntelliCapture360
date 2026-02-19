@@ -17,6 +17,7 @@ export const CH_LEADS={'CRM':'Jennifer Martinez','Digital Merch':'Robert Kim','L
 export const MKT_CH=['Email','Push','SMS','In-Store','Web/App Home Pages'];
 export const PRI_CLS={High:'bg-red-50 text-red-700 border-red-200',Medium:'bg-amber-50 text-amber-700 border-amber-200',Low:'bg-sky-50 text-sky-700 border-sky-200'};
 export const MEDIA_FIELDS={'Vendor Style Guide':'vendorGuide','ISAN Scripts':'isanScripts','AMC Guidance':'amcGuidance'};
+export const CURRENT_USER = { name: 'Lauren Hannigan', initials: 'LH', title: 'VP, Integrated Marketing' };
 export const parseDate=(s)=>{const[y,m,d]=(s||'').split('-').map(Number);return{y,m:m-1,d}};
 
 export const STAGE_APPROVALS = {
