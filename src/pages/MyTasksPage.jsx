@@ -13,7 +13,6 @@ const PRI = {
 const PRI_RANK = { High: 0, Medium: 1, Low: 2 };
 
 const TABS = [
-  { key: 'all', label: 'All', icon: 'layers' },
   { key: 'action', label: 'Action Required', icon: 'alert', color: '#fbbf24' },
   { key: 'progress', label: 'In Progress', icon: 'zap', color: '#3ECF8E' },
   { key: 'monitoring', label: 'Monitoring', icon: 'eye', color: '#60a5fa' },
@@ -63,17 +62,34 @@ const SortIcon = ({ active, dir }) => (
   </span>
 );
 
+const SCOPES = [
+  { key: 'mine', label: 'My Campaigns', icon: 'user' },
+  { key: 'all_camps', label: 'All Campaigns', icon: 'layers' },
+];
+
 const MyTasks = ({ campaigns, onSelect }) => {
-  const [tab, setTab] = useState('all');
+  const [scope, setScope] = useState('mine');
+  const [tab, setTab] = useState(null);
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState('asc');
+  const [search, setSearch] = useState('');
 
   const mine = campaigns.filter((c) => c.rep === CURRENT_USER);
-  const filtered = tab === 'all' ? mine : mine.filter((c) => categorize(c) === tab);
+  const scoped = scope === 'mine' ? mine : campaigns;
+
+  // Apply search
+  const searched = search.trim()
+    ? scoped.filter((c) => {
+        const q = search.toLowerCase();
+        return c.name.toLowerCase().includes(q) || c.bu.toLowerCase().includes(q) || c.rep.toLowerCase().includes(q);
+      })
+    : scoped;
+
+  const filtered = !tab ? searched : searched.filter((c) => categorize(c) === tab);
   const sorted = sortCampaigns(filtered, sortKey, sortDir);
 
-  const counts = { all: mine.length };
-  mine.forEach((c) => { const k = categorize(c); counts[k] = (counts[k] || 0) + 1; });
+  const counts = {};
+  searched.forEach((c) => { const k = categorize(c); counts[k] = (counts[k] || 0) + 1; });
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -106,51 +122,89 @@ const MyTasks = ({ campaigns, onSelect }) => {
       {/* Header */}
       <div className="mb-4 shrink-0 flex items-center justify-between">
         <div>
-          <h1 className="text-[15px] font-semibold text-[#f8f8f8]">My Campaigns</h1>
+          <h1 className="text-[15px] font-semibold text-[#f8f8f8]">Campaigns</h1>
           <p className="text-[12px] text-[#666]">
-            {mine.length} campaigns assigned to {CURRENT_USER}
+            {scope === 'mine' ? `${mine.length} campaigns assigned to ${CURRENT_USER}` : `${campaigns.length} total campaigns`}
           </p>
         </div>
-        {sortKey && (
-          <button
-            onClick={() => { setSortKey(null); setSortDir('asc'); }}
-            className="text-[11px] text-[#666] hover:text-[#ccc] transition-colors flex items-center gap-1"
-          >
-            <I n="x" s={10} />
-            Clear sort
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {sortKey && (
+            <button
+              onClick={() => { setSortKey(null); setSortDir('asc'); }}
+              className="text-[11px] text-[#666] hover:text-[#ccc] transition-colors flex items-center gap-1"
+            >
+              <I n="x" s={10} />
+              Clear sort
+            </button>
+          )}
+          <div className="relative w-44">
+            <I n="search" s={12} c="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#555]" />
+            <input
+              className="w-full pl-8 pr-3 py-1.5 bg-[#1e1e1e] border border-[#2a2a2a] text-[#ccc] text-[11px] rounded-md placeholder-[#555] focus:outline-none focus:border-[#3ECF8E50] transition-colors"
+              placeholder="Search campaigns..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#555] hover:text-[#ccc]">
+                <I n="x" s={10} />
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-1 mb-4 shrink-0">
-        {TABS.map((t) => {
-          const isActive = tab === t.key;
-          return (
+      {/* Scope + Filter tabs */}
+      <div className="flex items-center gap-3 mb-4 shrink-0">
+        <div className="flex bg-[#1a1a1a] rounded-md border border-[#2a2a2a] p-0.5">
+          {SCOPES.map((s) => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-md transition-colors border ${
-                isActive
-                  ? 'bg-[#252525] text-white border-[#3ECF8E50]'
-                  : 'text-[#777] hover:text-[#ccc] hover:bg-[#1e1e1e] border-transparent'
+              key={s.key}
+              onClick={() => { setScope(s.key); setTab(null); }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-md transition-colors ${
+                scope === s.key
+                  ? 'bg-[#252525] text-white shadow-sm'
+                  : 'text-[#666] hover:text-[#ccc]'
               }`}
             >
-              <I n={t.icon} s={12} />
-              {t.label}
-              <span className={`text-[10px] ${isActive ? 'text-[#888]' : 'text-[#555]'}`}>
-                {counts[t.key] || 0}
-              </span>
+              <I n={s.icon} s={11} />
+              {s.label}
             </button>
-          );
-        })}
+          ))}
+        </div>
+
+        <div className="w-px h-5 bg-[#2a2a2a]" />
+
+        <div className="flex gap-1">
+          {TABS.filter((t) => (counts[t.key] || 0) > 0).map((t) => {
+            const isActive = tab === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setTab(isActive ? null : t.key)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-md transition-colors border ${
+                  isActive
+                    ? 'bg-[#252525] text-white border-[#3ECF8E50]'
+                    : 'text-[#777] hover:text-[#ccc] hover:bg-[#1e1e1e] border-transparent'
+                }`}
+              >
+                <I n={t.icon} s={12} />
+                {t.label}
+                <span className={`text-[10px] ${isActive ? 'text-[#888]' : 'text-[#555]'}`}>
+                  {counts[t.key]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Table */}
       <div className="flex-1 min-h-0 rounded-lg border border-[#2a2a2a] bg-[#161616] overflow-hidden flex flex-col">
-        <div className="grid grid-cols-[1fr_120px_80px_80px_80px_70px] gap-3 px-4 py-2.5 border-b border-[#2a2a2a] bg-[#1a1a1a] shrink-0">
+        <div className={`grid gap-3 px-4 py-2.5 border-b border-[#2a2a2a] bg-[#1a1a1a] shrink-0 ${scope === 'all_camps' ? 'grid-cols-[1fr_120px_110px_80px_80px_80px_70px]' : 'grid-cols-[1fr_120px_80px_80px_80px_70px]'}`}>
           {colHeader('Campaign', null)}
           {colHeader('Stage', null)}
+          {scope === 'all_camps' && colHeader('Lead', null)}
           {colHeader('Priority', 'priority')}
           {colHeader('Date', 'date')}
           {colHeader('ROI', 'roi')}
@@ -170,10 +224,10 @@ const MyTasks = ({ campaigns, onSelect }) => {
               <div
                 key={c.id}
                 onClick={() => onSelect(c)}
-                className="grid grid-cols-[1fr_120px_80px_80px_80px_70px] gap-3 px-4 py-2.5 border-b border-[#222] cursor-pointer hover:bg-[#1e1e1e] transition-colors items-center"
+                className={`grid gap-3 px-4 py-2.5 border-b border-[#222] cursor-pointer hover:bg-[#1e1e1e] transition-colors items-center ${scope === 'all_camps' ? 'grid-cols-[1fr_120px_110px_80px_80px_80px_70px]' : 'grid-cols-[1fr_120px_80px_80px_80px_70px]'}`}
               >
                 <div className="min-w-0 flex items-center gap-2.5">
-                  {tab === 'all' && (
+                  {!tab && (
                     <span
                       className="w-1 h-5 rounded-full shrink-0"
                       style={{ backgroundColor: catTab?.color || '#555' }}
@@ -189,6 +243,9 @@ const MyTasks = ({ campaigns, onSelect }) => {
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: stg.hex }} />
                   <span className="text-[11px] text-[#888] truncate">{stg.label}</span>
                 </div>
+                {scope === 'all_camps' && (
+                  <span className="text-[11px] text-[#888] truncate">{c.rep}</span>
+                )}
                 <span
                   className="text-[10px] font-medium px-1.5 py-0.5 rounded border w-fit"
                   style={{ backgroundColor: pri.bg, borderColor: pri.border, color: pri.text }}

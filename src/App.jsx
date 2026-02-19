@@ -4,11 +4,12 @@ import DetailPanel from './components/DetailPanel';
 import Sidebar from './components/Sidebar';
 import TopNav from './components/TopNav';
 import CalendarPage from './pages/CalendarPage';
+import CampaignDetailPage from './pages/CampaignDetailPage';
 import DashboardPage from './pages/DashboardPage';
 import IntakePage from './pages/IntakePage';
 import MyTasksPage from './pages/MyTasksPage';
 import TrackerPage from './pages/TrackerPage';
-import { CAMPS, I } from './shared/campaignShared';
+import { CAMPS, I, STAGES, STAGE_APPROVALS } from './shared/campaignShared';
 
 const VIEW_TO_PATH = {
   dashboard: '/dashboard',
@@ -43,6 +44,10 @@ function resolveViewFromPath(pathname) {
     return 'mytasks';
   }
 
+  if (clean.startsWith('/campaign/')) {
+    return 'campaign';
+  }
+
   return 'dashboard';
 }
 
@@ -52,7 +57,45 @@ export default function App() {
   const view = resolveViewFromPath(location.pathname);
 
   const [selected, setSelected] = useState(null);
-  const [campaigns] = useState(CAMPS);
+  const [campaigns, setCampaigns] = useState(CAMPS);
+  const [approvals, setApprovals] = useState({
+    1: {
+      'hero-assets': { by: 'David Park', date: 'Feb 16, 3:20 PM' },
+      'email-review': { by: 'Lisa Smith', date: 'Feb 17, 10:45 AM' },
+    },
+    3: {
+      'assets-deploy': { by: 'Robert Kim', date: 'Feb 17, 9:00 AM' },
+      'qa-test': { by: 'Lisa Smith', date: 'Feb 17, 2:30 PM' },
+      'go-nogo': { by: 'Lauren Hannigan', date: 'Feb 18, 8:15 AM' },
+    },
+    6: {
+      'creative-strat': { by: 'David Park', date: 'Feb 14, 11:00 AM' },
+      'media-plan': { by: 'Chris Thompson', date: 'Feb 15, 4:10 PM' },
+    },
+    8: {
+      'launched': { by: 'System', date: 'Feb 8, 6:00 AM' },
+      'perf-monitor': { by: 'Lisa Smith', date: 'Feb 8, 9:30 AM' },
+      'post-review': { by: 'Lauren Hannigan', date: 'Feb 10, 11:00 AM' },
+    },
+    14: {
+      'brief-signoff': { by: 'Lauren Hannigan', date: 'Feb 15, 1:00 PM' },
+      'timeline-approve': { by: 'Sarah Johnson', date: 'Feb 16, 10:20 AM' },
+    },
+  });
+  const [comments, setComments] = useState({
+    1: [
+      { id: 1, author: 'Michael Chen', text: "Creative assets are looking great \u2014 let's finalize the hero banner by Friday.", date: '2026-02-14T09:32:00' },
+      { id: 2, author: 'Lauren Hannigan', text: "Agreed. I'll loop in the design team for final review.", date: '2026-02-15T14:15:00' },
+    ],
+    3: [
+      { id: 1, author: 'Lisa Wong', text: 'Can we add a local produce spotlight section to this campaign?', date: '2026-02-16T11:05:00' },
+    ],
+    8: [
+      { id: 1, author: 'Derek Nguyen', text: "App download numbers are up 18% since launch \u2014 nice momentum.", date: '2026-02-12T16:48:00' },
+      { id: 2, author: 'Lisa Smith', text: 'Doubling the push notification cadence this week.', date: '2026-02-13T10:22:00' },
+      { id: 3, author: 'Lauren Hannigan', text: "Great results so far. Let's keep the energy going into next week.", date: '2026-02-17T08:50:00' },
+    ],
+  });
   const [toast, setToast] = useState(null);
   const [formDirty, setFormDirty] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -64,6 +107,91 @@ export default function App() {
   const handleSubmit = (fd) => {
     setFormDirty(false);
     setToast(`"${fd.projectName}" submitted`);
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const fmtNow = () => {
+    const d = new Date();
+    const mon = d.toLocaleString('en-US', { month: 'short' });
+    const day = d.getDate();
+    const h = d.getHours();
+    const m = d.getMinutes().toString().padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+    return `${mon} ${day}, ${h12}:${m} ${ampm}`;
+  };
+
+  const addSystemComment = (cid, text) => {
+    setComments((prev) => ({
+      ...prev,
+      [cid]: [...(prev[cid] || []), { id: Date.now(), author: 'Lauren Hannigan', text, date: new Date().toISOString() }],
+    }));
+  };
+
+  const handleApprove = (campaignId, approvalKey, comment) => {
+    const camp = campaigns.find((c) => c.id === campaignId);
+    if (!camp) return;
+    const stageApprovals = STAGE_APPROVALS[camp.stage] || [];
+    const item = stageApprovals.find((a) => a.key === approvalKey);
+    setApprovals((prev) => ({
+      ...prev,
+      [campaignId]: { ...(prev[campaignId] || {}), [approvalKey]: { by: 'Lauren Hannigan', date: fmtNow() } },
+    }));
+    addSystemComment(campaignId, `✅ Approved "${item?.label || approvalKey}": ${comment}`);
+    setToast(`Approved: ${item?.label || approvalKey}`);
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleReject = (campaignId, approvalKey, targetStageKey, comment) => {
+    const camp = campaigns.find((c) => c.id === campaignId);
+    if (!camp) return;
+    const currentStageIdx = STAGES.findIndex((s) => s.key === camp.stage);
+    const targetStageIdx = STAGES.findIndex((s) => s.key === targetStageKey);
+    const stageApprovals = STAGE_APPROVALS[camp.stage] || [];
+    const item = stageApprovals.find((a) => a.key === approvalKey);
+    const targetLabel = STAGES[targetStageIdx]?.label || targetStageKey;
+    const currentLabel = STAGES[currentStageIdx]?.label || camp.stage;
+
+    // Clear approvals from target stage through current stage
+    setApprovals((prev) => {
+      const next = { ...prev };
+      const campApprovals = { ...(next[campaignId] || {}) };
+      for (let i = targetStageIdx; i <= currentStageIdx; i++) {
+        const stgKey = STAGES[i]?.key;
+        if (stgKey) {
+          (STAGE_APPROVALS[stgKey] || []).forEach((a) => {
+            delete campApprovals[a.key];
+          });
+        }
+      }
+      next[campaignId] = campApprovals;
+      return next;
+    });
+
+    // Move campaign to target stage
+    setCampaigns((prev) =>
+      prev.map((c) => (c.id === campaignId ? { ...c, stage: targetStageKey, days: 0 } : c))
+    );
+
+    addSystemComment(campaignId, `❌ Rejected "${item?.label || approvalKey}" — sent back to ${targetLabel}: ${comment}`);
+    setToast(`Rejected — campaign sent back to ${targetLabel}`);
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleAdvanceStage = (campaignId) => {
+    const camp = campaigns.find((c) => c.id === campaignId);
+    if (!camp) return;
+    const currentIdx = STAGES.findIndex((s) => s.key === camp.stage);
+    if (currentIdx < 0 || currentIdx >= STAGES.length - 1) return;
+    const nextStage = STAGES[currentIdx + 1];
+    const currentLabel = STAGES[currentIdx].label;
+
+    setCampaigns((prev) =>
+      prev.map((c) => (c.id === campaignId ? { ...c, stage: nextStage.key, days: 0 } : c))
+    );
+
+    addSystemComment(campaignId, `🚀 Campaign advanced from ${currentLabel} to ${nextStage.label}`);
+    setToast(`Campaign advanced to ${nextStage.label}`);
     setTimeout(() => setToast(null), 4000);
   };
 
@@ -148,7 +276,7 @@ export default function App() {
               <Route path="/products" element={<Navigate to="/dashboard" replace />} />
               <Route
                 path="/dashboard"
-                element={<DashboardPage campaigns={campaigns} onSelect={(campaign) => setSelected(campaign)} />}
+                element={<DashboardPage campaigns={campaigns} approvals={approvals} onSelect={(campaign) => setSelected(campaign)} />}
               />
               <Route
                 path="/intake"
@@ -175,13 +303,62 @@ export default function App() {
                 path="/my-tasks"
                 element={<MyTasksPage campaigns={campaigns} onSelect={(campaign) => setSelected(campaign)} />}
               />
+              <Route
+                path="/campaign/:id"
+                element={
+                  <CampaignDetailPage
+                    campaigns={campaigns}
+                    approvals={approvals}
+                    onApprove={handleApprove}
+                    onReject={handleReject}
+                    onAdvanceStage={handleAdvanceStage}
+                    comments={(() => {
+                      const match = location.pathname.match(/\/campaign\/(\d+)/);
+                      return match ? (comments[Number(match[1])] || []) : [];
+                    })()}
+                    onAddComment={(text) => {
+                      const match = location.pathname.match(/\/campaign\/(\d+)/);
+                      if (!match) return;
+                      const cid = Number(match[1]);
+                      setComments((prev) => {
+                        const list = prev[cid] || [];
+                        return {
+                          ...prev,
+                          [cid]: [...list, { id: Date.now(), author: 'Lauren Hannigan', text, date: new Date().toISOString() }],
+                        };
+                      });
+                    }}
+                  />
+                }
+              />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </div>
         </main>
       </div>
 
-      {selected && <DetailPanel camp={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <DetailPanel
+          camp={selected}
+          onClose={() => setSelected(null)}
+          comments={comments[selected.id] || []}
+          onAddComment={(text) => {
+            setComments((prev) => {
+              const list = prev[selected.id] || [];
+              return {
+                ...prev,
+                [selected.id]: [...list, { id: Date.now(), author: 'Lauren Hannigan', text, date: new Date().toISOString() }],
+              };
+            });
+          }}
+          onViewDetail={() => {
+            const id = selected.id;
+            const labels = { dashboard: 'Dashboard', tracker: 'Tracker', calendar: 'Calendar', mytasks: 'Campaigns' };
+            setSelected(null);
+            routerNavigate(`/campaign/${id}`, { state: { from: labels[view] || 'Dashboard' } });
+          }}
+        />
+      )}
 
       {toast && (
         <div className="fixed bottom-5 right-5 bg-emerald-600 text-white pl-3.5 pr-2 py-2 rounded-md shadow-lg text-[12px] font-medium anim-scale z-50 flex items-center gap-2">

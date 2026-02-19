@@ -177,6 +177,7 @@ select {
 /* ═══ CHIP TOGGLES ═══ */
 .chip-toggle {
   transition: all 0.15s ease;
+  border-color: #2e2e2e;
 }
 
 .chip-toggle:hover {
@@ -194,27 +195,20 @@ select {
   background: rgba(62, 207, 142, 0.18);
 }
 
-/* ═══ INTAKE MAP ═══ */
-.intake-map .card-focus {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  border-color: var(--sb-border);
-  background: var(--sb-panel);
-  border-radius: 0.5rem;
-}
-
-.intake-map .card-focus > div:first-child {
-  background: var(--sb-panel-2);
-  border-bottom-color: var(--sb-border);
-}
-
-.intake-map .card-focus > div:last-child {
-  padding-top: 16px;
-  padding-bottom: 16px;
-}
-
 .intake-shell-footer {
   background: rgba(17, 17, 17, 0.94);
   backdrop-filter: blur(12px);
+}
+
+/* Upload zones need hover to override .supabase .border-dashed */
+.intake-upload-zone {
+  border-style: dashed;
+  border-color: #3a3a3a;
+  transition: all 0.15s ease;
+}
+.intake-upload-zone:hover {
+  border-color: rgba(62, 207, 142, 0.35) !important;
+  background: rgba(62, 207, 142, 0.04);
 }
 
 /* ═══════════════════════════════════

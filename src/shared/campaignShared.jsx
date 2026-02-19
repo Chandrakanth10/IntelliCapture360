@@ -19,6 +19,50 @@ export const PRI_CLS={High:'bg-red-50 text-red-700 border-red-200',Medium:'bg-am
 export const MEDIA_FIELDS={'Vendor Style Guide':'vendorGuide','ISAN Scripts':'isanScripts','AMC Guidance':'amcGuidance'};
 export const parseDate=(s)=>{const[y,m,d]=(s||'').split('-').map(Number);return{y,m:m-1,d}};
 
+export const STAGE_APPROVALS = {
+  intake: [
+    { key: 'intake-form', label: 'Intake form submitted', assignee: 'Requester' },
+    { key: 'bu-confirm', label: 'Business unit confirmed', assignee: 'BU Director' },
+    { key: 'req-verify', label: 'Requester identity verified', assignee: 'System' },
+  ],
+  review: [
+    { key: 'mkt-review', label: 'Marketing team review', assignee: 'Lauren Hannigan' },
+    { key: 'budget-approve', label: 'Budget allocation approved', assignee: 'Finance — Greg Harmon' },
+    { key: 'pri-validate', label: 'Priority validated', assignee: 'David Park' },
+    { key: 'ch-feasible', label: 'Channel feasibility confirmed', assignee: 'Nicole Patel' },
+  ],
+  planning: [
+    { key: 'brief-signoff', label: 'Campaign brief signed off', assignee: 'Lauren Hannigan' },
+    { key: 'timeline-approve', label: 'Timeline approved', assignee: 'Sarah Johnson' },
+    { key: 'leads-assigned', label: 'Channel leads assigned', assignee: 'Jennifer Martinez' },
+    { key: 'aud-finalized', label: 'Audience segments finalized', assignee: 'Robert Kim' },
+  ],
+  strategy: [
+    { key: 'creative-strat', label: 'Creative strategy approved', assignee: 'David Park' },
+    { key: 'media-plan', label: 'Media plan reviewed', assignee: 'Chris Thompson' },
+    { key: 'vendor-contracts', label: 'Vendor contracts signed', assignee: 'Legal — Patricia Lee' },
+    { key: 'roi-validate', label: 'ROI targets validated', assignee: 'Finance — Greg Harmon' },
+  ],
+  creative: [
+    { key: 'hero-assets', label: 'Hero assets approved', assignee: 'David Park' },
+    { key: 'email-review', label: 'Email templates reviewed', assignee: 'Lisa Smith' },
+    { key: 'store-signage', label: 'In-store signage approved', assignee: 'Diana Ramirez' },
+    { key: 'legal-review', label: 'Legal & compliance review', assignee: 'Legal — Patricia Lee' },
+    { key: 'creative-signoff', label: 'Final creative sign-off', assignee: 'Lauren Hannigan' },
+  ],
+  execution: [
+    { key: 'assets-deploy', label: 'Assets deployed to channels', assignee: 'Robert Kim' },
+    { key: 'qa-test', label: 'QA testing complete', assignee: 'Lisa Smith' },
+    { key: 'go-nogo', label: 'Stakeholder go / no-go', assignee: 'Lauren Hannigan' },
+    { key: 'launch-ready', label: 'Launch readiness checklist', assignee: 'Sarah Johnson' },
+  ],
+  live: [
+    { key: 'launched', label: 'Campaign launched', assignee: 'System' },
+    { key: 'perf-monitor', label: 'Performance monitoring active', assignee: 'Lisa Smith' },
+    { key: 'post-review', label: 'Post-launch review scheduled', assignee: 'Lauren Hannigan' },
+  ],
+};
+
 export const CAMPS=[
   {id:1,name:'Q1 Stock Up Sale',desc:'Major quarterly stock-up promotion targeting all loyalty members with deep discounts on pantry essentials.',bu:'Divisions',banners:['Safeway','Vons','Albertsons','Jewel-Osco'],by:{n:'Michael Chen',l:'mchen42'},mr:'Integrated Marketing',rep:'Lauren Hannigan',pri:'High',roi:'$2.4M',roiT:'Revenue',q:'Q1',p:'P3',w:'W2',date:'2026-03-15',ch:['CRM','Digital Merch','In-Store','Circular'],mch:['Email','Push','In-Store'],ct:'New',stage:'creative',days:3,created:'2026-01-28',aud:'All loyalty members, high-value shoppers',status:'On Track'},
   {id:2,name:'March Madness Promo',desc:'Basketball-themed promotional campaign with game-day snack bundles and party supplies.',bu:'DINE',banners:['Safeway','Vons'],by:{n:'Sarah Park',l:'spark15'},mr:'Brand Marketing',rep:'David Park',pri:'Medium',roi:'$850K',roiT:'Revenue',q:'Q1',p:'P3',w:'W1',date:'2026-03-08',ch:['CRM','Paid Media','Digital Merch'],mch:['Email','Push','Web/App Home Pages'],ct:'Existing',stage:'planning',days:5,created:'2026-02-01',aud:'Sports enthusiasts, party shoppers',status:'On Track'},
