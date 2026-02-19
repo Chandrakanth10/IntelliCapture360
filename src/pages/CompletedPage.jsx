@@ -142,6 +142,7 @@ const BriefingModal = ({ camp, briefing, onClose }) => {
 const CompletedPage = ({ campaigns = [], briefings = {}, onSelect }) => {
   const liveCampaigns = campaigns.filter((c) => c.stage === 'live');
   const [modalCamp, setModalCamp] = useState(null);
+  const [modalType, setModalType] = useState(null); // 'uploaded' | 'ai'
 
   return (
     <div className="anim-fade">
@@ -161,12 +162,13 @@ const CompletedPage = ({ campaigns = [], briefings = {}, onSelect }) => {
       ) : (
         <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-[1fr_120px_100px_100px_140px_32px] gap-4 px-5 py-3 border-b border-[#2a2a2a] bg-[#1a1a1a]">
+          <div className="grid grid-cols-[1fr_120px_100px_100px_150px_140px_32px] gap-4 px-5 py-3 border-b border-[#2a2a2a] bg-[#1a1a1a]">
             <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Campaign</span>
             <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Business Unit</span>
             <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Created</span>
             <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Launch Date</span>
-            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Briefing</span>
+            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Final Brief</span>
+            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">AI Brief</span>
             <span />
           </div>
 
@@ -180,9 +182,9 @@ const CompletedPage = ({ campaigns = [], briefings = {}, onSelect }) => {
               <div
                 key={camp.id}
                 onClick={() => onSelect(camp.id)}
-                className="grid grid-cols-[1fr_120px_100px_100px_140px_32px] gap-4 px-5 py-3.5 border-b border-[#222] last:border-b-0 hover:bg-[#1e1e1e] transition-colors text-left group cursor-pointer"
+                className="grid grid-cols-[1fr_120px_100px_100px_150px_140px_32px] gap-4 px-5 py-3.5 border-b border-[#222] last:border-b-0 hover:bg-[#1e1e1e] transition-colors text-left group"
               >
-                <div className="min-w-0">
+                <div className="min-w-0 cursor-pointer">
                   <p className="text-[13px] font-medium text-[#ededed] truncate group-hover:text-white transition-colors">
                     {camp.name}
                   </p>
@@ -194,23 +196,28 @@ const CompletedPage = ({ campaigns = [], briefings = {}, onSelect }) => {
                 <div className="self-center">
                   {hasUpload ? (
                     <button
-                      onClick={(e) => { e.stopPropagation(); setModalCamp(camp); }}
-                      className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#3ECF8E15] border border-[#3ECF8E30] text-[#3ECF8E] hover:bg-[#3ECF8E25] hover:border-[#3ECF8E50] transition-colors cursor-pointer"
+                      onClick={(e) => { e.stopPropagation(); setModalCamp(camp); setModalType('uploaded'); }}
+                      className="badge-click inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#3ECF8E15] border border-[#3ECF8E30] text-[#3ECF8E] hover:bg-[#3ECF8E25] hover:border-[#3ECF8E50] transition-colors"
                     >
                       <I n="check" s={10} />
                       Final Brief
                     </button>
                   ) : (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setModalCamp(camp); }}
-                      className="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#a78bfa15] border border-[#a78bfa30] text-[#a78bfa] hover:bg-[#a78bfa25] hover:border-[#a78bfa50] transition-colors cursor-pointer"
-                    >
-                      <I n="sparkle" s={10} />
-                      AI Generated
-                    </button>
+                    <span className="inline-flex items-center gap-1.5 text-[11px] text-[#555] italic">
+                      Not Ready
+                    </span>
                   )}
                 </div>
-                <div className="self-center flex justify-end">
+                <div className="self-center">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setModalCamp(camp); setModalType('ai'); }}
+                    className="badge-click inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#a78bfa15] border border-[#a78bfa30] text-[#a78bfa] hover:bg-[#a78bfa25] hover:border-[#a78bfa50] transition-colors"
+                  >
+                    <I n="sparkle" s={10} />
+                    AI Generated
+                  </button>
+                </div>
+                <div className="self-center flex justify-end cursor-pointer">
                   <I n="chevR" s={14} c="text-[#444] group-hover:text-[#888] transition-colors" />
                 </div>
               </div>
@@ -223,8 +230,8 @@ const CompletedPage = ({ campaigns = [], briefings = {}, onSelect }) => {
       {modalCamp && (
         <BriefingModal
           camp={modalCamp}
-          briefing={briefings[modalCamp.id]}
-          onClose={() => setModalCamp(null)}
+          briefing={modalType === 'ai' ? null : briefings[modalCamp.id]}
+          onClose={() => { setModalCamp(null); setModalType(null); }}
         />
       )}
     </div>
