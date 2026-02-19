@@ -73,18 +73,18 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
       >
         <div className={`py-5 px-4 flex ${showText ? 'justify-start' : 'lg:justify-center'}`}>
           {showText ? (
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#3ECF8E] flex items-center justify-center">
-                <span className="text-[#0a1f15] text-[10px] font-bold tracking-tight">IC</span>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#3ECF8E] flex items-center justify-center">
+                <span className="text-[#0a1f15] text-[12px] font-bold tracking-tight">IC</span>
               </div>
               <div>
-                <p className="text-[13px] font-semibold text-white leading-tight">IntelliCapture</p>
-                <p className="text-[11px] text-[#555]">Campaign Workflow</p>
+                <p className="text-[15px] font-semibold text-white leading-tight">IntelliCapture</p>
+                <p className="text-[12px] text-[#555]">Campaign Workflow</p>
               </div>
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-[#3ECF8E] flex items-center justify-center">
-              <span className="text-[#0a1f15] text-[10px] font-bold tracking-tight">IC</span>
+            <div className="w-10 h-10 rounded-xl bg-[#3ECF8E] flex items-center justify-center">
+              <span className="text-[#0a1f15] text-[12px] font-bold tracking-tight">IC</span>
             </div>
           )}
         </div>

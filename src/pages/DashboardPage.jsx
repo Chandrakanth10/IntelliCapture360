@@ -8,7 +8,6 @@ const PRI_COLORS = {
 };
 
 const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
-  const [filter, setFilter] = useState('all');
   const counts = useMemo(() => {
     const c = {};
     STAGES.forEach((s) => (c[s.key] = 0));
@@ -108,9 +107,8 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
             return (
               <div
                 key={s.key}
-                className={`pipe-seg ${s.color} flex items-center justify-center cursor-pointer relative group`}
+                className={`${s.color} flex items-center justify-center relative group`}
                 style={{ width: `${Math.max((cnt / total) * 100, 8)}%` }}
-                onClick={() => setFilter(filter === s.key ? 'all' : s.key)}
               >
                 <span className="text-[10px] font-bold text-white">{cnt}</span>
                 <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-[#2a2a2a] text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20 border border-[#333]">
@@ -122,66 +120,16 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
         </div>
         <div className="flex mt-2.5 gap-2.5 flex-wrap justify-center">
           {STAGES.map((s) => (
-            <button
+            <div
               key={s.key}
-              onClick={() => setFilter(filter === s.key ? 'all' : s.key)}
-              className={`flex items-center gap-1.5 text-[11px] transition-all ${
-                filter === s.key ? 'font-semibold ' + s.text : 'text-[#999] hover:text-[#ccc]'
-              }`}
+              className="flex items-center gap-1.5 text-[11px] text-[#999]"
             >
               <div className={`w-2.5 h-2.5 rounded-full ${s.color}`} />
               {s.label}
-            </button>
+            </div>
           ))}
-          {filter !== 'all' && (
-            <button
-              onClick={() => setFilter('all')}
-              className="text-[11px] text-indigo-600 font-medium hover:underline ml-auto"
-            >
-              Clear
-            </button>
-          )}
         </div>
       </Card>
-
-      {/* Filtered Campaign List */}
-      {filter !== 'all' && (() => {
-        const stg = STAGES.find((s) => s.key === filter);
-        const filtered = campaigns.filter((c) => c.stage === filter);
-        if (!filtered.length) return null;
-        return (
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] overflow-hidden anim-fade">
-            <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className={`w-2.5 h-2.5 rounded-full ${stg?.color || ''}`} />
-                <h3 className="text-[13px] font-semibold text-[#ededed]">{stg?.label || filter}</h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border" style={{ backgroundColor: stg?.hex + '18', borderColor: stg?.hex + '30', color: stg?.hex }}>{filtered.length}</span>
-              </div>
-              <button onClick={() => setFilter('all')} className="text-[11px] text-[#666] hover:text-[#ccc] transition-colors">Dismiss</button>
-            </div>
-            <div className="divide-y divide-[#222]">
-              {filtered.map((c) => {
-                const pri = PRI_COLORS[c.pri] || PRI_COLORS.Medium;
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => onSelect && onSelect(c)}
-                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#1e1e1e] transition-colors text-left group"
-                  >
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[12px] font-medium text-[#ccc] group-hover:text-[#ededed] transition-colors truncate block">{c.name}</span>
-                      <span className="text-[10px] text-[#666] mt-0.5 block">{c.bu}</span>
-                    </div>
-                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded border" style={{ backgroundColor: pri.bg, borderColor: pri.border, color: pri.text }}>{c.pri}</span>
-                    <span className="text-[10px] text-[#555]">{c.days}d</span>
-                    <I n="chevR" s={12} c="text-[#333] group-hover:text-[#666] transition-colors" />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
 
       {/* My Pending Approvals */}
       <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] overflow-hidden">
