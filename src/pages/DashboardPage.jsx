@@ -113,7 +113,7 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
             );
           })}
         </div>
-        <div className="flex mt-2.5 gap-2.5 flex-wrap">
+        <div className="flex mt-2.5 gap-2.5 flex-wrap justify-center">
           {STAGES.map((s) => (
             <button
               key={s.key}
