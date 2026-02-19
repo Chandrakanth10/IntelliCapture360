@@ -431,7 +431,7 @@ export default function App() {
       )}
 
       {toast && (
-        <div className="fixed bottom-5 right-5 bg-emerald-600 text-white pl-3.5 pr-2 py-2 rounded-md shadow-lg text-[12px] font-medium anim-scale z-50 flex items-center gap-2">
+        <div className="fixed bottom-5 right-5 bg-emerald-600 text-white pl-3.5 pr-2 py-2 rounded-md shadow-lg text-[12px] font-medium anim-toast z-50 flex items-center gap-2">
           <I n="check" s={14} />
           <span>{toast}</span>
           <button

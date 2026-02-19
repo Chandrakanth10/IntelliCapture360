@@ -342,7 +342,7 @@ const FilePreviewModal = ({ file, onClose }) => {
 
   return createPortal(
     <>
-      <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-[3px]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-[3px] anim-backdrop" onClick={onClose} />
       <div className="fixed inset-4 sm:inset-8 lg:inset-y-10 lg:inset-x-[10%] z-[61] flex flex-col bg-[#161616] border border-[#2a2a2a] rounded-xl shadow-2xl anim-scale overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[#2a2a2a] bg-[#1a1a1a] shrink-0">
@@ -1218,7 +1218,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
       {/* Approve / Reject modal */}
       {actionModal && createPortal(
         <>
-          <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-[3px]" onClick={() => setActionModal(null)} />
+          <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-[3px] anim-backdrop" onClick={() => setActionModal(null)} />
           <div className="fixed inset-0 z-[61] flex items-center justify-center p-4">
             <div className="bg-[#161616] border border-[#2a2a2a] rounded-xl shadow-2xl anim-scale w-full max-w-md overflow-hidden">
               {/* Modal header */}

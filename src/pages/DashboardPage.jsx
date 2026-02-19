@@ -60,7 +60,7 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
   ];
 
   return (
-    <div className="space-y-4 anim-fade">
+    <div className="space-y-4 anim-fade anim-stagger">
       <div>
         <h1 className="text-[15px] font-semibold text-[#f8f8f8]">Dashboard</h1>
         <p className="text-[12px] text-[#888] mt-0.5">

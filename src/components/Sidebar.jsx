@@ -10,7 +10,7 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
     { id: 'calendar', icon: 'cal', label: 'Calendar' },
   ];
   const resultsNav = [
-    { id: 'completed', icon: 'check', label: 'Completed' },
+    { id: 'completed', icon: 'check', label: 'Campaign History' },
   ];
   const actionsNav = [
     { id: 'intake', icon: 'plus', label: 'New Campaign' },

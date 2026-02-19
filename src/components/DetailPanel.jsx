@@ -50,7 +50,7 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-40 backdrop-blur-[2px]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/40 z-40 backdrop-blur-[2px] anim-backdrop" onClick={onClose} />
       <div className="fixed right-0 top-0 bottom-0 w-[600px] bg-[#161616] border-l border-[#2a2a2a] z-50 anim-slide-r overflow-y-auto scrollbar-thin">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-[#161616] border-b border-[#2a2a2a] px-5 py-3.5 flex items-center justify-between">

@@ -17,7 +17,7 @@ const BriefingModal = ({ camp, briefing, onClose }) => {
 
   return createPortal(
     <>
-      <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-[3px]" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-[3px] anim-backdrop" onClick={onClose} />
       <div className="fixed inset-4 sm:inset-8 lg:inset-y-8 lg:inset-x-[12%] z-[61] flex flex-col bg-[#161616] border border-[#2a2a2a] rounded-xl shadow-2xl anim-scale overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[#2a2a2a] bg-[#1a1a1a] shrink-0">
@@ -171,6 +171,7 @@ const CompletedPage = ({ campaigns = [], briefings = {}, onSelect }) => {
           </div>
 
           {/* Rows */}
+          <div className="anim-stagger">
           {liveCampaigns.map((camp) => {
             const briefing = briefings[camp.id];
             const hasUpload = briefing?.type === 'uploaded';
@@ -215,6 +216,7 @@ const CompletedPage = ({ campaigns = [], briefings = {}, onSelect }) => {
               </div>
             );
           })}
+          </div>
         </div>
       )}
 

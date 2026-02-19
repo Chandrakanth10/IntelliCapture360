@@ -43,46 +43,113 @@ body {
 }
 
 /* ═══ ANIMATIONS ═══ */
+
+/* Spring-like cubic-bezier curves */
+/* --spring: cubic-bezier(0.22, 1.2, 0.36, 1)   — overshoot spring */
+/* --smooth: cubic-bezier(0.16, 1, 0.3, 1)       — decelerate, no overshoot */
+/* --snappy: cubic-bezier(0.34, 1.56, 0.64, 1)   — snappy spring for small elements */
+
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideFwd {
-  from { opacity: 0; transform: translateX(12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes slideBack {
-  from { opacity: 0; transform: translateX(-12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes checkDraw {
   from { stroke-dashoffset: 24; }
-  to { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: 0; }
 }
 
 @keyframes progressPulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50%      { opacity: 0.7; }
 }
 
-.anim-fade { animation: fadeIn 0.3s ease-out both; }
-.anim-slide-r { animation: slideRight 0.2s ease-out both; }
-.anim-fwd { animation: slideFwd 0.25s cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.anim-back { animation: slideBack 0.25s cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.anim-scale { animation: scaleIn 0.2s ease-out both; }
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.anim-fade {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-slide-r {
+  animation: slideRight 0.35s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.anim-fwd {
+  animation: slideFwd 0.3s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.anim-back {
+  animation: slideBack 0.3s cubic-bezier(0.22, 1.2, 0.36, 1) both;
+}
+
+.anim-scale {
+  animation: scaleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.anim-toast {
+  animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.anim-backdrop {
+  animation: backdropIn 0.25s ease-out both;
+}
+
+/* Staggered children — add anim-stagger to parent */
+.anim-stagger > * {
+  animation: staggerFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.anim-stagger > *:nth-child(1)  { animation-delay: 0.03s; }
+.anim-stagger > *:nth-child(2)  { animation-delay: 0.06s; }
+.anim-stagger > *:nth-child(3)  { animation-delay: 0.09s; }
+.anim-stagger > *:nth-child(4)  { animation-delay: 0.12s; }
+.anim-stagger > *:nth-child(5)  { animation-delay: 0.15s; }
+.anim-stagger > *:nth-child(6)  { animation-delay: 0.18s; }
+.anim-stagger > *:nth-child(7)  { animation-delay: 0.21s; }
+.anim-stagger > *:nth-child(8)  { animation-delay: 0.24s; }
+.anim-stagger > *:nth-child(9)  { animation-delay: 0.27s; }
+.anim-stagger > *:nth-child(10) { animation-delay: 0.30s; }
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade, .anim-slide-r, .anim-fwd, .anim-back,
+  .anim-scale, .anim-toast, .anim-backdrop, .anim-stagger > * {
+    animation-duration: 0.01s !important;
+    animation-delay: 0s !important;
+  }
+}
 
 /* ═══ SCROLLBAR ═══ */
 .scrollbar-thin::-webkit-scrollbar {
