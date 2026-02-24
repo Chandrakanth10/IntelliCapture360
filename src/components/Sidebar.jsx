@@ -14,6 +14,7 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
   ];
   const actionsNav = [
     { id: 'intake', icon: 'plus', label: 'New Campaign' },
+    { id: 'agentIntake', icon: 'sparkle', label: 'AI Intake' },
   ];
   const showText = isExpanded || isHovered || isMobileOpen;
 

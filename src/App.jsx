@@ -7,6 +7,7 @@ import CalendarPage from './pages/CalendarPage';
 import CampaignDetailPage from './pages/CampaignDetailPage';
 import CompletedPage from './pages/CompletedPage';
 import DashboardPage from './pages/DashboardPage';
+import AgentIntakePage from './pages/AgentIntakePage';
 import IntakePage from './pages/IntakePage';
 import MyTasksPage from './pages/MyTasksPage';
 import TrackerPage from './pages/TrackerPage';
@@ -15,6 +16,7 @@ import { CAMPS, CURRENT_USER, I, STAGES, STAGE_APPROVALS } from './shared/campai
 const VIEW_TO_PATH = {
   dashboard: '/dashboard',
   intake: '/intake',
+  agentIntake: '/agent-intake',
   tracker: '/tracker',
   calendar: '/calendar',
   mytasks: '/my-tasks',
@@ -48,6 +50,10 @@ function resolveViewFromPath(pathname) {
 
   if (clean === '/completed') {
     return 'completed';
+  }
+
+  if (clean === '/agent-intake') {
+    return 'agentIntake';
   }
 
   if (clean.startsWith('/campaign/')) {
@@ -236,7 +242,7 @@ export default function App() {
   const navigate = (targetView) => {
     const targetPath = VIEW_TO_PATH[targetView] || VIEW_TO_PATH.dashboard;
 
-    if (view === 'intake' && targetView !== 'intake' && formDirty) {
+    if ((view === 'intake' || view === 'agentIntake') && targetView !== view && formDirty) {
       const leave = window.confirm('Unsaved changes will be lost. Leave?');
       if (!leave) {
         return;
@@ -247,7 +253,7 @@ export default function App() {
       routerNavigate(targetPath);
     }
 
-    if (targetView !== 'intake') {
+    if (targetView !== 'intake' && targetView !== 'agentIntake') {
       setFormDirty(false);
     }
 
@@ -267,7 +273,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (view !== 'intake' && formDirty) {
+    if (view !== 'intake' && view !== 'agentIntake' && formDirty) {
       setFormDirty(false);
     }
   }, [view, formDirty]);
@@ -329,6 +335,23 @@ export default function App() {
                     onViewCampaign={(id) => {
                       setFormDirty(false);
                       routerNavigate(`/campaign/${id}`, { state: { from: 'Intake' } });
+                    }}
+                  />
+                }
+              />
+              <Route
+                path="/agent-intake"
+                element={
+                  <AgentIntakePage
+                    onSubmit={handleSubmit}
+                    onInput={() => {
+                      if (!formDirty) {
+                        setFormDirty(true);
+                      }
+                    }}
+                    onViewCampaign={(id) => {
+                      setFormDirty(false);
+                      routerNavigate(`/campaign/${id}`, { state: { from: 'AI Intake' } });
                     }}
                   />
                 }
