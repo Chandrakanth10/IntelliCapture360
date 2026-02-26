@@ -183,7 +183,7 @@ function RichText({ text }) {
       {li > 0 && <br />}
       {line.split(/(\*\*[^*]+\*\*)/).map((seg, si) =>
         seg.startsWith('**') && seg.endsWith('**')
-          ? <strong key={si} className="text-white font-semibold">{seg.slice(2, -2)}</strong>
+          ? <strong key={si} className="text-[var(--sb-text-strong)] font-semibold">{seg.slice(2, -2)}</strong>
           : <span key={si}>{seg}</span>
       )}
     </span>
@@ -210,8 +210,8 @@ function computeGrouping(messages, idx) {
 /* ═══ TYPING INDICATOR ═══ */
 const TypingIndicator = () => (
   <div className="flex items-end gap-2.5 anim-fade">
-    <div className="w-7 h-7 rounded-full bg-[#3ECF8E] flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(62,207,142,0.2)]">
-      <I n="sparkle" s={13} c="text-[#0a1f15]" />
+    <div className="w-7 h-7 rounded-full bg-[var(--sb-accent)] flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(var(--sb-accent-rgb),0.2)]">
+      <I n="sparkle" s={13} c="text-[var(--sb-accent-contrast)]" />
     </div>
     <div className="px-4 py-3.5 rounded-2xl rounded-bl-md chat-bubble-agent">
       <div className="flex items-center gap-1.5">
@@ -227,16 +227,16 @@ const TypingIndicator = () => (
 const AgentMessage = ({ text, showAvatar, showTime, timestamp }) => (
   <div className={`flex items-end gap-2.5 anim-fade ${showAvatar ? '' : 'ml-[38px]'}`}>
     {showAvatar && (
-      <div className="w-7 h-7 rounded-full bg-[#3ECF8E] flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(62,207,142,0.2)]">
-        <I n="sparkle" s={13} c="text-[#0a1f15]" />
+      <div className="w-7 h-7 rounded-full bg-[var(--sb-accent)] flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(var(--sb-accent-rgb),0.2)]">
+        <I n="sparkle" s={13} c="text-[var(--sb-accent-contrast)]" />
       </div>
     )}
     <div className="max-w-[85%]">
       <div className="px-4 py-3 rounded-2xl rounded-bl-md chat-bubble-agent">
-        <span className="text-[13px] text-[#e0e0e0] leading-relaxed"><RichText text={text} /></span>
+        <span className="text-[13px] text-[var(--sb-text)] leading-relaxed"><RichText text={text} /></span>
       </div>
       {showTime && timestamp && (
-        <p className="text-[10px] text-[#444] mt-1.5 ml-2 select-none">{relativeTime(timestamp)}</p>
+        <p className="text-[11px] text-[var(--sb-muted-soft)] mt-1.5 ml-2 select-none">{relativeTime(timestamp)}</p>
       )}
     </div>
   </div>
@@ -246,10 +246,10 @@ const AgentMessage = ({ text, showAvatar, showTime, timestamp }) => (
 const UserMessage = ({ text, showTime, timestamp }) => (
   <div className="flex flex-col items-end anim-fade">
     <div className="max-w-[80%] px-4 py-3 rounded-2xl rounded-br-md chat-bubble-user">
-      <p className="text-[13px] text-[#6ee7b7] leading-relaxed">{text}</p>
+      <p className="text-[13px] text-[var(--sb-accent-soft-text)] leading-relaxed">{text}</p>
     </div>
     {showTime && timestamp && (
-      <p className="text-[10px] text-[#444] mt-1.5 mr-2 select-none">{relativeTime(timestamp)}</p>
+      <p className="text-[11px] text-[var(--sb-muted-soft)] mt-1.5 mr-2 select-none">{relativeTime(timestamp)}</p>
     )}
   </div>
 );
@@ -259,15 +259,15 @@ const SystemMessage = ({ text, isPhaseTransition }) => (
   <div className={`flex justify-center ${isPhaseTransition ? 'my-4' : 'my-1'} anim-fade`}>
     {isPhaseTransition ? (
       <div className="flex items-center gap-3 px-5 py-2.5 rounded-full"
-        style={{ background: 'rgba(62,207,142,0.06)', border: '1px solid rgba(62,207,142,0.12)' }}>
-        <div className="w-5 h-5 rounded-full bg-[rgba(62,207,142,0.12)] flex items-center justify-center">
-          <I n="chevR" s={10} c="text-[#3ECF8E]" />
+        style={{ background: 'rgba(var(--sb-accent-rgb),0.06)', border: '1px solid rgba(var(--sb-accent-rgb),0.12)' }}>
+        <div className="w-5 h-5 rounded-full bg-[rgba(var(--sb-accent-rgb),0.12)] flex items-center justify-center">
+          <I n="chevR" s={10} c="text-[var(--sb-accent)]" />
         </div>
-        <p className="text-[11px] font-semibold text-[#3ECF8E] tracking-wide">{text}</p>
+        <p className="text-[11px] font-semibold text-[var(--sb-accent)] tracking-wide">{text}</p>
       </div>
     ) : (
-      <div className="px-4 py-1.5 rounded-full bg-[#1a1a1a] border border-[#252525]">
-        <p className="text-[11px] text-[#555] font-medium">{text}</p>
+      <div className="px-4 py-1.5 rounded-full bg-[var(--sb-panel-3)] border border-[var(--sb-border-soft)]">
+        <p className="text-[11px] text-[var(--sb-muted-soft)] font-medium">{text}</p>
       </div>
     )}
   </div>
@@ -278,14 +278,14 @@ const InsightCard = ({ text, variant = 'emerald' }) => {
   const isAmber = variant === 'amber';
   return (
     <div className="anim-fade mx-2 rounded-lg overflow-hidden" style={{
-      background: isAmber ? 'rgba(245,158,11,0.05)' : 'rgba(62,207,142,0.04)',
-      border: `1px solid ${isAmber ? 'rgba(245,158,11,0.12)' : 'rgba(62,207,142,0.10)'}`,
+      background: isAmber ? 'rgba(245,158,11,0.05)' : 'rgba(var(--sb-accent-rgb),0.04)',
+      border: `1px solid ${isAmber ? 'rgba(245,158,11,0.12)' : 'rgba(var(--sb-accent-rgb),0.10)'}`,
     }}>
       <div className="flex items-start gap-3 px-4 py-3">
         <div className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-px ${
-          isAmber ? 'bg-amber-500/15' : 'bg-[rgba(62,207,142,0.12)]'
+          isAmber ? 'bg-amber-500/15' : 'bg-[rgba(var(--sb-accent-rgb),0.12)]'
         }`}>
-          <I n={isAmber ? 'zap' : 'sparkle'} s={11} c={isAmber ? 'text-amber-400' : 'text-[#3ECF8E]'} />
+          <I n={isAmber ? 'zap' : 'sparkle'} s={11} c={isAmber ? 'text-amber-400' : 'text-[var(--sb-accent)]'} />
         </div>
         <p className={`text-[12px] leading-relaxed ${isAmber ? 'text-[#c9a84e]' : 'text-[#8ab8a0]'}`}>{text}</p>
       </div>
@@ -304,28 +304,28 @@ const EXTRACTED_MOCK = [
 
 const ExtractedDataCard = () => (
   <div className="anim-scale mx-2 rounded-xl overflow-hidden" style={{
-    background: '#151515',
-    border: '1px solid rgba(62,207,142,0.15)',
+    background: 'var(--sb-bg-soft)',
+    border: '1px solid rgba(var(--sb-accent-rgb),0.15)',
   }}>
     <div className="px-4 py-2.5 flex items-center gap-2" style={{
-      background: 'rgba(62,207,142,0.06)',
-      borderBottom: '1px solid rgba(62,207,142,0.1)',
+      background: 'rgba(var(--sb-accent-rgb),0.06)',
+      borderBottom: '1px solid rgba(var(--sb-accent-rgb),0.1)',
     }}>
-      <div className="w-5 h-5 rounded-md bg-[rgba(62,207,142,0.15)] flex items-center justify-center">
-        <I n="zap" s={11} c="text-[#3ECF8E]" />
+      <div className="w-5 h-5 rounded-md bg-[rgba(var(--sb-accent-rgb),0.15)] flex items-center justify-center">
+        <I n="zap" s={11} c="text-[var(--sb-accent)]" />
       </div>
-      <span className="text-[10px] font-bold text-[#3ECF8E] uppercase tracking-wider">Auto-extracted Data</span>
+      <span className="text-[11px] font-bold text-[var(--sb-accent)] uppercase tracking-wider">Auto-extracted Data</span>
     </div>
     <div className="grid grid-cols-2 gap-1.5 p-3">
       {EXTRACTED_MOCK.map(({ label, value, icon }) => (
         <div key={label} className="flex items-center gap-2 rounded-lg px-2.5 py-2" style={{
-          background: '#1a1a1a',
-          border: '1px solid rgba(62,207,142,0.08)',
+          background: 'var(--sb-panel-3)',
+          border: '1px solid rgba(var(--sb-accent-rgb),0.08)',
         }}>
-          <I n={icon} s={11} c="text-[#3ECF8E]" />
+          <I n={icon} s={11} c="text-[var(--sb-accent)]" />
           <div className="min-w-0">
-            <p className="text-[9px] font-medium text-[#3ECF8E]/50 uppercase tracking-wider">{label}</p>
-            <p className="text-[11px] font-semibold text-[#ededed] truncate">{value}</p>
+            <p className="text-[11px] font-medium text-[var(--sb-accent)]/50 uppercase tracking-wider">{label}</p>
+            <p className="text-[11px] font-semibold text-[var(--sb-text-strong)] truncate">{value}</p>
           </div>
         </div>
       ))}
@@ -344,7 +344,7 @@ const ChatChips = ({ chips, onSelect, multi, selected = [], onConfirm }) => (
           {multi && (
             <div className="w-3.5 h-3.5 rounded flex items-center justify-center transition-all" style={{
               borderWidth: '1.5px', borderStyle: 'solid',
-              ...(active ? { background: '#3ECF8E', borderColor: '#3ECF8E' } : { borderColor: '#555' }),
+              ...(active ? { background: 'var(--sb-accent)', borderColor: 'var(--sb-accent)' } : { borderColor: 'var(--sb-muted-soft)' }),
             }}>
               {active && <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>}
             </div>
@@ -355,7 +355,7 @@ const ChatChips = ({ chips, onSelect, multi, selected = [], onConfirm }) => (
     })}
     {multi && selected.length > 0 && (
       <button type="button" onClick={onConfirm}
-        className="chat-chip inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-[12px] font-semibold bg-[#3ECF8E] text-[#0a1f15] hover:bg-[#38b97e] transition-all border-transparent">
+        className="chat-chip inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-[12px] font-semibold bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] hover:bg-[var(--sb-accent-strong)] transition-all border-transparent">
         <I n="check" s={12} /> Confirm ({selected.length})
       </button>
     )}
@@ -470,25 +470,25 @@ const FieldCard = ({ field, onFieldChange }) => {
   if (field.files !== undefined) {
     return (
       <div className="preview-field-card rounded-lg p-2.5 col-span-2 transition-all duration-300" style={{
-        background: hasFill ? 'rgba(62,207,142,0.03)' : '#141414',
-        border: `1px solid ${hasFill ? 'rgba(62,207,142,0.1)' : '#1e1e1e'}`,
+        background: hasFill ? 'rgba(var(--sb-accent-rgb),0.03)' : 'var(--sb-bg-soft)',
+        border: `1px solid ${hasFill ? 'rgba(var(--sb-accent-rgb),0.1)' : 'var(--sb-panel)'}`,
       }}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <I n={field.icon} s={10} c={hasFill ? 'text-[#3ECF8E]' : 'text-[#333]'} />
-            <span className="text-[10px] font-medium text-[#555] uppercase tracking-wider">{field.label}</span>
+            <I n={field.icon} s={10} c={hasFill ? 'text-[var(--sb-accent)]' : 'text-[var(--sb-muted-soft)]'} />
+            <span className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider">{field.label}</span>
           </div>
           <button type="button" onClick={addFile}
-            className="flex items-center gap-1 text-[10px] font-semibold text-[#3ECF8E] hover:text-[#6ee7b7] px-1.5 py-0.5 rounded hover:bg-[rgba(62,207,142,0.06)] transition-all">
+            className="flex items-center gap-1 text-[11px] font-semibold text-[var(--sb-accent)] hover:text-[var(--sb-accent-soft-text)] px-1.5 py-0.5 rounded hover:bg-[rgba(var(--sb-accent-rgb),0.06)] transition-all">
             <I n="plus" s={10} /> Add
           </button>
         </div>
         {field.files.length > 0 ? (
           <div className="space-y-1">
             {field.files.map(f => (
-              <div key={f} className="flex items-center gap-2 px-2 py-1.5 rounded-md group" style={{ background: '#1a1a1a', border: '1px solid #222' }}>
-                <I n="file" s={10} c="text-[#555]" />
-                <span className="text-[11px] text-[#ccc] flex-1 truncate">{f}</span>
+              <div key={f} className="flex items-center gap-2 px-2 py-1.5 rounded-md group" style={{ background: 'var(--sb-panel-3)', border: '1px solid var(--sb-border-soft)' }}>
+                <I n="file" s={10} c="text-[var(--sb-muted-soft)]" />
+                <span className="text-[11px] text-[var(--sb-text)] flex-1 truncate">{f}</span>
                 <button type="button" onClick={() => removeFile(f)}
                   className="opacity-0 group-hover:opacity-100 w-4 h-4 rounded flex items-center justify-center hover:bg-[rgba(244,63,94,0.15)] transition-all">
                   <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
@@ -498,8 +498,8 @@ const FieldCard = ({ field, onFieldChange }) => {
           </div>
         ) : (
           <button type="button" onClick={addFile}
-            className="w-full py-3 rounded-md border border-dashed border-[#2a2a2a] hover:border-[rgba(62,207,142,0.3)] text-[11px] text-[#555] hover:text-[#888] transition-all flex items-center justify-center gap-1.5">
-            <I n="plus" s={11} c="text-[#444]" /> Upload files
+            className="w-full py-3 rounded-md border border-dashed border-[var(--sb-border-soft)] hover:border-[rgba(var(--sb-accent-rgb),0.3)] text-[11px] text-[var(--sb-muted-soft)] hover:text-[var(--sb-muted)] transition-all flex items-center justify-center gap-1.5">
+            <I n="plus" s={11} c="text-[var(--sb-muted-soft)]" /> Upload files
           </button>
         )}
       </div>
@@ -507,17 +507,17 @@ const FieldCard = ({ field, onFieldChange }) => {
   }
 
   return (
-    <div className={`preview-field-card rounded-lg p-2.5 transition-all duration-300 ${hasFill && field.editable ? 'cursor-pointer hover:border-[rgba(62,207,142,0.2)]' : ''}`}
+    <div className={`preview-field-card rounded-lg p-2.5 transition-all duration-300 ${hasFill && field.editable ? 'cursor-pointer hover:border-[rgba(var(--sb-accent-rgb),0.2)]' : ''}`}
       onClick={!editing ? startEdit : undefined}
       style={{
-        background: hasFill ? 'rgba(62,207,142,0.03)' : '#141414',
-        border: `1px solid ${editing ? 'rgba(62,207,142,0.3)' : hasFill ? 'rgba(62,207,142,0.1)' : '#1e1e1e'}`,
+        background: hasFill ? 'rgba(var(--sb-accent-rgb),0.03)' : 'var(--sb-bg-soft)',
+        border: `1px solid ${editing ? 'rgba(var(--sb-accent-rgb),0.3)' : hasFill ? 'rgba(var(--sb-accent-rgb),0.1)' : 'var(--sb-panel)'}`,
       }}>
       <div className="flex items-center gap-2 mb-1.5">
-        <I n={field.icon} s={10} c={hasFill ? 'text-[#3ECF8E]' : 'text-[#333]'} />
-        <span className="text-[10px] font-medium text-[#555] uppercase tracking-wider flex-1">{field.label}</span>
+        <I n={field.icon} s={10} c={hasFill ? 'text-[var(--sb-accent)]' : 'text-[var(--sb-muted-soft)]'} />
+        <span className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider flex-1">{field.label}</span>
         {hasFill && field.editable && !editing && (
-          <I n="edit" s={9} c="text-[#333] hover:text-[#666] transition-colors" />
+          <I n="edit" s={9} c="text-[var(--sb-muted-soft)] hover:text-[var(--sb-muted-soft)] transition-colors" />
         )}
       </div>
 
@@ -529,7 +529,7 @@ const FieldCard = ({ field, onFieldChange }) => {
           onChange={e => setEditVal(e.target.value)}
           onBlur={saveEdit}
           onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditing(false); }}
-          className="w-full text-[12px] text-[#ededed] bg-[#1a1a1a] border border-[rgba(62,207,142,0.2)] rounded px-2 py-1 outline-none focus:border-[rgba(62,207,142,0.4)]"
+          className="w-full text-[12px] text-[var(--sb-text-strong)] bg-[var(--sb-panel-3)] border border-[rgba(var(--sb-accent-rgb),0.2)] rounded px-2 py-1 outline-none focus:border-[rgba(var(--sb-accent-rgb),0.4)]"
         />
       ) : field.chips ? (
         <div className="flex flex-wrap gap-1">
@@ -539,7 +539,7 @@ const FieldCard = ({ field, onFieldChange }) => {
               {field.removable && onFieldChange && (
                 <button type="button" onClick={(e) => { e.stopPropagation(); removeChip(c); }}
                   className="opacity-0 group-hover/chip:opacity-100 transition-opacity ml-0.5">
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent-soft-text)" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                 </button>
               )}
             </span>
@@ -551,7 +551,7 @@ const FieldCard = ({ field, onFieldChange }) => {
           <span className="text-[12px] font-semibold" style={{ color: priBadgeColor[field.badge] }}>{field.value}</span>
         </div>
       ) : hasFill ? (
-        <p className="text-[12px] text-[#e0e0e0] font-medium leading-relaxed truncate">{field.value}</p>
+        <p className="text-[12px] text-[var(--sb-text)] font-medium leading-relaxed truncate">{field.value}</p>
       ) : (
         <div className="flex gap-1.5 items-center">
           <div className="h-[6px] rounded-full preview-skeleton" style={{ width: `${40 + Math.random() * 35}%` }} />
@@ -574,27 +574,27 @@ const StepperNode = ({ index, phase, fd, isActive, isCompleted, isFuture, expand
         {/* Step circle */}
         <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
           isCompleted
-            ? 'bg-[#3ECF8E] shadow-[0_0_12px_rgba(62,207,142,0.3)]'
+            ? 'bg-[var(--sb-accent)] shadow-[0_0_12px_rgba(var(--sb-accent-rgb),0.3)]'
             : isActive
-              ? 'stepper-node-active border-2 border-[#3ECF8E] bg-[#111]'
-              : 'border border-[#2a2a2a] bg-[#151515]'
+              ? 'stepper-node-active border-2 border-[var(--sb-accent)] bg-[var(--sb-bg)]'
+              : 'border border-[var(--sb-border-soft)] bg-[var(--sb-panel-3)]'
         }`}>
           {isCompleted ? (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a1f15" strokeWidth="3" strokeLinecap="round" className="completion-pop">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent-contrast)" strokeWidth="3" strokeLinecap="round" className="completion-pop">
               <polyline points="20 6 9 17 4 12" />
             </svg>
           ) : isActive ? (
-            <span className="text-[11px] font-bold text-[#3ECF8E]">{index + 1}</span>
+            <span className="text-[11px] font-bold text-[var(--sb-accent)]">{index + 1}</span>
           ) : (
-            <span className="text-[11px] font-semibold text-[#444]">{index + 1}</span>
+            <span className="text-[11px] font-semibold text-[var(--sb-muted-soft)]">{index + 1}</span>
           )}
         </div>
         {/* Connector line */}
         {!isLast && (
           <div className="w-[2px] flex-1 -mt-px transition-all duration-500" style={{
             background: isCompleted
-              ? 'linear-gradient(to bottom, #3ECF8E, rgba(62,207,142,0.3))'
-              : '#1e1e1e',
+              ? 'linear-gradient(to bottom, var(--sb-accent), rgba(var(--sb-accent-rgb),0.3))'
+              : 'var(--sb-panel)',
           }} />
         )}
       </div>
@@ -605,33 +605,33 @@ const StepperNode = ({ index, phase, fd, isActive, isCompleted, isFuture, expand
         <button type="button" onClick={onToggle}
           className={`w-full flex items-center gap-2.5 text-left group rounded-xl px-3 py-2.5 -mt-1 transition-all duration-200 ${
             isActive
-              ? 'bg-[rgba(62,207,142,0.04)]'
-              : 'hover:bg-[#161616]'
+              ? 'bg-[rgba(var(--sb-accent-rgb),0.04)]'
+              : 'hover:bg-[var(--sb-panel-3)]'
           }`}>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className={`text-[13px] font-semibold transition-colors ${
-                isActive ? 'text-white' : isCompleted ? 'text-[#ccc]' : 'text-[#444]'
+                isActive ? 'text-[var(--sb-text-strong)]' : isCompleted ? 'text-[var(--sb-text)]' : 'text-[var(--sb-muted-soft)]'
               }`}>{phase.title}</p>
               {isCompleted && (
-                <span className="text-[9px] font-bold uppercase tracking-wider text-[#3ECF8E] bg-[rgba(62,207,142,0.08)] px-1.5 py-0.5 rounded">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--sb-accent)] bg-[rgba(var(--sb-accent-rgb),0.08)] px-1.5 py-0.5 rounded">
                   Done
                 </span>
               )}
             </div>
-            <p className={`text-[11px] mt-0.5 ${isActive ? 'text-[#666]' : 'text-[#333]'}`}>
+            <p className={`text-[11px] mt-0.5 ${isActive ? 'text-[var(--sb-muted-soft)]' : 'text-[var(--sb-muted-soft)]'}`}>
               {isActive ? phase.desc : `${filled}/${total} fields`}
             </p>
           </div>
           {/* Mini bar */}
-          <div className="w-14 h-1.5 rounded-full bg-[#1a1a1a] overflow-hidden flex-shrink-0">
+          <div className="w-14 h-1.5 rounded-full bg-[var(--sb-panel-3)] overflow-hidden flex-shrink-0">
             <div className="h-full rounded-full transition-all duration-500" style={{
               width: `${total > 0 ? (filled / total) * 100 : 0}%`,
-              background: isCompleted ? '#3ECF8E' : isActive ? '#3ECF8E' : '#333',
+              background: isCompleted ? 'var(--sb-accent)' : isActive ? 'var(--sb-accent)' : 'var(--sb-muted-soft)',
             }} />
           </div>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-            className={`text-[#444] transition-transform duration-200 flex-shrink-0 ${expanded ? 'rotate-90' : ''}`}>
+            className={`text-[var(--sb-muted-soft)] transition-transform duration-200 flex-shrink-0 ${expanded ? 'rotate-90' : ''}`}>
             <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
@@ -644,7 +644,7 @@ const StepperNode = ({ index, phase, fd, isActive, isCompleted, isFuture, expand
             </div>
             {isCompleted && (
               <button type="button" onClick={onEdit}
-                className="mt-2.5 text-[11px] text-[#3ECF8E] hover:text-[#6ee7b7] font-medium flex items-center gap-1.5 px-1 py-1 rounded-md hover:bg-[rgba(62,207,142,0.06)] transition-all">
+                className="mt-2.5 text-[11px] text-[var(--sb-accent)] hover:text-[var(--sb-accent-soft-text)] font-medium flex items-center gap-1.5 px-1 py-1 rounded-md hover:bg-[rgba(var(--sb-accent-rgb),0.06)] transition-all">
                 <I n="edit" s={10} /> Edit in chat
               </button>
             )}
@@ -662,17 +662,17 @@ const FormPreview = ({ fd, activePhase, completedPhases, expandedSections, onTog
   const overallPct = totalFields > 0 ? Math.round((filledFields / totalFields) * 100) : 0;
 
   return (
-    <div className="h-full flex flex-col" style={{ background: '#0f0f0f' }}>
+    <div className="h-full flex flex-col" style={{ background: 'var(--sb-bg)' }}>
       {/* Header */}
-      <div className="px-5 py-4 border-b border-[#1e1e1e] flex-shrink-0" style={{ background: '#121212' }}>
+      <div className="px-5 py-4 border-b border-[var(--sb-border-soft)] flex-shrink-0" style={{ background: 'var(--sb-bg-soft)' }}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-[14px] font-semibold text-[#ededed]">Campaign Brief</h2>
+            <h2 className="text-[14px] font-semibold text-[var(--sb-text-strong)]">Campaign Brief</h2>
           </div>
-          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[#181818] border border-[#222]">
-            <span className="text-[12px] font-bold text-[#3ECF8E]">{filledFields}</span>
-            <span className="text-[10px] text-[#444]">/</span>
-            <span className="text-[11px] text-[#555]">{totalFields} fields</span>
+          <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-[var(--sb-panel-3)] border border-[var(--sb-border-soft)]">
+            <span className="text-[12px] font-bold text-[var(--sb-accent)]">{filledFields}</span>
+            <span className="text-[11px] text-[var(--sb-muted-soft)]">/</span>
+            <span className="text-[11px] text-[var(--sb-muted-soft)]">{totalFields} fields</span>
           </div>
         </div>
         {/* Segmented progress */}
@@ -683,13 +683,13 @@ const FormPreview = ({ fd, activePhase, completedPhases, expandedSections, onTog
             const done = completedPhases.includes(idx);
             const active = activePhase === idx;
             return (
-              <div key={idx} className="flex-1 h-1.5 rounded-full overflow-hidden bg-[#1a1a1a]">
+              <div key={idx} className="flex-1 h-1.5 rounded-full overflow-hidden bg-[var(--sb-panel-3)]">
                 <div className="h-full rounded-full transition-all duration-700 ease-out" style={{
                   width: done ? '100%' : active ? `${phFields.length > 0 ? (phFilled / phFields.length) * 100 : 0}%` : '0%',
                   background: done
-                    ? '#3ECF8E'
+                    ? 'var(--sb-accent)'
                     : active
-                      ? 'linear-gradient(90deg, #3ECF8E, rgba(62,207,142,0.5))'
+                      ? 'linear-gradient(90deg, var(--sb-accent), rgba(var(--sb-accent-rgb),0.5))'
                       : 'transparent',
                 }} />
               </div>
@@ -720,16 +720,16 @@ const FormPreview = ({ fd, activePhase, completedPhases, expandedSections, onTog
 
       {/* Submit footer */}
       {allComplete && (
-        <div className="flex-shrink-0 px-5 py-4 border-t border-[#1e1e1e] anim-fade" style={{ background: '#121212' }}>
+        <div className="flex-shrink-0 px-5 py-4 border-t border-[var(--sb-border-soft)] anim-fade" style={{ background: 'var(--sb-bg-soft)' }}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-5 h-5 rounded-full bg-[#3ECF8E] flex items-center justify-center">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0a1f15" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+            <div className="w-5 h-5 rounded-full bg-[var(--sb-accent)] flex items-center justify-center">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent-contrast)" strokeWidth="3" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
-            <p className="text-[12px] text-[#999]">All <span className="text-[#ededed] font-semibold">{totalFields} fields</span> completed. Ready to submit.</p>
+            <p className="text-[12px] text-[var(--sb-muted)]">All <span className="text-[var(--sb-text-strong)] font-semibold">{totalFields} fields</span> completed. Ready to submit.</p>
           </div>
           <button type="button" onClick={onSubmitCampaign}
-            className="cta-glow w-full py-3 rounded-xl bg-[#3ECF8E] text-[#0a1f15] text-[13px] font-semibold hover:bg-[#38b97e] transition-all flex items-center justify-center gap-2">
-            <I n="send" s={14} c="text-[#0a1f15]" />
+            className="cta-glow w-full py-3 rounded-xl bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] text-[13px] font-semibold hover:bg-[var(--sb-accent-strong)] transition-all flex items-center justify-center gap-2">
+            <I n="send" s={14} c="text-[var(--sb-accent-contrast)]" />
             Submit Campaign
           </button>
         </div>
@@ -753,73 +753,73 @@ const WelcomeHero = ({ onStart }) => {
         <div className="max-w-lg">
           {/* Icon + badge */}
           <div className="flex items-center gap-3 mb-6 anim-fade">
-            <div className="w-12 h-12 rounded-2xl bg-[rgba(62,207,142,0.1)] flex items-center justify-center shadow-[0_0_24px_rgba(62,207,142,0.15)]">
-              <I n="sparkle" s={22} c="text-[#3ECF8E]" />
+            <div className="w-12 h-12 rounded-2xl bg-[rgba(var(--sb-accent-rgb),0.1)] flex items-center justify-center shadow-[0_0_24px_rgba(var(--sb-accent-rgb),0.15)]">
+              <I n="sparkle" s={22} c="text-[var(--sb-accent)]" />
             </div>
-            <div className="px-3 py-1 rounded-full bg-[rgba(62,207,142,0.06)] border border-[rgba(62,207,142,0.12)]">
-              <span className="text-[11px] font-semibold text-[#3ECF8E] tracking-wide">AI-POWERED</span>
+            <div className="px-3 py-1 rounded-full bg-[rgba(var(--sb-accent-rgb),0.06)] border border-[rgba(var(--sb-accent-rgb),0.12)]">
+              <span className="text-[11px] font-semibold text-[var(--sb-accent)] tracking-wide">AI-POWERED</span>
             </div>
           </div>
 
-          <h1 className="text-[28px] lg:text-[32px] font-bold text-white mb-3 leading-tight anim-fade" style={{ animationDelay: '0.08s' }}>
+          <h1 className="text-[28px] lg:text-[32px] font-bold text-[var(--sb-text-strong)] mb-3 leading-tight anim-fade" style={{ animationDelay: '0.08s' }}>
             Campaign Intake,<br />
-            <span className="text-[#3ECF8E]">Reimagined</span>
+            <span className="text-[var(--sb-accent)]">Reimagined</span>
           </h1>
-          <p className="text-[14px] text-[#777] mb-10 leading-relaxed anim-fade max-w-md" style={{ animationDelay: '0.14s' }}>
+          <p className="text-[14px] text-[var(--sb-muted)] mb-10 leading-relaxed anim-fade max-w-md" style={{ animationDelay: '0.14s' }}>
             Skip the form. Have a conversation instead. Our assistant guides you through each step, suggests smart defaults, and builds your intake in real-time.
           </p>
 
           <div className="space-y-3 mb-10">
             {features.map((f, i) => (
-              <div key={f.title} className="flex items-center gap-4 p-3.5 rounded-xl bg-[#161616] border border-[#222] anim-fade group hover:border-[#333] transition-colors"
+              <div key={f.title} className="flex items-center gap-4 p-3.5 rounded-xl bg-[var(--sb-panel-3)] border border-[var(--sb-border-soft)] anim-fade group hover:border-[var(--sb-border)] transition-colors"
                 style={{ animationDelay: `${0.2 + i * 0.07}s` }}>
-                <div className="w-10 h-10 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] flex items-center justify-center flex-shrink-0 group-hover:border-[rgba(62,207,142,0.2)] transition-colors">
-                  <I n={f.icon} s={17} c="text-[#555] group-hover:text-[#3ECF8E] transition-colors" />
+                <div className="w-10 h-10 rounded-xl bg-[var(--sb-panel-3)] border border-[var(--sb-border-soft)] flex items-center justify-center flex-shrink-0 group-hover:border-[rgba(var(--sb-accent-rgb),0.2)] transition-colors">
+                  <I n={f.icon} s={17} c="text-[var(--sb-muted-soft)] group-hover:text-[var(--sb-accent)] transition-colors" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-semibold text-[#ededed]">{f.title}</p>
-                  <p className="text-[11px] text-[#666] mt-0.5 leading-relaxed">{f.desc}</p>
+                  <p className="text-[13px] font-semibold text-[var(--sb-text-strong)]">{f.title}</p>
+                  <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5 leading-relaxed">{f.desc}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <button type="button" onClick={onStart}
-            className="cta-glow px-7 py-3.5 rounded-xl bg-[#3ECF8E] text-[#0a1f15] text-[14px] font-semibold hover:bg-[#38b97e] transition-all anim-fade flex items-center gap-2.5"
+            className="cta-glow px-7 py-3.5 rounded-xl bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] text-[14px] font-semibold hover:bg-[var(--sb-accent-strong)] transition-all anim-fade flex items-center gap-2.5"
             style={{ animationDelay: '0.45s' }}>
-            <I n="sparkle" s={16} c="text-[#0a1f15]" />
+            <I n="sparkle" s={16} c="text-[var(--sb-accent-contrast)]" />
             Start New Intake
-            <I n="chevR" s={14} c="text-[#0a1f15]" />
+            <I n="chevR" s={14} c="text-[var(--sb-accent-contrast)]" />
           </button>
         </div>
       </div>
 
       {/* Right: visual roadmap */}
-      <div className="hidden lg:flex flex-col items-center justify-center w-[42%] border-l border-[#1e1e1e] p-8" style={{ background: '#0e0e0e' }}>
+      <div className="hidden lg:flex flex-col items-center justify-center w-[42%] border-l border-[var(--sb-border-soft)] p-8" style={{ background: 'var(--sb-bg)' }}>
         <div className="w-full max-w-xs">
-          <p className="text-[10px] uppercase tracking-[0.15em] text-[#444] font-semibold mb-6 anim-fade" style={{ animationDelay: '0.3s' }}>
+          <p className="text-[11px] uppercase tracking-[0.15em] text-[var(--sb-muted-soft)] font-semibold mb-6 anim-fade" style={{ animationDelay: '0.3s' }}>
             6 quick steps
           </p>
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute left-[15px] top-4 bottom-4 w-px bg-[#222]" />
+            <div className="absolute left-[15px] top-4 bottom-4 w-px bg-[var(--sb-panel)]" />
             <div className="space-y-0">
               {PHASES.map((p, i) => (
                 <div key={p.key} className="flex items-center gap-4 py-3 relative z-10 anim-fade"
                   style={{ animationDelay: `${0.35 + i * 0.06}s` }}>
-                  <div className="w-[30px] h-[30px] rounded-lg bg-[#181818] border border-[#282828] flex items-center justify-center flex-shrink-0">
-                    <I n={p.icon} s={13} c="text-[#555]" />
+                  <div className="w-[30px] h-[30px] rounded-lg bg-[var(--sb-panel-3)] border border-[var(--sb-border-soft)] flex items-center justify-center flex-shrink-0">
+                    <I n={p.icon} s={13} c="text-[var(--sb-muted-soft)]" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-[#888]">{p.title}</p>
-                    <p className="text-[10px] text-[#444] mt-0.5">{p.desc}</p>
+                    <p className="text-[12px] font-semibold text-[var(--sb-muted)]">{p.title}</p>
+                    <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5">{p.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <div className="mt-8 flex items-center gap-2 text-[11px] text-[#444] anim-fade" style={{ animationDelay: '0.75s' }}>
-            <I n="clock" s={12} c="text-[#444]" />
+          <div className="mt-8 flex items-center gap-2 text-[11px] text-[var(--sb-muted-soft)] anim-fade" style={{ animationDelay: '0.75s' }}>
+            <I n="clock" s={12} c="text-[var(--sb-muted-soft)]" />
             <span>Typically 3\u20135 minutes</span>
           </div>
         </div>
@@ -832,26 +832,26 @@ const WelcomeHero = ({ onStart }) => {
 const SuccessScreen = ({ campaignId, campaignName, onViewCampaign, onStartAnother }) => (
   <div className="h-full flex items-center justify-center p-8">
     <div className="text-center max-w-sm">
-      <div className="w-20 h-20 rounded-2xl bg-[rgba(62,207,142,0.1)] flex items-center justify-center mx-auto mb-5 anim-scale shadow-[0_0_40px_rgba(62,207,142,0.15)]">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3ECF8E" strokeWidth="2.5" strokeLinecap="round" className="check-anim">
+      <div className="w-20 h-20 rounded-2xl bg-[rgba(var(--sb-accent-rgb),0.1)] flex items-center justify-center mx-auto mb-5 anim-scale shadow-[0_0_40px_rgba(var(--sb-accent-rgb),0.15)]">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent)" strokeWidth="2.5" strokeLinecap="round" className="check-anim">
           <polyline points="20 6 9 17 4 12" />
         </svg>
       </div>
-      <h2 className="text-[20px] font-bold text-white mb-2 anim-fade" style={{ animationDelay: '0.1s' }}>Campaign Submitted!</h2>
-      <p className="text-[13px] text-[#888] mb-1 anim-fade" style={{ animationDelay: '0.15s' }}>
-        <strong className="text-[#ededed]">"{campaignName}"</strong> has been created successfully.
+      <h2 className="text-[20px] font-bold text-[var(--sb-text-strong)] mb-2 anim-fade" style={{ animationDelay: '0.1s' }}>Campaign Submitted!</h2>
+      <p className="text-[13px] text-[var(--sb-muted)] mb-1 anim-fade" style={{ animationDelay: '0.15s' }}>
+        <strong className="text-[var(--sb-text-strong)]">"{campaignName}"</strong> has been created successfully.
       </p>
-      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1a1a1a] border border-[#2e2e2e] mt-2 mb-7 anim-fade" style={{ animationDelay: '0.2s' }}>
-        <I n="hash" s={11} c="text-[#3ECF8E]" />
-        <span className="text-[11px] font-mono text-[#888]">IC-{String(campaignId).padStart(4, '0')}</span>
+      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--sb-panel-3)] border border-[var(--sb-border)] mt-2 mb-7 anim-fade" style={{ animationDelay: '0.2s' }}>
+        <I n="hash" s={11} c="text-[var(--sb-accent)]" />
+        <span className="text-[11px] font-mono text-[var(--sb-muted)]">IC-{String(campaignId).padStart(4, '0')}</span>
       </div>
       <div className="flex items-center gap-3 justify-center anim-fade" style={{ animationDelay: '0.25s' }}>
         <button type="button" onClick={onViewCampaign}
-          className="cta-glow px-5 py-3 rounded-xl bg-[#3ECF8E] text-[#0a1f15] text-[12px] font-semibold hover:bg-[#38b97e] transition-all flex items-center gap-1.5">
-          <I n="eye" s={13} c="text-[#0a1f15]" /> View Campaign
+          className="cta-glow px-5 py-3 rounded-xl bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] text-[12px] font-semibold hover:bg-[var(--sb-accent-strong)] transition-all flex items-center gap-1.5">
+          <I n="eye" s={13} c="text-[var(--sb-accent-contrast)]" /> View Campaign
         </button>
         <button type="button" onClick={onStartAnother}
-          className="px-5 py-3 rounded-xl bg-[#1e1e1e] text-[#ededed] text-[12px] font-semibold hover:bg-[#262626] border border-[#333] transition-all flex items-center gap-1.5">
+          className="px-5 py-3 rounded-xl bg-[var(--sb-panel)] text-[var(--sb-text-strong)] text-[12px] font-semibold hover:bg-[var(--sb-panel-2)] border border-[var(--sb-border)] transition-all flex items-center gap-1.5">
           <I n="plus" s={13} /> Start Another
         </button>
       </div>
@@ -861,11 +861,11 @@ const SuccessScreen = ({ campaignId, campaignName, onViewCampaign, onStartAnothe
 
 /* ═══ MOBILE TAB SWITCHER ═══ */
 const MobileTab = ({ activeTab, onSwitch }) => (
-  <div className="flex lg:hidden border-b border-[#2e2e2e]" style={{ background: '#161616' }}>
+  <div className="flex lg:hidden border-b border-[var(--sb-border)]" style={{ background: 'var(--sb-bg-soft)' }}>
     {['chat', 'preview'].map(tab => (
       <button key={tab} type="button" onClick={() => onSwitch(tab)}
         className={`flex-1 py-2.5 text-[12px] font-semibold text-center transition-colors ${
-          activeTab === tab ? 'text-[#3ECF8E] border-b-2 border-[#3ECF8E]' : 'text-[#666]'
+          activeTab === tab ? 'text-[var(--sb-accent)] border-b-2 border-[var(--sb-accent)]' : 'text-[var(--sb-muted-soft)]'
         }`}>
         <span className="flex items-center justify-center gap-1.5">
           <I n={tab === 'chat' ? 'send' : 'eye'} s={13} />
@@ -1181,41 +1181,41 @@ export default function AgentIntakePage({ onSubmit, onInput, onViewCampaign }) {
   /* ═══ NOT STARTED ═══ */
   if (!started) {
     return (
-      <div className="h-[calc(100vh-72px)] -m-4 md:-m-6" style={{ background: '#111' }}>
+      <div className="h-[calc(100vh-72px)] -m-4 md:-m-6" style={{ background: 'var(--sb-bg)' }}>
         <WelcomeHero onStart={handleStart} />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-72px)] -m-4 md:-m-6" style={{ background: '#111' }}>
+    <div className="flex flex-col lg:flex-row h-[calc(100vh-72px)] -m-4 md:-m-6" style={{ background: 'var(--sb-bg)' }}>
       {!submitted && <MobileTab activeTab={mobileTab} onSwitch={setMobileTab} />}
 
       {/* ═══ CHAT PANEL ═══ */}
-      <div className={`flex flex-col lg:border-r lg:border-[#222] ${
+      <div className={`flex flex-col lg:border-r lg:border-[var(--sb-border-soft)] ${
         mobileTab === 'chat' ? 'flex-1' : 'hidden'
       } lg:flex lg:w-[45%] lg:flex-none`}>
         {/* Header */}
-        <div className="px-5 py-3.5 border-b border-[#222] flex items-center gap-3 flex-shrink-0" style={{ background: '#141414' }}>
+        <div className="px-5 py-3.5 border-b border-[var(--sb-border-soft)] flex items-center gap-3 flex-shrink-0" style={{ background: 'var(--sb-bg-soft)' }}>
           <div className="relative">
-            <div className="w-9 h-9 rounded-full bg-[#3ECF8E] flex items-center justify-center shadow-[0_0_16px_rgba(62,207,142,0.2)]">
-              <I n="sparkle" s={16} c="text-[#0a1f15]" />
+            <div className="w-9 h-9 rounded-full bg-[var(--sb-accent)] flex items-center justify-center shadow-[0_0_16px_rgba(var(--sb-accent-rgb),0.2)]">
+              <I n="sparkle" s={16} c="text-[var(--sb-accent-contrast)]" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#3ECF8E] border-2 border-[#141414]" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[var(--sb-accent)] border-2 border-[var(--sb-bg)]" />
           </div>
           <div className="flex-1">
-            <p className="text-[13px] font-semibold text-white">IC Assistant</p>
-            <p className="text-[11px] text-[#555]">Campaign intake agent</p>
+            <p className="text-[13px] font-semibold text-[var(--sb-text-strong)]">IC Assistant</p>
+            <p className="text-[11px] text-[var(--sb-muted-soft)]">Campaign intake agent</p>
           </div>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1a1a1a] border border-[#252525]">
-            <div className="text-[11px] font-semibold text-[#888]">Step {Math.min(phase + 1, PHASES.length)}</div>
-            <div className="text-[11px] text-[#444]">/</div>
-            <div className="text-[11px] text-[#555]">{PHASES.length}</div>
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--sb-panel-3)] border border-[var(--sb-border-soft)]">
+            <div className="text-[11px] font-semibold text-[var(--sb-muted)]">Step {Math.min(phase + 1, PHASES.length)}</div>
+            <div className="text-[11px] text-[var(--sb-muted-soft)]">/</div>
+            <div className="text-[11px] text-[var(--sb-muted-soft)]">{PHASES.length}</div>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-3" style={{ background: '#111' }}>
+        <div className="flex-1 overflow-y-auto scrollbar-thin p-5 space-y-3" style={{ background: 'var(--sb-bg)' }}>
           {messages.map((msg, idx) => {
             const { isFirstInGroup, isLastInGroup } = computeGrouping(messages, idx);
             if (msg.type === 'agent') return <AgentMessage key={msg.id} text={msg.text} showAvatar={isFirstInGroup} showTime={isLastInGroup} timestamp={msg.timestamp} />;
@@ -1242,15 +1242,15 @@ export default function AgentIntakePage({ onSubmit, onInput, onViewCampaign }) {
         </div>
 
         {/* Input */}
-        <div className="px-4 py-3.5 border-t border-[#222] flex-shrink-0" style={{ background: '#141414' }}>
+        <div className="px-4 py-3.5 border-t border-[var(--sb-border-soft)] flex-shrink-0" style={{ background: 'var(--sb-bg-soft)' }}>
           {submitted ? (
             <div className="text-center py-2">
-              <p className="text-[12px] text-[#555]">Conversation ended</p>
+              <p className="text-[12px] text-[var(--sb-muted-soft)]">Conversation ended</p>
             </div>
           ) : chipOnlyMode ? (
             <div className="flex items-center justify-center gap-2 py-2.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#3ECF8E] animate-pulse" />
-              <p className="text-[11px] text-[#555] font-medium">Select an option above to continue</p>
+              <div className="w-1.5 h-1.5 rounded-full bg-[var(--sb-accent)] animate-pulse" />
+              <p className="text-[11px] text-[var(--sb-muted-soft)] font-medium">Select an option above to continue</p>
             </div>
           ) : (
             <div className="flex items-center gap-2.5">
@@ -1261,15 +1261,15 @@ export default function AgentIntakePage({ onSubmit, onInput, onViewCampaign }) {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 placeholder={customFlow ? 'Type your answer...' : currentScript?.placeholder || (expectType === 'date' ? 'Select a date...' : 'Type your message...')}
-                className="flex-1 px-4 py-2.5 rounded-xl text-[13px] border border-[#2a2a2a] outline-none focus:border-[rgba(62,207,142,0.3)] transition-colors"
-                style={{ background: '#1a1a1a', color: '#ededed' }}
+                className="flex-1 px-4 py-2.5 rounded-xl text-[13px] border border-[var(--sb-border-soft)] outline-none focus:border-[rgba(var(--sb-accent-rgb),0.3)] transition-colors"
+                style={{ background: 'var(--sb-panel-3)', color: 'var(--sb-text)' }}
                 disabled={isTyping}
               />
               <button type="button" onClick={handleSend}
                 disabled={isTyping || !inputValue.trim()}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-20 hover:shadow-[0_0_16px_rgba(62,207,142,0.25)]"
-                style={{ background: '#3ECF8E' }}>
-                <I n="send" s={15} c="text-[#0a1f15]" />
+                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-20 hover:shadow-[0_0_16px_rgba(var(--sb-accent-rgb),0.25)]"
+                style={{ background: 'var(--sb-accent)' }}>
+                <I n="send" s={15} c="text-[var(--sb-accent-contrast)]" />
               </button>
             </div>
           )}

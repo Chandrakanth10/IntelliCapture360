@@ -14,9 +14,9 @@ const fmtTime = (iso) => {
 };
 
 const PRI = {
-  High: { bg: '#3b1520', border: '#5c2030', text: '#f87171' },
-  Medium: { bg: '#3b2e10', border: '#5c4a18', text: '#fbbf24' },
-  Low: { bg: '#0f2d3d', border: '#164050', text: '#38bdf8' },
+  High: { bg: 'rgba(248, 113, 113, 0.12)', border: 'rgba(248, 113, 113, 0.28)', text: '#dc2626' },
+  Medium: { bg: 'rgba(251, 191, 36, 0.14)', border: 'rgba(251, 191, 36, 0.3)', text: '#d97706' },
+  Low: { bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.28)', text: '#0369a1' },
 };
 
 const AI_SUM = {
@@ -50,19 +50,19 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 z-40 backdrop-blur-[2px] anim-backdrop" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 w-[600px] bg-[#161616] border-l border-[#2a2a2a] z-50 anim-slide-r overflow-y-auto scrollbar-thin">
+      <div className="fixed inset-0 z-40 anim-backdrop detail-panel-overlay" onClick={onClose} />
+      <div className="fixed right-0 top-0 bottom-0 w-[600px] bg-[var(--sb-bg-soft)] border-l border-[var(--sb-border-soft)] shadow-[var(--sb-shadow-lg)] z-50 anim-slide-r overflow-y-auto scrollbar-thin">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-[#161616] border-b border-[#2a2a2a] px-5 py-3.5 flex items-center justify-between">
-          <h2 className="text-[14px] font-semibold text-[#f8f8f8] truncate pr-4">{camp.name}</h2>
+        <div className="sticky top-0 z-10 bg-[var(--sb-bg-soft)] border-b border-[var(--sb-border-soft)] px-5 py-3.5 flex items-center justify-between">
+          <h2 className="text-[16px] font-semibold tracking-tight text-[var(--sb-text-strong)] truncate pr-4">{camp.name}</h2>
           <div className="flex items-center gap-1 shrink-0">
             {onViewDetail && (
-              <button onClick={onViewDetail} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-[#999] hover:text-[#ededed] hover:bg-[#252525] transition-colors">
+              <button onClick={onViewDetail} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-[var(--sb-muted)] hover:text-[var(--sb-text)] hover:bg-[var(--sb-panel-2)] transition-colors">
                 <I n="eye" s={12} />
                 View campaign in detail
               </button>
             )}
-            <button onClick={onClose} className="p-1.5 hover:bg-[#252525] rounded-md transition-colors text-[#777] hover:text-[#ededed]">
+            <button onClick={onClose} className="p-1.5 hover:bg-[var(--sb-panel-2)] rounded-md transition-colors text-[var(--sb-muted)] hover:text-[var(--sb-text)]">
               <I n="x" s={14} />
             </button>
           </div>
@@ -72,52 +72,52 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
           {/* Status row */}
           <div className="flex items-center gap-2 flex-wrap">
             <span
-              className="text-[10px] font-semibold px-2 py-1 rounded border"
+              className="text-[11px] font-semibold px-2 py-1 rounded border"
               style={{ backgroundColor: pri.bg, borderColor: pri.border, color: pri.text }}
             >
               {camp.pri}
             </span>
             <span
-              className="text-[10px] font-semibold px-2 py-1 rounded border"
+              className="text-[11px] font-semibold px-2 py-1 rounded border"
               style={{ backgroundColor: stg.hex + '18', borderColor: stg.hex + '30', color: stg.hex }}
             >
               {stg.label}
             </span>
             {camp.status !== 'On Track' && (
-              <span className="text-[10px] font-medium px-2 py-1 rounded bg-[#1e1e1e] border border-[#2e2e2e] text-[#999]">
+              <span className="text-[11px] font-medium px-2 py-1 rounded bg-[var(--sb-panel)] border border-[var(--sb-border)] text-[var(--sb-muted)]">
                 {camp.status}
               </span>
             )}
-            <span className="text-[11px] text-[#555] ml-auto">{camp.days}d in stage</span>
+            <span className="text-[12px] text-[var(--sb-muted-soft)] ml-auto">{camp.days}d in stage</span>
           </div>
 
           {/* AI Summary */}
-          <div className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a2e, #161625)', border: '1px solid #2a2a3a' }}>
-            <div className="px-3.5 py-2.5 flex items-center gap-2" style={{ borderBottom: '1px solid #2a2a3a' }}>
-              <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #a78bfa20, #f472b620)' }}>
-                <I n="sparkle" s={11} c="text-[#a78bfa]" />
+          <div className="rounded-lg overflow-hidden" style={{ background: 'linear-gradient(135deg, var(--sb-panel-3), var(--sb-panel))', border: '1px solid var(--sb-border)' }}>
+            <div className="px-3.5 py-2.5 flex items-center gap-2" style={{ borderBottom: '1px solid var(--sb-border-soft)' }}>
+              <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(167,139,250,0.24), rgba(244,114,182,0.18))' }}>
+                <I n="sparkle" s={11} c="text-violet-500" />
               </div>
-              <span className="text-[10px] font-semibold text-[#a78bfa] uppercase tracking-wider">AI Summary</span>
+              <span className="text-[11px] font-semibold text-violet-500 uppercase tracking-wider">AI Summary</span>
             </div>
             <div className="px-3.5 py-3">
-              <p className="text-[12px] text-[#b0b0c0] leading-[1.7]">{AI_SUM[camp.id] || genAiSum(camp)}</p>
+              <p className="text-[13px] text-[var(--sb-text)] leading-[1.7]">{AI_SUM[camp.id] || genAiSum(camp)}</p>
             </div>
           </div>
 
           {/* Description */}
-          <p className="text-[12px] text-[#999] leading-relaxed">{camp.desc}</p>
+          <p className="text-[13px] text-[var(--sb-text)] leading-relaxed">{camp.desc}</p>
 
           {/* Pipeline */}
           <div>
-            <h3 className="text-[11px] font-medium text-[#555] uppercase tracking-wider mb-3">Pipeline</h3>
+            <h3 className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider mb-3">Pipeline</h3>
             <div className="relative">
               {/* Track + progress lines — centered on the 20px dots */}
               <div
-                className="absolute h-[2px] bg-[#2a2a2a]"
+                className="absolute h-[2px] bg-[var(--sb-border-soft)]"
                 style={{ top: 9, left: `calc(100% / ${STAGES.length * 2})`, right: `calc(100% / ${STAGES.length * 2})` }}
               >
                 <div
-                  className="absolute inset-y-0 left-0 bg-[#3ECF8E]"
+                  className="absolute inset-y-0 left-0 bg-[var(--sb-accent)]"
                   style={{ width: si === 0 ? 0 : `${(si / (STAGES.length - 1)) * 100}%` }}
                 />
               </div>
@@ -131,19 +131,19 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
                       <div
                         className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
                         style={{
-                          backgroundColor: done ? '#3ECF8E' : current ? stg.hex : '#161616',
-                          border: !done && !current ? '2px solid #333' : current ? `2px solid ${stg.hex}` : 'none',
+                          backgroundColor: done ? 'var(--sb-accent)' : current ? stg.hex : 'var(--sb-bg-soft)',
+                          border: !done && !current ? '2px solid var(--sb-border)' : current ? `2px solid ${stg.hex}` : 'none',
                           boxShadow: current ? `0 0 8px ${stg.hex}40` : 'none',
                         }}
                       >
                         {done ? (
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0a1f15" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent-contrast)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         ) : (
-                          <span className={`font-bold text-[8px] ${current ? 'text-white' : 'text-[#555]'}`}>{i + 1}</span>
+                          <span className={`font-bold text-[9px] ${current ? 'text-white' : 'text-[var(--sb-muted-soft)]'}`}>{i + 1}</span>
                         )}
                       </div>
-                      <span className={`text-[9px] mt-2 text-center leading-tight ${
-                        current ? 'font-semibold text-[#ededed]' : done ? 'text-[#3ECF8E]' : 'text-[#444]'
+                      <span className={`text-[11px] mt-2 text-center leading-tight ${
+                        current ? 'font-semibold text-[var(--sb-text)]' : done ? 'text-[var(--sb-accent)]' : 'text-[var(--sb-muted-soft)]'
                       }`}>
                         {s.label}
                       </span>
@@ -154,11 +154,11 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
             </div>
           </div>
 
-          <div className="border-t border-[#222]" />
+          <div className="border-t border-[var(--sb-border-soft)]" />
 
           {/* Details */}
           <div>
-            <h3 className="text-[11px] font-medium text-[#555] uppercase tracking-wider mb-3">Details</h3>
+            <h3 className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider mb-3">Details</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               {[
                 ['Business Unit', camp.bu],
@@ -171,74 +171,74 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
                 ['Type', camp.ct],
               ].map(([k, v]) => (
                 <div key={k}>
-                  <span className="text-[10px] text-[#555] uppercase tracking-wide">{k}</span>
-                  <p className="text-[12px] font-medium text-[#ccc] mt-0.5">{v}</p>
+                  <span className="text-[11px] text-[var(--sb-muted-soft)] uppercase tracking-wide">{k}</span>
+                  <p className="text-[13px] font-medium text-[var(--sb-text)] mt-0.5">{v}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="border-t border-[#222]" />
+          <div className="border-t border-[var(--sb-border-soft)]" />
 
           {/* Banners & Channels */}
           <div>
-            <h3 className="text-[11px] font-medium text-[#555] uppercase tracking-wider mb-3">Banners</h3>
+            <h3 className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider mb-3">Banners</h3>
             <div className="flex flex-wrap gap-1.5 mb-4">
               {(camp.banners || []).map((b) => (
-                <span key={b} className="text-[11px] font-medium px-2 py-1 rounded bg-[#3ECF8E12] border border-[#3ECF8E25] text-[#3ECF8E]">
+                <span key={b} className="text-[11px] font-medium px-2 py-1 rounded bg-[rgba(var(--sb-accent-rgb),0.12)] border border-[rgba(var(--sb-accent-rgb),0.25)] text-[var(--sb-accent)]">
                   {b}
                 </span>
               ))}
             </div>
-            <h3 className="text-[11px] font-medium text-[#555] uppercase tracking-wider mb-3">Channels</h3>
+            <h3 className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider mb-3">Channels</h3>
             <div className="flex flex-wrap gap-1.5">
               {(camp.ch || []).map((c) => (
-                <span key={c} className="text-[11px] px-2 py-1 rounded bg-[#1e1e1e] border border-[#2e2e2e] text-[#999]">
+                <span key={c} className="text-[11px] px-2 py-1 rounded bg-[var(--sb-panel)] border border-[var(--sb-border)] text-[var(--sb-muted)]">
                   {c}
                 </span>
               ))}
             </div>
           </div>
 
-          <div className="border-t border-[#222]" />
+          <div className="border-t border-[var(--sb-border-soft)]" />
 
           {/* Audience */}
           {camp.aud && (
             <>
               <div>
-                <h3 className="text-[11px] font-medium text-[#555] uppercase tracking-wider mb-2">Target Audience</h3>
-                <p className="text-[12px] text-[#999] leading-relaxed">{camp.aud}</p>
+                <h3 className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider mb-2">Target Audience</h3>
+                <p className="text-[13px] text-[var(--sb-text)] leading-relaxed">{camp.aud}</p>
               </div>
-              <div className="border-t border-[#222]" />
+              <div className="border-t border-[var(--sb-border-soft)]" />
             </>
           )}
 
           {/* Activity */}
           <div>
-            <h3 className="text-[11px] font-medium text-[#555] uppercase tracking-wider mb-3">Activity</h3>
+            <h3 className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider mb-3">Activity</h3>
             {(() => {
               const events = [
                 { a: `Moved to ${stg.label}`, w: camp.rep, d: '2026-02-18', icon: 'layers', color: stg.hex },
                 { a: `Priority set to ${camp.pri}`, w: camp.rep, d: '2026-02-15', icon: 'flag', color: camp.pri === 'High' ? '#f87171' : camp.pri === 'Medium' ? '#fbbf24' : '#38bdf8' },
-                { a: `Assigned to ${camp.rep}`, w: 'System', d: camp.created, icon: 'user', color: '#3ECF8E' },
+                { a: `Assigned to ${camp.rep}`, w: 'System', d: camp.created, icon: 'user', color: 'var(--sb-accent)' },
                 { a: 'Campaign submitted', w: camp.by.n, d: camp.created, icon: 'send', color: '#60a5fa' },
               ];
               return (
                 <div className="relative ml-3">
-                  <div className="absolute left-0 top-2 bottom-2 w-px bg-[#2a2a2a]" />
+                  <div className="absolute left-0 top-2 bottom-2 w-px bg-[var(--sb-border-soft)]" />
                   <div className="space-y-4">
                     {events.map((l, i) => (
                       <div key={i} className="flex items-start gap-3 relative">
                         <div
                           className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 -ml-3"
-                          style={{ background: `linear-gradient(${l.color}18, ${l.color}18), #161616`, border: `1px solid ${l.color}30`, color: l.color }}
+                          style={{ background: `linear-gradient(${l.color}18, ${l.color}18), var(--sb-bg-soft)`, border: `1px solid ${l.color}30`, color: l.color }}
                         >
                           <I n={l.icon} s={11} />
                         </div>
                         <div className="pt-0.5">
-                          <p className="text-[12px] text-[#ccc]">{l.a}</p>
-                          <p className="text-[11px] text-[#555] mt-0.5">
-                            {l.w} <span className="text-[#333]">·</span> {l.d}
+                          <p className="text-[13px] text-[var(--sb-text)]">{l.a}</p>
+                          <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5">
+                            {l.w} <span className="text-[var(--sb-muted-soft)]">·</span> {l.d}
                           </p>
                         </div>
                       </div>
@@ -249,34 +249,34 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
             })()}
           </div>
 
-          <div className="border-t border-[#222]" />
+          <div className="border-t border-[var(--sb-border-soft)]" />
 
           {/* Comments */}
           <div>
-            <h3 className="text-[11px] font-medium text-[#555] uppercase tracking-wider mb-3">Comments</h3>
+            <h3 className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider mb-3">Comments</h3>
             {comments.length === 0 ? (
               <div className="py-6 text-center">
-                <I n="send" s={20} c="text-[#333] mx-auto mb-2" />
-                <p className="text-[12px] text-[#555]">No comments yet</p>
-                <p className="text-[11px] text-[#444] mt-0.5">Be the first to add one below</p>
+                <I n="send" s={20} c="text-[var(--sb-muted-soft)] mx-auto mb-2" />
+                <p className="text-[12px] text-[var(--sb-muted-soft)]">No comments yet</p>
+                <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5">Be the first to add one below</p>
               </div>
             ) : (
               <div className="relative ml-3 mb-4">
-                <div className="absolute left-0 top-2 bottom-2 w-px bg-[#2a2a2a]" />
+                <div className="absolute left-0 top-2 bottom-2 w-px bg-[var(--sb-border-soft)]" />
                 <div className="space-y-4">
                   {comments.map((c) => (
                     <div key={c.id} className="flex items-start gap-3 relative">
                       <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 -ml-3 text-[9px] font-bold"
-                        style={{ background: 'linear-gradient(#3ECF8E18, #3ECF8E18), #161616', border: '1px solid #3ECF8E30', color: '#3ECF8E' }}
+                        className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 -ml-3 text-[11px] font-bold"
+                        style={{ background: 'linear-gradient(rgba(var(--sb-accent-rgb),0.18), rgba(var(--sb-accent-rgb),0.18)), var(--sb-bg-soft)', border: '1px solid rgba(var(--sb-accent-rgb),0.30)', color: 'var(--sb-accent)' }}
                       >
                         {c.author.split(' ').map((w) => w[0]).join('')}
                       </div>
                       <div className="pt-0.5 min-w-0">
-                        <p className="text-[11px] text-[#555]">
-                          <span className="text-[#999] font-medium">{c.author}</span> <span className="text-[#333]">·</span> {fmtTime(c.date)}
+                        <p className="text-[11px] text-[var(--sb-muted-soft)]">
+                          <span className="text-[var(--sb-muted)] font-medium">{c.author}</span> <span className="text-[var(--sb-muted-soft)]">·</span> {fmtTime(c.date)}
                         </p>
-                        <p className="text-[12px] text-[#ccc] mt-0.5 leading-relaxed">{c.text}</p>
+                        <p className="text-[13px] text-[var(--sb-text)] mt-0.5 leading-relaxed">{c.text}</p>
                       </div>
                     </div>
                   ))}
@@ -296,7 +296,7 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
                 }}
                 placeholder="Add a comment..."
                 rows={2}
-                className="w-full bg-[#1e1e1e] border border-[#2a2a2a] text-[#ccc] text-[12px] rounded-md px-3 py-2 resize-none placeholder-[#444] focus:outline-none focus:border-[#3ECF8E50] focus:shadow-[0_0_0_2px_rgba(62,207,142,0.12)] transition-colors"
+                className="w-full bg-[var(--sb-panel)] border border-[var(--sb-border-soft)] text-[var(--sb-text)] text-[13px] rounded-md px-3 py-2 resize-none placeholder-[var(--sb-muted-soft)] focus:outline-none focus:border-[rgba(var(--sb-accent-rgb),0.50)] focus:shadow-[0_0_0_2px_rgba(var(--sb-accent-rgb),0.12)] transition-colors"
               />
               <div className="flex justify-end mt-2">
                 <button
@@ -309,12 +309,12 @@ const DetailPanel = ({ camp, onClose, comments = [], onAddComment, onViewDetail 
                   disabled={!commentText.trim()}
                   className="px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors"
                   style={{
-                    backgroundColor: commentText.trim() ? '#3ECF8E' : '#1e1e1e',
-                    color: commentText.trim() ? '#0a1f15' : '#555',
+                    backgroundColor: commentText.trim() ? 'var(--sb-accent)' : 'var(--sb-panel)',
+                    color: commentText.trim() ? 'var(--sb-accent-contrast)' : 'var(--sb-muted-soft)',
                     cursor: commentText.trim() ? 'pointer' : 'default',
                   }}
-                  onMouseEnter={(e) => { if (commentText.trim()) e.currentTarget.style.backgroundColor = '#38b97e'; }}
-                  onMouseLeave={(e) => { if (commentText.trim()) e.currentTarget.style.backgroundColor = '#3ECF8E'; }}
+                  onMouseEnter={(e) => { if (commentText.trim()) e.currentTarget.style.backgroundColor = 'var(--sb-accent-strong)'; }}
+                  onMouseLeave={(e) => { if (commentText.trim()) e.currentTarget.style.backgroundColor = 'var(--sb-accent)'; }}
                 >
                   Send
                 </button>

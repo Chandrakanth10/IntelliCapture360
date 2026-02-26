@@ -109,18 +109,18 @@ const fmtTime = (iso) => {
 };
 
 const PRI = {
-  High: { bg: '#3b1520', border: '#5c2030', text: '#f87171' },
-  Medium: { bg: '#3b2e10', border: '#5c4a18', text: '#fbbf24' },
-  Low: { bg: '#0f2d3d', border: '#164050', text: '#38bdf8' },
+  High: { bg: 'rgba(248, 113, 113, 0.12)', border: 'rgba(248, 113, 113, 0.28)', text: '#dc2626' },
+  Medium: { bg: 'rgba(251, 191, 36, 0.14)', border: 'rgba(251, 191, 36, 0.3)', text: '#d97706' },
+  Low: { bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.28)', text: '#0369a1' },
 };
 
 const Section = ({ title, icon, children }) => (
   <div>
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(62,207,142,0.08)' }}>
-        <I n={icon} s={12} c="text-[#3ECF8E]" />
+      <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(var(--sb-accent-rgb),0.08)' }}>
+        <I n={icon} s={12} c="text-[var(--sb-accent)]" />
       </div>
-      <h3 className="text-[12px] font-semibold text-[#ededed] uppercase tracking-wider">{title}</h3>
+      <h3 className="text-[12px] font-semibold text-[var(--sb-text-strong)] uppercase tracking-wider">{title}</h3>
     </div>
     {children}
   </div>
@@ -128,8 +128,8 @@ const Section = ({ title, icon, children }) => (
 
 const DetailField = ({ label, value }) => (
   <div>
-    <span className="text-[10px] text-[#555] uppercase tracking-wide">{label}</span>
-    <p className="text-[12px] font-medium text-[#ccc] mt-0.5">{value || <span className="text-[#444] italic font-normal">Not provided</span>}</p>
+    <span className="text-[11px] text-[var(--sb-muted-soft)] uppercase tracking-wide">{label}</span>
+    <p className="text-[13px] font-medium text-[var(--sb-text)] mt-0.5">{value || <span className="text-[var(--sb-muted-soft)] italic font-normal">Not provided</span>}</p>
   </div>
 );
 
@@ -149,30 +149,30 @@ const FILE_TYPE_META = {
   docx: { icon: 'file', color: '#60a5fa', label: 'Document' },
 };
 
-const getFileMeta = (name) => FILE_TYPE_META[ext_(name)] || { icon: 'file', color: '#3ECF8E', label: 'File' };
+const getFileMeta = (name) => FILE_TYPE_META[ext_(name)] || { icon: 'file', color: 'var(--sb-accent)', label: 'File' };
 
 /* ═══ MOCK PREVIEW CONTENT ═══ */
 const MockPdfPreview = ({ name }) => (
   <div className="space-y-3">
     {[1, 2, 3].map((p) => (
-      <div key={p} className="bg-[#1a1a1a] rounded-md border border-[#2a2a2a] p-5">
+      <div key={p} className="bg-[var(--sb-panel-3)] rounded-md border border-[var(--sb-border-soft)] p-5">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-[10px] text-[#444]">Page {p}</span>
-          <span className="text-[10px] text-[#333]">{name}</span>
+          <span className="text-[11px] text-[var(--sb-muted-soft)]">Page {p}</span>
+          <span className="text-[11px] text-[var(--sb-muted-soft)]">{name}</span>
         </div>
         <div className="space-y-2.5">
-          {p === 1 && <div className="h-5 w-3/5 rounded bg-[#252525]" />}
-          <div className="h-3 w-full rounded bg-[#1e1e1e]" />
-          <div className="h-3 w-full rounded bg-[#1e1e1e]" />
-          <div className="h-3 w-4/5 rounded bg-[#1e1e1e]" />
-          {p === 1 && <div className="h-24 w-full rounded bg-[#222] mt-3 flex items-center justify-center"><span className="text-[10px] text-[#444]">[ Chart / Diagram ]</span></div>}
+          {p === 1 && <div className="h-5 w-3/5 rounded bg-[var(--sb-panel-2)]" />}
+          <div className="h-3 w-full rounded bg-[var(--sb-panel)]" />
+          <div className="h-3 w-full rounded bg-[var(--sb-panel)]" />
+          <div className="h-3 w-4/5 rounded bg-[var(--sb-panel)]" />
+          {p === 1 && <div className="h-24 w-full rounded bg-[#222] mt-3 flex items-center justify-center"><span className="text-[11px] text-[var(--sb-muted-soft)]">[ Chart / Diagram ]</span></div>}
           {p === 2 && (
             <div className="grid grid-cols-3 gap-2 mt-3">
               {[1, 2, 3, 4, 5, 6].map((r) => <div key={r} className="h-6 rounded bg-[#222]" />)}
             </div>
           )}
-          <div className="h-3 w-full rounded bg-[#1e1e1e]" />
-          <div className="h-3 w-3/4 rounded bg-[#1e1e1e]" />
+          <div className="h-3 w-full rounded bg-[var(--sb-panel)]" />
+          <div className="h-3 w-3/4 rounded bg-[var(--sb-panel)]" />
         </div>
       </div>
     ))}
@@ -180,55 +180,55 @@ const MockPdfPreview = ({ name }) => (
 );
 
 const MockImagePreview = ({ name, color }) => (
-  <div className="bg-[#1a1a1a] rounded-md border border-[#2a2a2a] overflow-hidden">
+  <div className="bg-[var(--sb-panel-3)] rounded-md border border-[var(--sb-border-soft)] overflow-hidden">
     <div className="aspect-[16/9] flex items-center justify-center relative" style={{ background: `linear-gradient(135deg, ${color}10, ${color}05)` }}>
       <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, currentColor 10px, currentColor 11px)', color }} />
       <div className="text-center z-10">
         <div className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center" style={{ background: `${color}15`, border: `1px solid ${color}25` }}>
           <I n="eye" s={24} c={`text-[${color}]`} />
         </div>
-        <p className="text-[12px] font-medium text-[#999]">{name}</p>
-        <p className="text-[11px] text-[#555] mt-1">Image preview</p>
+        <p className="text-[12px] font-medium text-[var(--sb-muted)]">{name}</p>
+        <p className="text-[11px] text-[var(--sb-muted-soft)] mt-1">Image preview</p>
       </div>
     </div>
   </div>
 );
 
 const MockVideoPreview = ({ name }) => (
-  <div className="bg-[#0a0a0a] rounded-md border border-[#2a2a2a] overflow-hidden">
+  <div className="bg-[#0a0a0a] rounded-md border border-[var(--sb-border-soft)] overflow-hidden">
     <div className="aspect-video flex items-center justify-center relative">
       <div className="absolute inset-0 bg-gradient-to-br from-[#f472b608] to-transparent" />
       <div className="text-center z-10">
         <div className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 cursor-pointer hover:bg-white/15 transition-colors">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="8 5 20 12 8 19" /></svg>
         </div>
-        <p className="text-[12px] font-medium text-[#999]">{name}</p>
+        <p className="text-[12px] font-medium text-[var(--sb-muted)]">{name}</p>
       </div>
     </div>
-    <div className="px-4 py-2.5 border-t border-[#2a2a2a] flex items-center gap-3">
-      <div className="h-1 flex-1 bg-[#2a2a2a] rounded-full overflow-hidden"><div className="h-full w-0 bg-[#f472b6] rounded-full" /></div>
-      <span className="text-[10px] text-[#555] shrink-0">0:00 / 0:15</span>
+    <div className="px-4 py-2.5 border-t border-[var(--sb-border-soft)] flex items-center gap-3">
+      <div className="h-1 flex-1 bg-[var(--sb-border-soft)] rounded-full overflow-hidden"><div className="h-full w-0 bg-[#f472b6] rounded-full" /></div>
+      <span className="text-[11px] text-[var(--sb-muted-soft)] shrink-0">0:00 / 0:15</span>
     </div>
   </div>
 );
 
 const MockHtmlPreview = ({ name }) => (
-  <div className="bg-[#1a1a1a] rounded-md border border-[#2a2a2a] overflow-hidden">
-    <div className="px-3 py-2 border-b border-[#2a2a2a] flex items-center gap-2">
+  <div className="bg-[var(--sb-panel-3)] rounded-md border border-[var(--sb-border-soft)] overflow-hidden">
+    <div className="px-3 py-2 border-b border-[var(--sb-border-soft)] flex items-center gap-2">
       <div className="flex gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" /><span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" /><span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" /></div>
-      <span className="text-[10px] text-[#555] flex-1 text-center truncate">{name}</span>
+      <span className="text-[11px] text-[var(--sb-muted-soft)] flex-1 text-center truncate">{name}</span>
     </div>
     <div className="p-4 font-mono text-[11px] leading-relaxed">
-      <p><span className="text-[#555]">&lt;</span><span className="text-[#f87171]">html</span><span className="text-[#555]">&gt;</span></p>
-      <p className="ml-4"><span className="text-[#555]">&lt;</span><span className="text-[#f87171]">head</span><span className="text-[#555]">&gt;</span></p>
-      <p className="ml-8"><span className="text-[#555]">&lt;</span><span className="text-[#f87171]">title</span><span className="text-[#555]">&gt;</span><span className="text-[#ccc]">Email Template</span><span className="text-[#555]">&lt;/</span><span className="text-[#f87171]">title</span><span className="text-[#555]">&gt;</span></p>
-      <p className="ml-4"><span className="text-[#555]">&lt;/</span><span className="text-[#f87171]">head</span><span className="text-[#555]">&gt;</span></p>
-      <p className="ml-4"><span className="text-[#555]">&lt;</span><span className="text-[#f87171]">body</span> <span className="text-[#fbbf24]">style</span><span className="text-[#555]">=</span><span className="text-[#3ECF8E]">"..."</span><span className="text-[#555]">&gt;</span></p>
-      <p className="ml-8"><span className="text-[#555]">&lt;</span><span className="text-[#f87171]">table</span> <span className="text-[#fbbf24]">width</span><span className="text-[#555]">=</span><span className="text-[#3ECF8E]">"600"</span><span className="text-[#555]">&gt;</span></p>
-      <p className="ml-12 text-[#444]">...</p>
-      <p className="ml-8"><span className="text-[#555]">&lt;/</span><span className="text-[#f87171]">table</span><span className="text-[#555]">&gt;</span></p>
-      <p className="ml-4"><span className="text-[#555]">&lt;/</span><span className="text-[#f87171]">body</span><span className="text-[#555]">&gt;</span></p>
-      <p><span className="text-[#555]">&lt;/</span><span className="text-[#f87171]">html</span><span className="text-[#555]">&gt;</span></p>
+      <p><span className="text-[var(--sb-muted-soft)]">&lt;</span><span className="text-[#f87171]">html</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
+      <p className="ml-4"><span className="text-[var(--sb-muted-soft)]">&lt;</span><span className="text-[#f87171]">head</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
+      <p className="ml-8"><span className="text-[var(--sb-muted-soft)]">&lt;</span><span className="text-[#f87171]">title</span><span className="text-[var(--sb-muted-soft)]">&gt;</span><span className="text-[var(--sb-text)]">Email Template</span><span className="text-[var(--sb-muted-soft)]">&lt;/</span><span className="text-[#f87171]">title</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
+      <p className="ml-4"><span className="text-[var(--sb-muted-soft)]">&lt;/</span><span className="text-[#f87171]">head</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
+      <p className="ml-4"><span className="text-[var(--sb-muted-soft)]">&lt;</span><span className="text-[#f87171]">body</span> <span className="text-[#fbbf24]">style</span><span className="text-[var(--sb-muted-soft)]">=</span><span className="text-[var(--sb-accent)]">"..."</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
+      <p className="ml-8"><span className="text-[var(--sb-muted-soft)]">&lt;</span><span className="text-[#f87171]">table</span> <span className="text-[#fbbf24]">width</span><span className="text-[var(--sb-muted-soft)]">=</span><span className="text-[var(--sb-accent)]">"600"</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
+      <p className="ml-12 text-[var(--sb-muted-soft)]">...</p>
+      <p className="ml-8"><span className="text-[var(--sb-muted-soft)]">&lt;/</span><span className="text-[#f87171]">table</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
+      <p className="ml-4"><span className="text-[var(--sb-muted-soft)]">&lt;/</span><span className="text-[#f87171]">body</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
+      <p><span className="text-[var(--sb-muted-soft)]">&lt;/</span><span className="text-[#f87171]">html</span><span className="text-[var(--sb-muted-soft)]">&gt;</span></p>
     </div>
   </div>
 );
@@ -244,17 +244,17 @@ const MockZipPreview = ({ name }) => {
     { n: 'README.md', type: 'text', s: '1 KB' },
   ];
   return (
-    <div className="bg-[#1a1a1a] rounded-md border border-[#2a2a2a] overflow-hidden">
-      <div className="px-4 py-2.5 border-b border-[#2a2a2a] flex items-center justify-between">
-        <span className="text-[11px] font-medium text-[#999]">{name}</span>
-        <span className="text-[10px] text-[#555]">{items.filter((i) => i.type !== 'folder').length} files</span>
+    <div className="bg-[var(--sb-panel-3)] rounded-md border border-[var(--sb-border-soft)] overflow-hidden">
+      <div className="px-4 py-2.5 border-b border-[var(--sb-border-soft)] flex items-center justify-between">
+        <span className="text-[11px] font-medium text-[var(--sb-muted)]">{name}</span>
+        <span className="text-[11px] text-[var(--sb-muted-soft)]">{items.filter((i) => i.type !== 'folder').length} files</span>
       </div>
       <div className="divide-y divide-[#222]">
         {items.map((item) => (
-          <div key={item.n} className={`px-4 py-2 flex items-center gap-2.5 ${item.type === 'folder' ? 'bg-[#1e1e1e]' : ''}`}>
-            <I n={item.type === 'folder' ? 'layers' : 'file'} s={12} c={item.type === 'folder' ? 'text-[#fbbf24]' : 'text-[#555]'} />
-            <span className={`text-[11px] flex-1 ${item.type === 'folder' ? 'font-medium text-[#ccc]' : 'text-[#999]'}`}>{item.n}</span>
-            {item.s && <span className="text-[10px] text-[#444]">{item.s}</span>}
+          <div key={item.n} className={`px-4 py-2 flex items-center gap-2.5 ${item.type === 'folder' ? 'bg-[var(--sb-panel)]' : ''}`}>
+            <I n={item.type === 'folder' ? 'layers' : 'file'} s={12} c={item.type === 'folder' ? 'text-[#fbbf24]' : 'text-[var(--sb-muted-soft)]'} />
+            <span className={`text-[11px] flex-1 ${item.type === 'folder' ? 'font-medium text-[var(--sb-text)]' : 'text-[var(--sb-muted)]'}`}>{item.n}</span>
+            {item.s && <span className="text-[11px] text-[var(--sb-muted-soft)]">{item.s}</span>}
           </div>
         ))}
       </div>
@@ -263,25 +263,25 @@ const MockZipPreview = ({ name }) => {
 };
 
 const MockSpreadsheetPreview = ({ name }) => (
-  <div className="bg-[#1a1a1a] rounded-md border border-[#2a2a2a] overflow-hidden">
-    <div className="px-4 py-2.5 border-b border-[#2a2a2a]">
-      <span className="text-[11px] font-medium text-[#999]">{name}</span>
+  <div className="bg-[var(--sb-panel-3)] rounded-md border border-[var(--sb-border-soft)] overflow-hidden">
+    <div className="px-4 py-2.5 border-b border-[var(--sb-border-soft)]">
+      <span className="text-[11px] font-medium text-[var(--sb-muted)]">{name}</span>
     </div>
     <div className="overflow-x-auto">
       <table className="w-full text-[11px]">
         <thead>
-          <tr className="bg-[#1e1e1e]">
+          <tr className="bg-[var(--sb-panel)]">
             {['', 'A', 'B', 'C', 'D'].map((h) => (
-              <th key={h} className="px-3 py-1.5 text-[10px] font-medium text-[#555] border-b border-r border-[#2a2a2a] text-left">{h}</th>
+              <th key={h} className="px-3 py-1.5 text-[11px] font-medium text-[var(--sb-muted-soft)] border-b border-r border-[var(--sb-border-soft)] text-left">{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {[1, 2, 3, 4, 5].map((r) => (
             <tr key={r}>
-              <td className="px-3 py-1.5 text-[10px] text-[#444] border-b border-r border-[#2a2a2a] bg-[#1e1e1e] w-8">{r}</td>
+              <td className="px-3 py-1.5 text-[11px] text-[var(--sb-muted-soft)] border-b border-r border-[var(--sb-border-soft)] bg-[var(--sb-panel)] w-8">{r}</td>
               {[0, 1, 2, 3].map((c) => (
-                <td key={c} className="px-3 py-1.5 text-[#888] border-b border-r border-[#222] min-w-[100px]">
+                <td key={c} className="px-3 py-1.5 text-[var(--sb-muted)] border-b border-r border-[#222] min-w-[100px]">
                   {r === 1 ? ['SKU', 'Product Name', 'Bay #', 'Facings'][c] : ''}
                   {r > 1 ? <div className="h-3 rounded bg-[#222]" style={{ width: `${40 + Math.random() * 50}%` }} /> : null}
                 </td>
@@ -295,21 +295,21 @@ const MockSpreadsheetPreview = ({ name }) => (
 );
 
 const MockDocPreview = ({ name }) => (
-  <div className="bg-[#1a1a1a] rounded-md border border-[#2a2a2a] p-6 max-w-[480px] mx-auto">
+  <div className="bg-[var(--sb-panel-3)] rounded-md border border-[var(--sb-border-soft)] p-6 max-w-[480px] mx-auto">
     <div className="mb-5">
-      <div className="h-5 w-2/3 rounded bg-[#252525] mb-3" />
-      <div className="h-3 w-1/3 rounded bg-[#1e1e1e]" />
+      <div className="h-5 w-2/3 rounded bg-[var(--sb-panel-2)] mb-3" />
+      <div className="h-3 w-1/3 rounded bg-[var(--sb-panel)]" />
     </div>
     <div className="space-y-2">
-      <div className="h-3 w-full rounded bg-[#1e1e1e]" />
-      <div className="h-3 w-full rounded bg-[#1e1e1e]" />
-      <div className="h-3 w-5/6 rounded bg-[#1e1e1e]" />
+      <div className="h-3 w-full rounded bg-[var(--sb-panel)]" />
+      <div className="h-3 w-full rounded bg-[var(--sb-panel)]" />
+      <div className="h-3 w-5/6 rounded bg-[var(--sb-panel)]" />
       <div className="h-6" />
-      <div className="h-3 w-full rounded bg-[#1e1e1e]" />
-      <div className="h-3 w-full rounded bg-[#1e1e1e]" />
-      <div className="h-3 w-2/3 rounded bg-[#1e1e1e]" />
+      <div className="h-3 w-full rounded bg-[var(--sb-panel)]" />
+      <div className="h-3 w-full rounded bg-[var(--sb-panel)]" />
+      <div className="h-3 w-2/3 rounded bg-[var(--sb-panel)]" />
     </div>
-    <p className="text-[10px] text-[#444] text-center mt-5">{name}</p>
+    <p className="text-[11px] text-[var(--sb-muted-soft)] text-center mt-5">{name}</p>
   </div>
 );
 
@@ -343,20 +343,20 @@ const FilePreviewModal = ({ file, onClose }) => {
   return createPortal(
     <>
       <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-[3px] anim-backdrop" onClick={onClose} />
-      <div className="fixed inset-4 sm:inset-8 lg:inset-y-10 lg:inset-x-[10%] z-[61] flex flex-col bg-[#161616] border border-[#2a2a2a] rounded-xl shadow-2xl anim-scale overflow-hidden">
+      <div className="fixed inset-4 sm:inset-8 lg:inset-y-10 lg:inset-x-[10%] z-[61] flex flex-col bg-[var(--sb-bg-soft)] border border-[var(--sb-border-soft)] rounded-xl shadow-2xl anim-scale overflow-hidden">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[#2a2a2a] bg-[#1a1a1a] shrink-0">
+        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[var(--sb-border-soft)] bg-[var(--sb-panel-3)] shrink-0">
           <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: `${meta.color}15`, border: `1px solid ${meta.color}25`, color: meta.color }}>
             <I n={meta.icon} s={14} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-medium text-[#ededed] truncate">{file.name}</p>
-            <p className="text-[11px] text-[#555]">{meta.label} &middot; {file.size} &middot; Uploaded {file.date}</p>
+            <p className="text-[13px] font-medium text-[var(--sb-text-strong)] truncate">{file.name}</p>
+            <p className="text-[11px] text-[var(--sb-muted-soft)]">{meta.label} &middot; {file.size} &middot; Uploaded {file.date}</p>
           </div>
           {file.category && (
-            <span className="text-[10px] font-medium px-2 py-1 rounded bg-[#252525] border border-[#333] text-[#888] shrink-0">{file.category}</span>
+            <span className="text-[11px] font-medium px-2 py-1 rounded bg-[var(--sb-panel-2)] border border-[var(--sb-border)] text-[var(--sb-muted)] shrink-0">{file.category}</span>
           )}
-          <button onClick={onClose} className="p-1.5 hover:bg-[#252525] rounded-md transition-colors text-[#777] hover:text-[#ededed] shrink-0 ml-2">
+          <button onClick={onClose} className="p-1.5 hover:bg-[var(--sb-panel-2)] rounded-md transition-colors text-[var(--sb-muted)] hover:text-[var(--sb-text-strong)] shrink-0 ml-2">
             <I n="x" s={14} />
           </button>
         </div>
@@ -367,17 +367,17 @@ const FilePreviewModal = ({ file, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-[#2a2a2a] bg-[#1a1a1a] shrink-0">
-          <span className="text-[11px] text-[#555]">{file.size} &middot; {meta.label}</span>
+        <div className="flex items-center justify-between px-5 py-3 border-t border-[var(--sb-border-soft)] bg-[var(--sb-panel-3)] shrink-0">
+          <span className="text-[11px] text-[var(--sb-muted-soft)]">{file.size} &middot; {meta.label}</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => downloadFile(file)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-[11px] font-medium bg-[#3ECF8E] text-[#0a1f15] hover:bg-[#38b97e] transition-colors"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-[11px] font-medium bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] hover:bg-[var(--sb-accent-strong)] transition-colors"
             >
               <I n="upload" s={12} c="rotate-180" />
               Download
             </button>
-            <button onClick={onClose} className="px-3.5 py-1.5 rounded-md text-[11px] font-medium bg-[#252525] text-[#ccc] hover:bg-[#303030] border border-[#333] transition-colors">
+            <button onClick={onClose} className="px-3.5 py-1.5 rounded-md text-[11px] font-medium bg-[var(--sb-panel-2)] text-[var(--sb-text)] hover:bg-[var(--sb-panel-2)] border border-[var(--sb-border)] transition-colors">
               Close
             </button>
           </div>
@@ -413,27 +413,27 @@ const downloadFile = (file) => {
 const FileRow = ({ file, onClick }) => {
   const meta = getFileMeta(file.name);
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 rounded-md bg-[#1e1e1e] border border-[#2a2a2a] group cursor-pointer hover:border-[#3ECF8E30] transition-colors">
+    <div className="flex items-center gap-3 px-3 py-2.5 rounded-md bg-[var(--sb-panel)] border border-[var(--sb-border-soft)] group cursor-pointer hover:border-[rgba(var(--sb-accent-rgb),0.30)] transition-colors">
       <div onClick={onClick} className="flex items-center gap-3 flex-1 min-w-0">
         <div className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 transition-colors" style={{ background: `${meta.color}12`, border: `1px solid ${meta.color}20`, color: meta.color }}>
           <I n={meta.icon} s={14} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[12px] font-medium text-[#ccc] truncate group-hover:text-[#ededed] transition-colors">{file.name}</p>
-          <p className="text-[10px] text-[#555]">{meta.label} &middot; {file.size} &middot; {file.date}</p>
+          <p className="text-[12px] font-medium text-[var(--sb-text)] truncate group-hover:text-[var(--sb-text-strong)] transition-colors">{file.name}</p>
+          <p className="text-[11px] text-[var(--sb-muted-soft)]">{meta.label} &middot; {file.size} &middot; {file.date}</p>
         </div>
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <button
           onClick={(e) => { e.stopPropagation(); downloadFile(file); }}
-          className="p-1.5 rounded-md text-[#444] hover:text-[#3ECF8E] hover:bg-[#3ECF8E12] transition-colors opacity-0 group-hover:opacity-100"
+          className="p-1.5 rounded-md text-[var(--sb-muted-soft)] hover:text-[var(--sb-accent)] hover:bg-[rgba(var(--sb-accent-rgb),0.12)] transition-colors opacity-0 group-hover:opacity-100"
           title="Download"
         >
           <I n="upload" s={13} c="rotate-180" />
         </button>
         <button
           onClick={onClick}
-          className="p-1.5 rounded-md text-[#444] hover:text-[#3ECF8E] hover:bg-[#3ECF8E12] transition-colors opacity-0 group-hover:opacity-100"
+          className="p-1.5 rounded-md text-[var(--sb-muted-soft)] hover:text-[var(--sb-accent)] hover:bg-[rgba(var(--sb-accent-rgb),0.12)] transition-colors opacity-0 group-hover:opacity-100"
           title="Preview"
         >
           <I n="eye" s={13} />
@@ -444,8 +444,8 @@ const FileRow = ({ file, onClick }) => {
 };
 
 const EmptyState = ({ text }) => (
-  <div className="py-4 text-center rounded-md border border-dashed border-[#2a2a2a]">
-    <p className="text-[11px] text-[#444]">{text}</p>
+  <div className="py-4 text-center rounded-md border border-dashed border-[var(--sb-border-soft)]">
+    <p className="text-[11px] text-[var(--sb-muted-soft)]">{text}</p>
   </div>
 );
 
@@ -454,19 +454,19 @@ export const BriefingContent = ({ brief }) => (
   <div className="space-y-5">
     {/* Executive Summary */}
     <div>
-      <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-2">Executive Summary</h4>
-      <p className="text-[12px] text-[#b0c0b8] leading-[1.7]">{brief.executiveSummary}</p>
+      <h4 className="text-[11px] font-semibold text-[var(--sb-accent)] uppercase tracking-wider mb-2">Executive Summary</h4>
+      <p className="text-[13px] text-[var(--sb-text)] leading-[1.7]">{brief.executiveSummary}</p>
     </div>
 
     {/* Performance Highlights */}
     <div>
-      <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-3">Performance Highlights</h4>
+      <h4 className="text-[11px] font-semibold text-[var(--sb-accent)] uppercase tracking-wider mb-3">Performance Highlights</h4>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {brief.kpis.map((kpi) => (
-          <div key={kpi.label} className="rounded-lg bg-[#0a1510] border border-[#1a3a2a] p-3">
-            <span className="text-[10px] text-[#557a66] uppercase tracking-wide">{kpi.label}</span>
+          <div key={kpi.label} className="rounded-lg p-3" style={{ background: 'var(--sb-accent-muted)', border: '1px solid color-mix(in srgb, var(--sb-accent) 24%, var(--sb-border))' }}>
+            <span className="text-[11px] text-[var(--sb-muted)] uppercase tracking-wide">{kpi.label}</span>
             <p className="text-[18px] font-bold mt-1" style={{ color: kpi.color }}>{kpi.value}</p>
-            <span className="text-[10px] font-medium text-[#3ECF8E]">{kpi.trend} vs target</span>
+            <span className="text-[11px] font-medium text-[var(--sb-accent)]">{kpi.trend} vs target</span>
           </div>
         ))}
       </div>
@@ -475,14 +475,14 @@ export const BriefingContent = ({ brief }) => (
     {/* Channel Breakdown */}
     {brief.channelBreakdown.length > 0 && (
       <div>
-        <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-3">Channel Breakdown</h4>
+        <h4 className="text-[11px] font-semibold text-[var(--sb-accent)] uppercase tracking-wider mb-3">Channel Breakdown</h4>
         <div className="space-y-2">
           {brief.channelBreakdown.map((ch) => (
-            <div key={ch.channel} className="flex items-center gap-3 px-3 py-2.5 rounded-md bg-[#0a1510] border border-[#1a3a2a]">
-              <span className="text-[12px] font-medium text-[#ccc] flex-1">{ch.channel}</span>
-              <span className="text-[11px] text-[#668a76]">{ch.impressions} imp</span>
-              <span className="text-[11px] text-[#668a76]">{ch.ctr} CTR</span>
-              <span className="text-[11px] font-medium text-[#3ECF8E]">{ch.contribution}</span>
+            <div key={ch.channel} className="flex items-center gap-3 px-3 py-2.5 rounded-md" style={{ background: 'var(--sb-accent-muted)', border: '1px solid color-mix(in srgb, var(--sb-accent) 22%, var(--sb-border))' }}>
+              <span className="text-[12px] font-medium text-[var(--sb-text)] flex-1">{ch.channel}</span>
+              <span className="text-[11px] text-[var(--sb-muted)]">{ch.impressions} imp</span>
+              <span className="text-[11px] text-[var(--sb-muted)]">{ch.ctr} CTR</span>
+              <span className="text-[11px] font-medium text-[var(--sb-accent)]">{ch.contribution}</span>
             </div>
           ))}
         </div>
@@ -491,11 +491,11 @@ export const BriefingContent = ({ brief }) => (
 
     {/* Key Learnings */}
     <div>
-      <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-2">Key Learnings</h4>
+      <h4 className="text-[11px] font-semibold text-[var(--sb-accent)] uppercase tracking-wider mb-2">Key Learnings</h4>
       <ul className="space-y-2">
         {brief.learnings.map((item, i) => (
-          <li key={i} className="flex items-start gap-2.5 text-[12px] text-[#b0c0b8] leading-relaxed">
-            <span className="w-5 h-5 rounded-full bg-[#3ECF8E15] border border-[#3ECF8E25] flex items-center justify-center shrink-0 mt-0.5 text-[9px] font-bold text-[#3ECF8E]">{i + 1}</span>
+          <li key={i} className="flex items-start gap-2.5 text-[13px] text-[var(--sb-text)] leading-relaxed">
+            <span className="w-5 h-5 rounded-full bg-[rgba(var(--sb-accent-rgb),0.15)] border border-[rgba(var(--sb-accent-rgb),0.25)] flex items-center justify-center shrink-0 mt-0.5 text-[11px] font-bold text-[var(--sb-accent)]">{i + 1}</span>
             {item}
           </li>
         ))}
@@ -504,11 +504,11 @@ export const BriefingContent = ({ brief }) => (
 
     {/* Recommendations */}
     <div>
-      <h4 className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider mb-2">Recommendations</h4>
+      <h4 className="text-[11px] font-semibold text-[var(--sb-accent)] uppercase tracking-wider mb-2">Recommendations</h4>
       <ul className="space-y-2">
         {brief.recommendations.map((item, i) => (
-          <li key={i} className="flex items-start gap-2.5 text-[12px] text-[#b0c0b8] leading-relaxed">
-            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#3ECF8E] shrink-0" />
+          <li key={i} className="flex items-start gap-2.5 text-[13px] text-[var(--sb-text)] leading-relaxed">
+            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--sb-accent)] shrink-0" />
             {item}
           </li>
         ))}
@@ -539,7 +539,7 @@ export const generateBriefing = (camp) => {
   return {
     executiveSummary: `The ${camp.name} campaign successfully launched on ${camp.date} targeting ${camp.aud || 'the defined audience segment'}. The campaign leveraged ${channels.length} support channel${channels.length !== 1 ? 's' : ''} across ${(camp.banners || []).length} banner${(camp.banners || []).length !== 1 ? 's' : ''} with a projected ROI of ${camp.roi}. Performance metrics indicate strong engagement across digital and in-store touchpoints, with key conversion goals trending ahead of forecast.`,
     kpis: [
-      { label: 'Impressions', value: impressions, trend: '+14%', color: '#3ECF8E' },
+      { label: 'Impressions', value: impressions, trend: '+14%', color: 'var(--sb-accent)' },
       { label: 'Click-Through Rate', value: ctr, trend: '+0.3pp', color: '#60a5fa' },
       { label: 'Conversions', value: conversions, trend: '+22%', color: '#fbbf24' },
       { label: 'Return on Spend', value: roi, trend: '+8%', color: '#a78bfa' },
@@ -577,9 +577,9 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
   if (!camp) {
     return (
       <div className="anim-fade py-20 text-center">
-        <I n="alert" s={32} c="text-[#333] mx-auto mb-3" />
-        <p className="text-[14px] text-[#777]">Campaign not found</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-[12px] text-[#3ECF8E] hover:text-[#38b97e] transition-colors">Go back</button>
+        <I n="alert" s={32} c="text-[var(--sb-muted-soft)] mx-auto mb-3" />
+        <p className="text-[14px] text-[var(--sb-muted)]">Campaign not found</p>
+        <button onClick={() => navigate(-1)} className="mt-4 text-[12px] text-[var(--sb-accent)] hover:text-[var(--sb-accent-strong)] transition-colors">Go back</button>
       </div>
     );
   }
@@ -607,7 +607,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
   // Build team members list
   const teamMembers = [
     { name: camp.by.n, role: 'Requester', color: '#60a5fa' },
-    { name: camp.rep, role: 'Representative', color: '#3ECF8E' },
+    { name: camp.rep, role: 'Representative', color: 'var(--sb-accent)' },
   ];
   // Add unique channel leads
   const seenNames = new Set([camp.by.n, camp.rep]);
@@ -621,34 +621,34 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
   return (
     <div className="anim-fade">
       {/* Back button */}
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[12px] text-[#666] hover:text-[#ccc] transition-colors mb-4">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-[12px] text-[var(--sb-muted)] hover:text-[var(--sb-text)] transition-colors mb-4">
         <I n="chevL" s={14} />
         Back to {fromPage}
       </button>
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-[18px] font-semibold text-[#f8f8f8] mb-2">{camp.name}</h1>
+        <h1 className="text-[24px] font-semibold tracking-tight text-[var(--sb-text-strong)] mb-2.5">{camp.name}</h1>
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[10px] font-semibold px-2 py-1 rounded border" style={{ backgroundColor: pri.bg, borderColor: pri.border, color: pri.text }}>{camp.pri}</span>
-          <span className="text-[10px] font-semibold px-2 py-1 rounded border" style={{ backgroundColor: stg.hex + '18', borderColor: stg.hex + '30', color: stg.hex }}>{stg.label}</span>
+          <span className="text-[11px] font-semibold px-2 py-1 rounded border" style={{ backgroundColor: pri.bg, borderColor: pri.border, color: pri.text }}>{camp.pri}</span>
+          <span className="text-[11px] font-semibold px-2 py-1 rounded border" style={{ backgroundColor: stg.hex + '18', borderColor: stg.hex + '30', color: stg.hex }}>{stg.label}</span>
           {camp.status !== 'On Track' && (
-            <span className="text-[10px] font-medium px-2 py-1 rounded bg-[#1e1e1e] border border-[#2e2e2e] text-[#999]">{camp.status}</span>
+            <span className="text-[11px] font-medium px-2 py-1 rounded bg-[var(--sb-panel)] border border-[var(--sb-border)] text-[var(--sb-muted)]">{camp.status}</span>
           )}
-          <span className="text-[11px] text-[#555] ml-auto"><I n="clock" s={11} c="inline -mt-px mr-1" />{camp.days}d in stage</span>
+          <span className="text-[12px] text-[var(--sb-muted-soft)] ml-auto"><I n="clock" s={11} c="inline -mt-px mr-1" />{camp.days}d in stage</span>
         </div>
       </div>
 
       {/* AI Summary — full width */}
-      <div className="rounded-lg overflow-hidden mb-5" style={{ background: 'linear-gradient(135deg, #1a1a2e, #161625)', border: '1px solid #2a2a3a' }}>
-        <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid #2a2a3a' }}>
+      <div className="rounded-xl overflow-hidden mb-5 shadow-[var(--sb-shadow-sm)]" style={{ background: 'linear-gradient(135deg, var(--sb-panel-3), var(--sb-panel))', border: '1px solid var(--sb-border)' }}>
+        <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid var(--sb-border-soft)' }}>
           <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #a78bfa20, #f472b620)' }}>
             <I n="sparkle" s={11} c="text-[#a78bfa]" />
           </div>
           <span className="text-[11px] font-semibold text-[#a78bfa] uppercase tracking-wider">AI Summary</span>
         </div>
         <div className="px-5 py-3.5">
-          <p className="text-[12px] text-[#b0b0c0] leading-[1.7]">{AI_SUMMARIES[camp.id] || genSummary(camp)}</p>
+          <p className="text-[13px] text-[var(--sb-text)] leading-[1.7]">{AI_SUMMARIES[camp.id] || genSummary(camp)}</p>
         </div>
       </div>
 
@@ -659,14 +659,14 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
         const aiBrief = generateBriefing(camp);
 
         return (
-          <div className="rounded-lg overflow-hidden mb-5" style={{ background: hasUpload ? '#161616' : 'linear-gradient(135deg, #0f1f1a, #111a16)', border: `1px solid ${hasUpload ? '#2a2a2a' : '#1a3a2a'}` }}>
+          <div className="rounded-xl overflow-hidden mb-5 shadow-[var(--sb-shadow-sm)]" style={{ background: hasUpload ? 'var(--sb-panel)' : 'color-mix(in srgb, var(--sb-accent) 6%, var(--sb-panel))', border: `1px solid ${hasUpload ? 'var(--sb-border-soft)' : 'color-mix(in srgb, var(--sb-accent) 24%, var(--sb-border))'}` }}>
             {/* Header */}
-            <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: `1px solid ${hasUpload ? '#2a2a2a' : '#1a3a2a'}` }}>
-              <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #3ECF8E20, #34d39920)' }}>
-                <I n="file" s={11} c="text-[#3ECF8E]" />
+            <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: `1px solid ${hasUpload ? 'var(--sb-border-soft)' : 'color-mix(in srgb, var(--sb-accent) 24%, var(--sb-border))'}` }}>
+              <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(var(--sb-accent-rgb),0.20), rgba(var(--sb-success-rgb),0.20))' }}>
+                <I n="file" s={11} c="text-[var(--sb-accent)]" />
               </div>
-              <span className="text-[11px] font-semibold text-[#3ECF8E] uppercase tracking-wider">Briefing Document</span>
-              <span className="text-[10px] text-[#555] ml-auto">
+              <span className="text-[11px] font-semibold text-[var(--sb-accent)] uppercase tracking-wider">Briefing Document</span>
+              <span className="text-[11px] text-[var(--sb-muted-soft)] ml-auto">
                 {hasUpload ? 'Team upload available' : 'AI-Generated \u00B7 No team briefing uploaded'}
               </span>
             </div>
@@ -676,24 +676,24 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                 /* ─── State B: Team Uploaded ─── */
                 <div className="space-y-4">
                   {/* File card */}
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[#1e1e1e] border border-[#2a2a2a] group/file">
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[var(--sb-panel)] border border-[var(--sb-border-soft)] group/file">
                     <button
                       onClick={() => setPreviewFile({ name: briefing.fileName, size: 'PDF', date: briefing.uploadedDate, category: 'Briefing Document' })}
                       className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer text-left"
                     >
-                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors group-hover/file:border-[#3ECF8E40]" style={{ background: '#3ECF8E15', border: '1px solid #3ECF8E25' }}>
-                        <I n="file" s={18} c="text-[#3ECF8E]" />
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors group-hover/file:border-[rgba(var(--sb-accent-rgb),0.40)]" style={{ background: 'rgba(var(--sb-accent-rgb),0.15)', border: '1px solid rgba(var(--sb-accent-rgb),0.25)' }}>
+                        <I n="file" s={18} c="text-[var(--sb-accent)]" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[13px] font-medium text-[#ededed] truncate group-hover/file:text-white transition-colors">{briefing.fileName}</p>
-                        <p className="text-[11px] text-[#555] mt-0.5">
+                        <p className="text-[13px] font-medium text-[var(--sb-text-strong)] truncate group-hover/file:text-[var(--sb-text)] transition-colors">{briefing.fileName}</p>
+                        <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5">
                           Uploaded by {briefing.uploadedBy} &middot; {briefing.uploadedDate}
                         </p>
                       </div>
                     </button>
                     <button
                       onClick={() => setPreviewFile({ name: briefing.fileName, size: 'PDF', date: briefing.uploadedDate, category: 'Briefing Document' })}
-                      className="px-3 py-1.5 rounded-md text-[11px] font-medium bg-[#3ECF8E15] text-[#3ECF8E] hover:bg-[#3ECF8E25] border border-[#3ECF8E30] transition-colors shrink-0 flex items-center gap-1.5"
+                      className="px-3 py-1.5 rounded-md text-[11px] font-medium bg-[rgba(var(--sb-accent-rgb),0.15)] text-[var(--sb-accent)] hover:bg-[rgba(var(--sb-accent-rgb),0.25)] border border-[rgba(var(--sb-accent-rgb),0.30)] transition-colors shrink-0 flex items-center gap-1.5"
                     >
                       <I n="eye" s={12} />
                       View
@@ -717,7 +717,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                   </button>
 
                   {showAiBrief && (
-                    <div className="rounded-lg p-4 space-y-5" style={{ background: 'linear-gradient(135deg, #0f1f1a, #111a16)', border: '1px solid #1a3a2a' }}>
+                    <div className="rounded-lg p-4 space-y-5" style={{ background: 'color-mix(in srgb, var(--sb-accent) 6%, var(--sb-bg-soft))', border: '1px solid color-mix(in srgb, var(--sb-accent) 24%, var(--sb-border))' }}>
                       <BriefingContent brief={aiBrief} camp={camp} />
                     </div>
                   )}
@@ -727,15 +727,15 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                 <div className="space-y-5">
                   <BriefingContent brief={aiBrief} camp={camp} />
 
-                  <div className="pt-2 border-t border-[#1a3a2a]">
+                  <div className="pt-2 border-t border-[var(--sb-border-soft)]">
                     <button
                       onClick={() => {
                         const name = `${camp.name.replace(/\s+/g, '_')}_Briefing.pdf`;
                         onUploadBriefing?.(camp.id, name);
                       }}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[12px] font-semibold bg-[#3ECF8E] text-[#0a1f15] hover:bg-[#38b97e] transition-colors"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-[12px] font-semibold bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] hover:bg-[var(--sb-accent-strong)] transition-colors"
                     >
-                      <I n="upload" s={14} c="text-[#0a1f15]" />
+                      <I n="upload" s={14} c="text-[var(--sb-accent-contrast)]" />
                       Upload Team Briefing
                     </button>
                   </div>
@@ -751,16 +751,16 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
         {/* ─── Left column ─── */}
         <div className="space-y-5">
           {/* Description */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
-            <p className="text-[12px] text-[#999] leading-relaxed">{camp.desc}</p>
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
+            <p className="text-[13px] text-[var(--sb-text)] leading-relaxed">{camp.desc}</p>
           </div>
 
           {/* Pipeline */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
             <Section title="Pipeline" icon="layers">
               <div className="relative mt-4">
-                <div className="absolute h-[2px] bg-[#2a2a2a]" style={{ top: 9, left: `calc(100% / ${STAGES.length * 2})`, right: `calc(100% / ${STAGES.length * 2})` }}>
-                  <div className="absolute inset-y-0 left-0 bg-[#3ECF8E]" style={{ width: si === 0 ? 0 : `${(si / (STAGES.length - 1)) * 100}%` }} />
+                <div className="absolute h-[2px] bg-[var(--sb-border-soft)]" style={{ top: 9, left: `calc(100% / ${STAGES.length * 2})`, right: `calc(100% / ${STAGES.length * 2})` }}>
+                  <div className="absolute inset-y-0 left-0 bg-[var(--sb-accent)]" style={{ width: si === 0 ? 0 : `${(si / (STAGES.length - 1)) * 100}%` }} />
                 </div>
                 <div className="relative flex">
                   {STAGES.map((s, i) => {
@@ -769,17 +769,17 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                     return (
                       <div key={s.key} className="flex-1 flex flex-col items-center">
                         <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0" style={{
-                          backgroundColor: done ? '#3ECF8E' : current ? stg.hex : '#161616',
-                          border: !done && !current ? '2px solid #333' : current ? `2px solid ${stg.hex}` : 'none',
+                          backgroundColor: done ? 'var(--sb-accent)' : current ? stg.hex : 'var(--sb-bg-soft)',
+                          border: !done && !current ? '2px solid var(--sb-border)' : current ? `2px solid ${stg.hex}` : 'none',
                           boxShadow: current ? `0 0 8px ${stg.hex}40` : 'none',
                         }}>
                           {done ? (
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0a1f15" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent-contrast)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                           ) : (
-                            <span className={`font-bold text-[8px] ${current ? 'text-white' : 'text-[#555]'}`}>{i + 1}</span>
+                            <span className={`font-bold text-[9px] ${current ? 'text-white' : 'text-[var(--sb-muted-soft)]'}`}>{i + 1}</span>
                           )}
                         </div>
-                        <span className={`text-[9px] mt-2 text-center leading-tight ${current ? 'font-semibold text-[#ededed]' : done ? 'text-[#3ECF8E]' : 'text-[#444]'}`}>{s.label}</span>
+                        <span className={`text-[11px] mt-2 text-center leading-tight ${current ? 'font-semibold text-[var(--sb-text-strong)]' : done ? 'text-[var(--sb-accent)]' : 'text-[var(--sb-muted-soft)]'}`}>{s.label}</span>
                       </div>
                     );
                   })}
@@ -788,12 +788,12 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
             </Section>
 
             {/* Stage Approvals */}
-            <div className="border-t border-[#2a2a2a] mt-5 pt-5">
+            <div className="border-t border-[var(--sb-border-soft)] mt-5 pt-5">
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(62,207,142,0.08)' }}>
-                  <I n="check" s={11} c="text-[#3ECF8E]" />
+                <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(var(--sb-accent-rgb),0.08)' }}>
+                  <I n="check" s={11} c="text-[var(--sb-accent)]" />
                 </div>
-                <span className="text-[11px] font-semibold text-[#ededed] uppercase tracking-wider">Stage Approvals</span>
+                <span className="text-[11px] font-semibold text-[var(--sb-text-strong)] uppercase tracking-wider">Stage Approvals</span>
               </div>
 
               <div className="space-y-1.5">
@@ -821,46 +821,46 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                   const allDone = stageItems.length > 0 && doneCount === stageItems.length;
 
                   // Colors
-                  const stageColor = done ? '#3ECF8E' : current ? stg.hex : '#444';
-                  const headerBg = isOpen ? (done ? '#3ECF8E08' : current ? stg.hex + '08' : '#1a1a1a') : 'transparent';
-                  const borderCol = isOpen ? (done ? '#3ECF8E30' : current ? stg.hex + '30' : '#2a2a2a') : 'transparent';
+                  const stageColor = done ? 'var(--sb-accent)' : current ? stg.hex : 'var(--sb-muted-soft)';
+                  const headerBg = isOpen ? (done ? 'rgba(var(--sb-accent-rgb),0.08)' : current ? stg.hex + '08' : 'var(--sb-panel-3)') : 'transparent';
+                  const borderCol = isOpen ? (done ? 'rgba(var(--sb-accent-rgb),0.30)' : current ? stg.hex + '30' : 'var(--sb-border-soft)') : 'transparent';
 
                   return (
-                    <div key={s.key} className="rounded-lg overflow-hidden transition-colors" style={{ border: `1px solid ${borderCol}`, background: isOpen ? '#1a1a1a' : 'transparent' }}>
+                    <div key={s.key} className="rounded-lg overflow-hidden transition-colors" style={{ border: `1px solid ${borderCol}`, background: isOpen ? 'var(--sb-panel-3)' : 'transparent' }}>
                       {/* Header — always clickable */}
                       <button
                         onClick={() => setExpandedStage(isOpen ? '__none__' : s.key)}
-                        className="w-full px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-[#1e1e1e] transition-colors rounded-lg"
+                        className="w-full px-3.5 py-2.5 flex items-center justify-between cursor-pointer hover:bg-[var(--sb-panel)] transition-colors rounded-lg"
                         style={{ background: headerBg }}
                       >
                         <div className="flex items-center gap-2">
                           {done ? (
-                            <div className="w-4 h-4 rounded-full bg-[#3ECF8E] flex items-center justify-center shrink-0">
-                              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#0a1f15" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                            <div className="w-4 h-4 rounded-full bg-[var(--sb-accent)] flex items-center justify-center shrink-0">
+                              <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent-contrast)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                             </div>
                           ) : current ? (
                             <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: stg.hex, boxShadow: `0 0 6px ${stg.hex}40` }}>
-                              <span className="text-white font-bold text-[7px]">{i + 1}</span>
+                              <span className="text-white font-bold text-[8px]">{i + 1}</span>
                             </div>
                           ) : (
-                            <div className="w-4 h-4 rounded-full border-2 border-[#333] flex items-center justify-center shrink-0">
-                              <span className="text-[7px] font-bold text-[#444]">{i + 1}</span>
+                            <div className="w-4 h-4 rounded-full border-2 border-[var(--sb-border)] flex items-center justify-center shrink-0">
+                              <span className="text-[8px] font-bold text-[var(--sb-muted-soft)]">{i + 1}</span>
                             </div>
                           )}
                           <span className="text-[11px] font-medium" style={{ color: stageColor }}>{s.label}</span>
-                          {current && <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#252525] text-[#888]">Current</span>}
+                          {current && <span className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--sb-panel-2)] text-[var(--sb-muted)]">Current</span>}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px]" style={{ color: done ? '#3ECF8E80' : current ? stg.hex : '#444' }}>
+                          <span className="text-[11px]" style={{ color: done ? 'rgba(var(--sb-accent-rgb),0.80)' : current ? stg.hex : 'var(--sb-muted-soft)' }}>
                             {done ? `${stageItems.length}/${stageItems.length}` : current ? `${doneCount}/${stageItems.length}` : `0/${stageItems.length}`}
                           </span>
-                          <I n="chevR" s={10} c={`transition-transform ${isOpen ? 'rotate-90' : ''} ${done ? 'text-[#3ECF8E60]' : current ? '' : 'text-[#333]'}`} />
+                          <I n="chevR" s={10} c={`transition-transform ${isOpen ? 'rotate-90' : ''} ${done ? 'text-[rgba(var(--sb-accent-rgb),0.60)]' : current ? '' : 'text-[var(--sb-muted-soft)]'}`} />
                         </div>
                       </button>
 
                       {/* Expanded content */}
                       {isOpen && (
-                        <div className="px-3.5 pb-3 pt-2 space-y-1" style={{ borderTop: `1px solid ${done ? '#3ECF8E15' : current ? stg.hex + '15' : '#222'}` }}>
+                        <div className="px-3.5 pb-3 pt-2 space-y-1" style={{ borderTop: `1px solid ${done ? 'rgba(var(--sb-accent-rgb),0.15)' : current ? stg.hex + '15' : 'var(--sb-border-soft)'}` }}>
                           {stageItems.map((a) => {
                             const approval = doneMap[a.key];
                             const isDone = !!approval;
@@ -868,20 +868,20 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                             return (
                               <div key={a.key} className="flex items-start gap-2.5 py-1.5">
                                 {isDone ? (
-                                  <div className="w-4 h-4 rounded-full bg-[#3ECF8E] flex items-center justify-center shrink-0 mt-0.5">
-                                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#0a1f15" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                  <div className="w-4 h-4 rounded-full bg-[var(--sb-accent)] flex items-center justify-center shrink-0 mt-0.5">
+                                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent-contrast)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                                   </div>
                                 ) : (
-                                  <div className="w-4 h-4 rounded-full border-2 shrink-0 mt-0.5" style={{ borderColor: future ? '#282828' : '#333' }} />
+                                  <div className="w-4 h-4 rounded-full border-2 shrink-0 mt-0.5" style={{ borderColor: future ? 'var(--sb-panel-2)' : 'var(--sb-border)' }} />
                                 )}
                                 <div className="flex-1 min-w-0">
-                                  <span className={`text-[11px] ${isDone ? 'text-[#888] line-through' : future ? 'text-[#555]' : 'text-[#ccc]'}`}>{a.label}</span>
+                                  <span className={`text-[11px] ${isDone ? 'text-[var(--sb-muted)] line-through' : future ? 'text-[var(--sb-muted-soft)]' : 'text-[var(--sb-text)]'}`}>{a.label}</span>
                                   <div className="flex items-center gap-1.5 mt-0.5">
-                                    <I n="user" s={9} c={isDone ? 'text-[#555]' : future ? 'text-[#333]' : 'text-[#444]'} />
-                                    <span className={`text-[10px] ${isDone ? 'text-[#555]' : future ? 'text-[#333]' : 'text-[#666]'}`}>
+                                    <I n="user" s={9} c={isDone ? 'text-[var(--sb-muted-soft)]' : future ? 'text-[var(--sb-muted-soft)]' : 'text-[var(--sb-muted-soft)]'} />
+                                    <span className={`text-[11px] ${isDone ? 'text-[var(--sb-muted-soft)]' : future ? 'text-[var(--sb-muted-soft)]' : 'text-[var(--sb-muted)]'}`}>
                                       {isDone ? approval.by : a.assignee}
                                     </span>
-                                    {isDone && <span className="text-[10px] text-[#444]">&middot; {approval.date}</span>}
+                                    {isDone && <span className="text-[11px] text-[var(--sb-muted-soft)]">&middot; {approval.date}</span>}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
@@ -889,14 +889,14 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                                     <>
                                       <button
                                         onClick={() => { setActionModal({ type: 'approve', key: a.key, label: a.label }); setActionComment(''); }}
-                                        className="px-2 py-0.5 rounded text-[9px] font-semibold bg-[#3ECF8E20] text-[#3ECF8E] hover:bg-[#3ECF8E35] border border-[#3ECF8E30] transition-colors"
+                                        className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[rgba(var(--sb-accent-rgb),0.20)] text-[var(--sb-accent)] hover:bg-[rgba(var(--sb-accent-rgb),0.35)] border border-[rgba(var(--sb-accent-rgb),0.30)] transition-colors"
                                       >
                                         Approve
                                       </button>
                                       {camp.stage !== 'intake' && (
                                         <button
                                           onClick={() => { setActionModal({ type: 'reject', key: a.key, label: a.label }); setActionComment(''); setRejectStage(si > 0 ? STAGES[si - 1].key : ''); }}
-                                          className="px-2 py-0.5 rounded text-[9px] font-semibold bg-[#f8717120] text-[#f87171] hover:bg-[#f8717135] border border-[#f8717130] transition-colors"
+                                          className="px-2 py-0.5 rounded text-[11px] font-semibold bg-[#f8717120] text-[#f87171] hover:bg-[#f8717135] border border-[#f8717130] transition-colors"
                                         >
                                           Reject
                                         </button>
@@ -904,8 +904,8 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                                     </>
                                   )}
                                   {!canAct && (
-                                    <span className={`text-[9px] px-1.5 py-0.5 rounded ${
-                                      isDone ? 'bg-[#3ECF8E12] text-[#3ECF8E]' : future ? 'text-[#333]' : 'bg-[#fbbf2412] text-[#fbbf24]'
+                                    <span className={`text-[11px] px-1.5 py-0.5 rounded ${
+                                      isDone ? 'bg-[rgba(var(--sb-accent-rgb),0.12)] text-[var(--sb-accent)]' : future ? 'text-[var(--sb-muted-soft)]' : 'bg-[#fbbf2412] text-[#fbbf24]'
                                     }`}>
                                       {isDone ? 'Approved' : future ? 'Upcoming' : 'Awaiting'}
                                     </span>
@@ -916,8 +916,8 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                           })}
                           {/* Progress bar */}
                           <div className="pt-2">
-                            <div className="h-1 rounded-full bg-[#2a2a2a] overflow-hidden">
-                              <div className="h-full rounded-full bg-[#3ECF8E] transition-all" style={{ width: `${stageItems.length > 0 ? (doneCount / stageItems.length) * 100 : 0}%` }} />
+                            <div className="h-1 rounded-full bg-[var(--sb-border-soft)] overflow-hidden">
+                              <div className="h-full rounded-full bg-[var(--sb-accent)] transition-all" style={{ width: `${stageItems.length > 0 ? (doneCount / stageItems.length) * 100 : 0}%` }} />
                             </div>
                           </div>
                           {/* Advance to next stage button */}
@@ -925,10 +925,10 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                             <div className="pt-3">
                               <button
                                 onClick={() => onAdvanceStage(camp.id)}
-                                className="w-full py-2.5 rounded-lg text-[12px] font-semibold bg-[#3ECF8E] text-[#0a1f15] hover:bg-[#38b97e] transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-2.5 rounded-lg text-[12px] font-semibold bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] hover:bg-[var(--sb-accent-strong)] transition-colors flex items-center justify-center gap-2"
                               >
                                 Advance to {STAGES[si + 1]?.label || 'Next Stage'}
-                                <I n="chevR" s={14} c="text-[#0a1f15]" />
+                                <I n="chevR" s={14} c="text-[var(--sb-accent-contrast)]" />
                               </button>
                             </div>
                           )}
@@ -942,7 +942,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
           </div>
 
           {/* Project Details */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
             <Section title="Project Details" icon="file">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-5 gap-y-4">
                 <DetailField label="Business Unit" value={camp.bu} />
@@ -962,15 +962,15 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
           </div>
 
           {/* ROI */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
             <Section title="ROI Estimates" icon="trendUp">
               <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-md border border-[#2a2a2a] bg-[#1e1e1e] p-4">
-                  <span className="text-[10px] text-[#555] uppercase tracking-wide">Revenue</span>
-                  <p className="text-[16px] font-semibold text-[#3ECF8E] mt-1">{ext.roiRevenue || camp.roi || '—'}</p>
+                <div className="rounded-md border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-4">
+                  <span className="text-[11px] text-[var(--sb-muted-soft)] uppercase tracking-wide">Revenue</span>
+                  <p className="text-[16px] font-semibold text-[var(--sb-accent)] mt-1">{ext.roiRevenue || camp.roi || '—'}</p>
                 </div>
-                <div className="rounded-md border border-[#2a2a2a] bg-[#1e1e1e] p-4">
-                  <span className="text-[10px] text-[#555] uppercase tracking-wide">Engagement</span>
+                <div className="rounded-md border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-4">
+                  <span className="text-[11px] text-[var(--sb-muted-soft)] uppercase tracking-wide">Engagement</span>
                   <p className="text-[16px] font-semibold text-[#60a5fa] mt-1">{ext.roiEngagement || '—'}</p>
                 </div>
               </div>
@@ -978,28 +978,28 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
           </div>
 
           {/* Banners & Channels */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5 space-y-5">
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 space-y-5 shadow-[var(--sb-shadow-sm)]">
             <Section title="Banners" icon="grid">
               <div className="flex flex-wrap gap-1.5">
                 {(camp.banners || []).map((b) => (
-                  <span key={b} className="text-[11px] font-medium px-2.5 py-1 rounded bg-[#3ECF8E12] border border-[#3ECF8E25] text-[#3ECF8E]">{b}</span>
+                  <span key={b} className="text-[11px] font-medium px-2.5 py-1 rounded bg-[rgba(var(--sb-accent-rgb),0.12)] border border-[rgba(var(--sb-accent-rgb),0.25)] text-[var(--sb-accent)]">{b}</span>
                 ))}
               </div>
             </Section>
 
-            <div className="border-t border-[#2a2a2a]" />
+            <div className="border-t border-[var(--sb-border-soft)]" />
 
             <Section title="Support Channels" icon="hash">
               <div className="flex flex-wrap gap-1.5">
                 {(camp.ch || []).map((c) => (
-                  <span key={c} className="text-[11px] px-2.5 py-1 rounded bg-[#1e1e1e] border border-[#2e2e2e] text-[#999]">{c}</span>
+                  <span key={c} className="text-[11px] px-2.5 py-1 rounded bg-[var(--sb-panel)] border border-[var(--sb-border)] text-[var(--sb-muted)]">{c}</span>
                 ))}
               </div>
             </Section>
 
             {(camp.mch || []).length > 0 && (
               <>
-                <div className="border-t border-[#2a2a2a]" />
+                <div className="border-t border-[var(--sb-border-soft)]" />
                 <Section title="Marketing Channels" icon="globe">
                   <div className="flex flex-wrap gap-1.5">
                     {camp.mch.map((c) => (
@@ -1013,16 +1013,16 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
 
           {/* Channel Leads */}
           {chLeads.length > 0 && (
-            <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
+            <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
               <Section title="Channel Lead Assignments" icon="user">
                 <div className="space-y-2">
                   {chLeads.map((cl) => (
-                    <div key={cl.channel} className="flex items-center justify-between px-3 py-2 rounded-md bg-[#1e1e1e] border border-[#2a2a2a]">
-                      <span className="text-[12px] text-[#999]">{cl.channel}</span>
+                    <div key={cl.channel} className="flex items-center justify-between px-3 py-2 rounded-md bg-[var(--sb-panel)] border border-[var(--sb-border-soft)]">
+                      <span className="text-[12px] text-[var(--sb-muted)]">{cl.channel}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[12px] font-medium text-[#ccc]">{cl.lead}</span>
+                        <span className="text-[12px] font-medium text-[var(--sb-text)]">{cl.lead}</span>
                         {cl.isOverride && (
-                          <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#fbbf2418] border border-[#fbbf2430] text-[#fbbf24]">Custom</span>
+                          <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-[#fbbf2418] border border-[#fbbf2430] text-[#fbbf24]">Custom</span>
                         )}
                       </div>
                     </div>
@@ -1033,26 +1033,26 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
           )}
 
           {/* Audience & Targeting */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5 space-y-5">
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 space-y-5 shadow-[var(--sb-shadow-sm)]">
             <Section title="Audience & Targeting" icon="target">
               {camp.aud && (
                 <div className="mb-4">
-                  <span className="text-[10px] text-[#555] uppercase tracking-wide">Target Audience</span>
-                  <p className="text-[12px] text-[#ccc] mt-1 leading-relaxed">{camp.aud}</p>
+                  <span className="text-[11px] text-[var(--sb-muted-soft)] uppercase tracking-wide">Target Audience</span>
+                  <p className="text-[12px] text-[var(--sb-text)] mt-1 leading-relaxed">{camp.aud}</p>
                 </div>
               )}
               {(ext.segDef || ext.targetCriteria) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {ext.segDef && (
-                    <div className="rounded-md border border-[#2a2a2a] bg-[#1e1e1e] p-3">
-                      <span className="text-[10px] text-[#555] uppercase tracking-wide">Segment Definition</span>
-                      <p className="text-[12px] text-[#ccc] mt-1 leading-relaxed">{ext.segDef}</p>
+                    <div className="rounded-md border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-3">
+                      <span className="text-[11px] text-[var(--sb-muted-soft)] uppercase tracking-wide">Segment Definition</span>
+                      <p className="text-[12px] text-[var(--sb-text)] mt-1 leading-relaxed">{ext.segDef}</p>
                     </div>
                   )}
                   {ext.targetCriteria && (
-                    <div className="rounded-md border border-[#2a2a2a] bg-[#1e1e1e] p-3">
-                      <span className="text-[10px] text-[#555] uppercase tracking-wide">Targeting Criteria</span>
-                      <p className="text-[12px] text-[#ccc] mt-1 leading-relaxed">{ext.targetCriteria}</p>
+                    <div className="rounded-md border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-3">
+                      <span className="text-[11px] text-[var(--sb-muted-soft)] uppercase tracking-wide">Targeting Criteria</span>
+                      <p className="text-[12px] text-[var(--sb-text)] mt-1 leading-relaxed">{ext.targetCriteria}</p>
                     </div>
                   )}
                 </div>
@@ -1063,7 +1063,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
 
           {/* Creative Brief */}
           {(ext.creativeType || ext.brandAssets) && (
-            <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
+            <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
               <Section title="Creative Brief" icon="sparkle">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <DetailField label="Creative Type" value={ext.creativeType} />
@@ -1074,7 +1074,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
           )}
 
           {/* Files & Uploads */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
             <Section title="Files & Uploads" icon="upload">
               {allFiles.length === 0 ? (
                 <EmptyState text="No files uploaded for this campaign" />
@@ -1087,8 +1087,8 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                     return (
                       <div key={cat}>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-[10px] font-medium text-[#555] uppercase tracking-wider">{cat}</span>
-                          <span className="text-[10px] text-[#444]">{files.length} file{files.length !== 1 ? 's' : ''}</span>
+                          <span className="text-[11px] font-medium text-[var(--sb-muted-soft)] uppercase tracking-wider">{cat}</span>
+                          <span className="text-[11px] text-[var(--sb-muted-soft)]">{files.length} file{files.length !== 1 ? 's' : ''}</span>
                         </div>
                         <div className="space-y-1.5">
                           {files.map((f) => <FileRow key={f.name} file={f} onClick={() => setPreviewFile(f)} />)}
@@ -1105,7 +1105,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
         {/* ─── Right column ─── */}
         <div className="space-y-5 lg:sticky lg:top-4 lg:self-start">
           {/* Team & Stakeholders */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
             <Section title="Team & Stakeholders" icon="user">
               {(() => {
                 const VISIBLE = 5;
@@ -1115,33 +1115,33 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                   <>
                     <div className="grid grid-cols-3 gap-2">
                       {visible.map((m) => (
-                        <div key={m.name + m.role} className="flex flex-col items-center text-center px-2 py-3 rounded-lg bg-[#1e1e1e] border border-[#2a2a2a]">
+                        <div key={m.name + m.role} className="flex flex-col items-center text-center px-2 py-3 rounded-lg bg-[var(--sb-panel)] border border-[var(--sb-border-soft)]">
                           <div
                             className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-bold mb-2"
                             style={{ background: `${m.color}15`, border: `2px solid ${m.color}30`, color: m.color }}
                           >
                             {m.name.split(' ').map((w) => w[0]).join('')}
                           </div>
-                          <p className="text-[11px] font-medium text-[#ccc] truncate w-full">{m.name}</p>
-                          <p className="text-[9px] text-[#555] mt-0.5 truncate w-full">{m.role}</p>
+                          <p className="text-[11px] font-medium text-[var(--sb-text)] truncate w-full">{m.name}</p>
+                          <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5 truncate w-full">{m.role}</p>
                         </div>
                       ))}
                       {!showAllTeam && remaining > 0 && (
                         <button
                           onClick={() => setShowAllTeam(true)}
-                          className="flex flex-col items-center justify-center px-2 py-3 rounded-lg border border-dashed border-[#333] hover:border-[#3ECF8E40] hover:bg-[#3ECF8E08] transition-colors cursor-pointer"
+                          className="flex flex-col items-center justify-center px-2 py-3 rounded-lg border border-dashed border-[var(--sb-border)] hover:border-[rgba(var(--sb-accent-rgb),0.40)] hover:bg-[rgba(var(--sb-accent-rgb),0.08)] transition-colors cursor-pointer"
                         >
-                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-bold mb-2 bg-[#252525] border-2 border-[#333] text-[#888]">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-[12px] font-bold mb-2 bg-[var(--sb-panel-2)] border-2 border-[var(--sb-border)] text-[var(--sb-muted)]">
                             +{remaining}
                           </div>
-                          <p className="text-[11px] font-medium text-[#666]">more</p>
+                          <p className="text-[11px] font-medium text-[var(--sb-muted)]">more</p>
                         </button>
                       )}
                     </div>
                     {showAllTeam && teamMembers.length > VISIBLE && (
                       <button
                         onClick={() => setShowAllTeam(false)}
-                        className="mt-2 text-[11px] text-[#555] hover:text-[#ccc] transition-colors flex items-center gap-1 mx-auto"
+                        className="mt-2 text-[11px] text-[var(--sb-muted-soft)] hover:text-[var(--sb-text)] transition-colors flex items-center gap-1 mx-auto"
                       >
                         <I n="chevL" s={10} c="rotate-90" />
                         Show less
@@ -1154,26 +1154,26 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
           </div>
 
           {/* Comments */}
-          <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] p-5">
+          <div className="rounded-xl border border-[var(--sb-border-soft)] bg-[var(--sb-panel)] p-5 shadow-[var(--sb-shadow-sm)]">
             <Section title="Comments" icon="send">
               {comments.length === 0 ? (
                 <div className="py-6 text-center">
-                  <I n="send" s={20} c="text-[#333] mx-auto mb-2" />
-                  <p className="text-[12px] text-[#555]">No comments yet</p>
-                  <p className="text-[11px] text-[#444] mt-0.5">Be the first to add one below</p>
+                  <I n="send" s={20} c="text-[var(--sb-muted-soft)] mx-auto mb-2" />
+                  <p className="text-[12px] text-[var(--sb-muted-soft)]">No comments yet</p>
+                  <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5">Be the first to add one below</p>
                 </div>
               ) : (
                 <div className="relative ml-3 mb-4">
-                  <div className="absolute left-0 top-2 bottom-2 w-px bg-[#2a2a2a]" />
+                  <div className="absolute left-0 top-2 bottom-2 w-px bg-[var(--sb-border-soft)]" />
                   <div className="space-y-4">
                     {comments.map((c) => (
                       <div key={c.id} className="flex items-start gap-3 relative">
-                        <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 -ml-3 text-[9px] font-bold" style={{ background: 'linear-gradient(#3ECF8E18, #3ECF8E18), #161616', border: '1px solid #3ECF8E30', color: '#3ECF8E' }}>
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 -ml-3 text-[11px] font-bold" style={{ background: 'linear-gradient(rgba(var(--sb-accent-rgb),0.18), rgba(var(--sb-accent-rgb),0.18)), var(--sb-bg-soft)', border: '1px solid rgba(var(--sb-accent-rgb),0.30)', color: 'var(--sb-accent)' }}>
                           {c.author.split(' ').map((w) => w[0]).join('')}
                         </div>
                         <div className="pt-0.5 min-w-0">
-                          <p className="text-[11px] text-[#555]"><span className="text-[#999] font-medium">{c.author}</span> <span className="text-[#333]">&middot;</span> {fmtTime(c.date)}</p>
-                          <p className="text-[12px] text-[#ccc] mt-0.5 leading-relaxed">{c.text}</p>
+                          <p className="text-[11px] text-[var(--sb-muted-soft)]"><span className="text-[var(--sb-muted)] font-medium">{c.author}</span> <span className="text-[var(--sb-muted-soft)]">&middot;</span> {fmtTime(c.date)}</p>
+                          <p className="text-[13px] text-[var(--sb-text)] mt-0.5 leading-relaxed">{c.text}</p>
                         </div>
                       </div>
                     ))}
@@ -1193,16 +1193,16 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                   }}
                   placeholder="Add a comment..."
                   rows={2}
-                  className="w-full bg-[#1e1e1e] border border-[#2a2a2a] text-[#ccc] text-[12px] rounded-md px-3 py-2 resize-none placeholder-[#444] focus:outline-none focus:border-[#3ECF8E50] focus:shadow-[0_0_0_2px_rgba(62,207,142,0.12)] transition-colors"
+                  className="w-full bg-[var(--sb-panel)] border border-[var(--sb-border-soft)] text-[var(--sb-text)] text-[13px] rounded-md px-3 py-2 resize-none placeholder-[var(--sb-muted-soft)] focus:outline-none focus:border-[rgba(var(--sb-accent-rgb),0.50)] focus:shadow-[0_0_0_2px_rgba(var(--sb-accent-rgb),0.12)] transition-colors"
                 />
                 <div className="flex justify-end mt-2">
                   <button
                     onClick={() => { if (commentText.trim()) { onAddComment(commentText.trim()); setCommentText(''); } }}
                     disabled={!commentText.trim()}
                     className="px-3 py-1.5 rounded-md text-[11px] font-medium transition-colors"
-                    style={{ backgroundColor: commentText.trim() ? '#3ECF8E' : '#1e1e1e', color: commentText.trim() ? '#0a1f15' : '#555', cursor: commentText.trim() ? 'pointer' : 'default' }}
-                    onMouseEnter={(e) => { if (commentText.trim()) e.currentTarget.style.backgroundColor = '#38b97e'; }}
-                    onMouseLeave={(e) => { if (commentText.trim()) e.currentTarget.style.backgroundColor = '#3ECF8E'; }}
+                    style={{ backgroundColor: commentText.trim() ? 'var(--sb-accent)' : 'var(--sb-panel)', color: commentText.trim() ? 'var(--sb-accent-contrast)' : 'var(--sb-muted-soft)', cursor: commentText.trim() ? 'pointer' : 'default' }}
+                    onMouseEnter={(e) => { if (commentText.trim()) e.currentTarget.style.backgroundColor = 'var(--sb-accent-strong)'; }}
+                    onMouseLeave={(e) => { if (commentText.trim()) e.currentTarget.style.backgroundColor = 'var(--sb-accent)'; }}
                   >
                     Send
                   </button>
@@ -1220,18 +1220,18 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
         <>
           <div className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-[3px] anim-backdrop" onClick={() => setActionModal(null)} />
           <div className="fixed inset-0 z-[61] flex items-center justify-center p-4">
-            <div className="bg-[#161616] border border-[#2a2a2a] rounded-xl shadow-2xl anim-scale w-full max-w-md overflow-hidden">
+            <div className="bg-[var(--sb-bg-soft)] border border-[var(--sb-border-soft)] rounded-xl shadow-2xl anim-scale w-full max-w-md overflow-hidden">
               {/* Modal header */}
-              <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#2a2a2a] bg-[#1a1a1a]">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--sb-border-soft)] bg-[var(--sb-panel-3)]">
                 <div className="flex items-center gap-2">
-                  <div className={`w-6 h-6 rounded-md flex items-center justify-center ${actionModal.type === 'approve' ? 'bg-[#3ECF8E20]' : 'bg-[#f8717120]'}`}>
-                    <I n={actionModal.type === 'approve' ? 'check' : 'x'} s={13} c={actionModal.type === 'approve' ? 'text-[#3ECF8E]' : 'text-[#f87171]'} />
+                  <div className={`w-6 h-6 rounded-md flex items-center justify-center ${actionModal.type === 'approve' ? 'bg-[rgba(var(--sb-accent-rgb),0.20)]' : 'bg-[#f8717120]'}`}>
+                    <I n={actionModal.type === 'approve' ? 'check' : 'x'} s={13} c={actionModal.type === 'approve' ? 'text-[var(--sb-accent)]' : 'text-[#f87171]'} />
                   </div>
-                  <h3 className="text-[13px] font-semibold text-[#ededed]">
+                  <h3 className="text-[13px] font-semibold text-[var(--sb-text-strong)]">
                     {actionModal.type === 'approve' ? 'Approve' : 'Reject'}: {actionModal.label}
                   </h3>
                 </div>
-                <button onClick={() => setActionModal(null)} className="p-1.5 hover:bg-[#252525] rounded-md transition-colors text-[#777] hover:text-[#ededed]">
+                <button onClick={() => setActionModal(null)} className="p-1.5 hover:bg-[var(--sb-panel-2)] rounded-md transition-colors text-[var(--sb-muted)] hover:text-[var(--sb-text-strong)]">
                   <I n="x" s={14} />
                 </button>
               </div>
@@ -1240,11 +1240,11 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
               <div className="px-5 py-4 space-y-4">
                 {actionModal.type === 'reject' && (
                   <div>
-                    <label className="block text-[11px] font-medium text-[#888] mb-1.5">Send back to stage</label>
+                    <label className="block text-[11px] font-medium text-[var(--sb-muted)] mb-1.5">Send back to stage</label>
                     <select
                       value={rejectStage}
                       onChange={(e) => setRejectStage(e.target.value)}
-                      className="w-full bg-[#1e1e1e] border border-[#2a2a2a] text-[#ccc] text-[12px] rounded-md px-3 py-2 focus:outline-none focus:border-[#f8717150] transition-colors"
+                      className="w-full bg-[var(--sb-panel)] border border-[var(--sb-border-soft)] text-[var(--sb-text)] text-[13px] rounded-md px-3 py-2 focus:outline-none focus:border-[#f8717150] transition-colors"
                     >
                       {STAGES.slice(0, si).map((s) => (
                         <option key={s.key} value={s.key}>{s.label}</option>
@@ -1253,7 +1253,7 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                   </div>
                 )}
                 <div>
-                  <label className="block text-[11px] font-medium text-[#888] mb-1.5">
+                  <label className="block text-[11px] font-medium text-[var(--sb-muted)] mb-1.5">
                     {actionModal.type === 'approve' ? 'Comment' : 'Rejection reason'}
                   </label>
                   <textarea
@@ -1261,17 +1261,17 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                     onChange={(e) => setActionComment(e.target.value)}
                     placeholder={actionModal.type === 'approve' ? 'Add a comment for this approval...' : 'Explain why this is being rejected...'}
                     rows={3}
-                    className="w-full bg-[#1e1e1e] border border-[#2a2a2a] text-[#ccc] text-[12px] rounded-md px-3 py-2 resize-none placeholder-[#444] focus:outline-none focus:border-[#3ECF8E50] transition-colors"
+                    className="w-full bg-[var(--sb-panel)] border border-[var(--sb-border-soft)] text-[var(--sb-text)] text-[13px] rounded-md px-3 py-2 resize-none placeholder-[var(--sb-muted-soft)] focus:outline-none focus:border-[rgba(var(--sb-accent-rgb),0.50)] transition-colors"
                     autoFocus
                   />
                 </div>
               </div>
 
               {/* Modal footer */}
-              <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[#2a2a2a] bg-[#1a1a1a]">
+              <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[var(--sb-border-soft)] bg-[var(--sb-panel-3)]">
                 <button
                   onClick={() => setActionModal(null)}
-                  className="px-3.5 py-1.5 rounded-md text-[11px] font-medium bg-[#252525] text-[#ccc] hover:bg-[#303030] border border-[#333] transition-colors"
+                  className="px-3.5 py-1.5 rounded-md text-[11px] font-medium bg-[var(--sb-panel-2)] text-[var(--sb-text)] hover:bg-[var(--sb-panel-2)] border border-[var(--sb-border)] transition-colors"
                 >
                   Cancel
                 </button>
@@ -1290,9 +1290,9 @@ const CampaignDetailPage = ({ campaigns = CAMPS, approvals = {}, onApprove, onRe
                   className={`px-3.5 py-1.5 rounded-md text-[11px] font-semibold transition-colors ${
                     actionComment.trim()
                       ? actionModal.type === 'approve'
-                        ? 'bg-[#3ECF8E] text-[#0a1f15] hover:bg-[#38b97e]'
+                        ? 'bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] hover:bg-[var(--sb-accent-strong)]'
                         : 'bg-[#f87171] text-white hover:bg-[#ef4444]'
-                      : 'bg-[#1e1e1e] text-[#555] cursor-default'
+                      : 'bg-[var(--sb-panel)] text-[var(--sb-muted-soft)] cursor-default'
                   }`}
                 >
                   {actionModal.type === 'approve' ? 'Confirm Approval' : 'Confirm Rejection'}

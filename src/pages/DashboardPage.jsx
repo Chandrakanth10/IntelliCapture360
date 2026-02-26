@@ -1,10 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Card, CURRENT_USER, I, STAGES, STAGE_APPROVALS } from '../shared/campaignShared';
 
 const PRI_COLORS = {
-  High: { bg: '#f8717118', border: '#f8717130', text: '#f87171' },
-  Medium: { bg: '#fbbf2418', border: '#fbbf2430', text: '#fbbf24' },
-  Low: { bg: '#38bdf818', border: '#38bdf830', text: '#38bdf8' },
+  High: { bg: 'rgba(248, 113, 113, 0.12)', border: 'rgba(248, 113, 113, 0.28)', text: '#dc2626' },
+  Medium: { bg: 'rgba(251, 191, 36, 0.14)', border: 'rgba(251, 191, 36, 0.3)', text: '#d97706' },
+  Low: { bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.28)', text: '#0369a1' },
+};
+
+const STAT_ICONS = {
+  total: { bg: 'rgba(var(--sb-accent-rgb),0.14)', text: 'var(--sb-accent)', icon: 'layers' },
+  active: { bg: 'rgba(167, 139, 250, 0.14)', text: '#8b5cf6', icon: 'bar' },
+  pending: { bg: 'rgba(251, 191, 36, 0.16)', text: '#d97706', icon: 'clock' },
+  live: { bg: 'rgba(var(--sb-success-rgb),0.16)', text: 'var(--sb-success-soft-text)', icon: 'flag' },
 };
 
 const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
@@ -14,12 +21,12 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
     campaigns.forEach((x) => (c[x.stage] = (c[x.stage] || 0) + 1));
     return c;
   }, [campaigns]);
+
   const total = campaigns.length;
   const active = counts.planning + counts.strategy + counts.creative + counts.execution;
   const pending = counts.intake + counts.review;
   const live = counts.live;
 
-  // Build pending tasks for current user
   const pendingTasks = useMemo(() => {
     const PRI_ORDER = { High: 0, Medium: 1, Low: 2 };
     const tasks = [];
@@ -37,7 +44,6 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
             stage: stg,
             priority: camp.pri,
             days: camp.days,
-            date: camp.date,
           });
         }
       });
@@ -52,55 +58,53 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
   }, [campaigns, approvals]);
 
   const stats = [
-    { l: 'Total Campaigns', v: total, t: '+12%', up: true, color: 'bg-[#3ECF8E]', icon: 'layers' },
-    { l: 'Active', v: active, t: '+3', up: true, color: 'bg-violet-500', icon: 'bar' },
-    { l: 'Pending Review', v: pending, t: '-2', up: false, color: 'bg-amber-500', icon: 'clock' },
-    { l: 'Live', v: live, t: 'Stable', up: null, color: 'bg-emerald-500', icon: 'flag' },
+    { key: 'total', label: 'Total Campaigns', value: total, trend: '+12%', up: true },
+    { key: 'active', label: 'Active', value: active, trend: '+3', up: true },
+    { key: 'pending', label: 'Pending Review', value: pending, trend: '-2', up: false },
+    { key: 'live', label: 'Live', value: live, trend: 'Stable', up: null },
   ];
 
   return (
-    <div className="space-y-4 anim-fade anim-stagger">
+    <div className="space-y-5 anim-fade anim-stagger">
       <div>
-        <h1 className="text-[15px] font-semibold text-[#f8f8f8]">Dashboard</h1>
-        <p className="text-[12px] text-[#888] mt-0.5">
+        <h1 className="text-[22px] font-semibold tracking-tight text-[var(--sb-text-strong)]">Dashboard</h1>
+        <p className="text-[13px] text-[var(--sb-muted)] mt-1.5">
           {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} &middot; {total} campaigns
         </p>
       </div>
 
-      <div className="grid grid-cols-4 gap-3">
-        {stats.map((s) => (
-          <Card key={s.l} className="!p-0">
-            <div className="p-3.5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">{s.l}</p>
-                  <p className="text-2xl font-semibold text-slate-900 mt-1">{s.v}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+        {stats.map((s) => {
+          const icon = STAT_ICONS[s.key];
+          return (
+            <Card key={s.label} className="!p-0">
+              <div className="p-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold text-[var(--sb-muted)] uppercase tracking-[0.12em]">{s.label}</p>
+                    <p className="text-[32px] leading-none font-semibold text-[var(--sb-text-strong)] mt-2.5">{s.value}</p>
+                  </div>
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center border"
+                    style={{ background: icon.bg, color: icon.text, borderColor: 'color-mix(in srgb, currentColor 26%, transparent)' }}
+                  >
+                    <I n={icon.icon} s={14} />
+                  </div>
                 </div>
-                <div
-                  className={`w-7 h-7 ${s.color} rounded-md flex items-center justify-center`}
-                >
-                  <I n={s.icon} s={13} c="text-white" />
-                </div>
+                {s.up !== null && (
+                  <p className={`text-[11px] mt-2 font-medium ${s.up ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    {s.trend} vs last quarter
+                  </p>
+                )}
+                {s.up === null && <p className="text-[11px] mt-2 text-[var(--sb-muted-soft)]">{s.trend}</p>}
               </div>
-              {s.up !== null && (
-                <p
-                  className={`text-[11px] mt-1.5 font-medium ${
-                    s.up ? 'text-emerald-600' : 'text-amber-600'
-                  }`}
-                >
-                  {s.t} vs last quarter
-                </p>
-              )}
-              {s.up === null && (
-                <p className="text-[11px] mt-1.5 text-slate-400">{s.t}</p>
-              )}
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
 
-      <Card title="Pipeline" icon="bar">
-        <div className="flex rounded-md overflow-hidden h-9">
+      <Card title="Pipeline" icon="bar" desc="Stage distribution across active campaigns">
+        <div className="flex rounded-lg overflow-hidden h-11 border border-[var(--sb-border)] bg-[var(--sb-panel-2)]">
           {STAGES.map((s) => {
             const cnt = counts[s.key] || 0;
             if (!cnt) return null;
@@ -110,20 +114,17 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
                 className={`${s.color} flex items-center justify-center relative group`}
                 style={{ width: `${Math.max((cnt / total) * 100, 8)}%` }}
               >
-                <span className="text-[10px] font-bold text-white">{cnt}</span>
-                <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-[#2a2a2a] text-white text-[10px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20 border border-[#333]">
+                <span className="text-[11px] font-bold text-white">{cnt}</span>
+                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[11px] px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-20 border bg-[var(--sb-panel)] border-[var(--sb-border)] text-[var(--sb-text)] shadow-md">
                   {s.label}: {cnt}
                 </div>
               </div>
             );
           })}
         </div>
-        <div className="flex mt-2.5 gap-2.5 flex-wrap justify-center">
+        <div className="flex mt-3 gap-3 flex-wrap justify-center">
           {STAGES.map((s) => (
-            <div
-              key={s.key}
-              className="flex items-center gap-1.5 text-[11px] text-[#999]"
-            >
+            <div key={s.key} className="flex items-center gap-1.5 text-[11px] text-[var(--sb-muted)]">
               <div className={`w-2.5 h-2.5 rounded-full ${s.color}`} />
               {s.label}
             </div>
@@ -131,33 +132,42 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
         </div>
       </Card>
 
-      {/* My Pending Approvals */}
-      <div className="rounded-lg border border-[#2a2a2a] bg-[#161616] overflow-hidden">
-        <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center justify-between">
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border-soft)', boxShadow: 'var(--sb-shadow-sm)' }}
+      >
+        <div className="px-4 py-3.5 border-b flex items-center justify-between bg-[var(--sb-panel-2)]" style={{ borderColor: 'var(--sb-border-soft)' }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-md bg-[#fbbf2415] border border-[#fbbf2425] flex items-center justify-center flex-shrink-0">
-              <I n="check" s={13} c="text-[#fbbf24]" />
+            <div
+              className="w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0"
+              style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border)' }}
+            >
+              <I n="clock" s={13} c="text-[var(--sb-muted)]" />
             </div>
             <div>
-              <h3 className="text-[13px] font-semibold text-[#ededed] leading-tight">My Pending Approvals</h3>
-              <p className="text-[11px] text-[#555] mt-0.5">{pendingTasks.length} item{pendingTasks.length !== 1 ? 's' : ''} awaiting your action</p>
+              <h3 className="text-[13px] font-semibold text-[var(--sb-text-strong)] leading-tight">My Pending Approvals</h3>
+              <p className="text-[11px] text-[var(--sb-muted)] mt-0.5">{pendingTasks.length} item{pendingTasks.length !== 1 ? 's' : ''} awaiting your action</p>
             </div>
           </div>
           {pendingTasks.length > 0 && (
-            <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-[#fbbf2418] border border-[#fbbf2430] text-[#fbbf24]">
+            <span
+              className="text-[11px] font-semibold px-2 py-1 rounded-full border text-[var(--sb-muted)]"
+              style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border)' }}
+            >
               {pendingTasks.length}
             </span>
           )}
         </div>
-        <div className="divide-y divide-[#222]">
-          {pendingTasks.length === 0 ? (
-            <div className="py-10 text-center">
-              <I n="check" s={24} c="text-[#3ECF8E] mx-auto mb-2" />
-              <p className="text-[13px] font-medium text-[#888]">All caught up!</p>
-              <p className="text-[11px] text-[#555] mt-0.5">No pending approvals right now</p>
-            </div>
-          ) : (
-            pendingTasks.map((task) => {
+
+        {pendingTasks.length === 0 ? (
+          <div className="py-10 text-center">
+            <I n="check" s={24} c="text-[var(--sb-accent)] mx-auto mb-2" />
+            <p className="text-[13px] font-medium text-[var(--sb-text)]">All caught up</p>
+            <p className="text-[11px] text-[var(--sb-muted)] mt-0.5">No pending approvals right now</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-[var(--sb-border-soft)]">
+            {pendingTasks.map((task) => {
               const pri = PRI_COLORS[task.priority] || PRI_COLORS.Medium;
               return (
                 <button
@@ -166,43 +176,35 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
                     const camp = campaigns.find((c) => c.id === task.campaignId);
                     if (camp && onSelect) onSelect(camp);
                   }}
-                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#1e1e1e] transition-colors text-left group"
+                  className="w-full px-4 py-3.5 flex items-center gap-3 transition-colors text-left group hover:bg-[var(--sb-panel-2)]"
                 >
-                  {/* Status indicator */}
-                  <div className="w-2 h-2 rounded-full bg-[#fbbf24] shrink-0 animate-pulse" />
-
-                  {/* Content */}
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--sb-accent)] shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[12px] font-medium text-[#ccc] group-hover:text-[#ededed] transition-colors truncate">
-                        {task.approvalLabel}
-                      </span>
+                      <span className="text-[12px] font-medium text-[var(--sb-text)] truncate">{task.approvalLabel}</span>
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-[10px] text-[#666] truncate">{task.campaignName}</span>
-                      <span className="text-[10px] text-[#333]">&middot;</span>
-                      <span className="text-[10px]" style={{ color: task.stage?.hex || '#666' }}>{task.stage?.label}</span>
+                      <span className="text-[11px] text-[var(--sb-muted)] truncate">{task.campaignName}</span>
+                      <span className="text-[11px] text-[var(--sb-muted-soft)]">&middot;</span>
+                      <span className="text-[11px]" style={{ color: task.stage?.hex || 'var(--sb-muted-soft)' }}>{task.stage?.label}</span>
                     </div>
                   </div>
-
-                  {/* Meta */}
                   <div className="flex items-center gap-2 shrink-0">
                     <span
-                      className="text-[9px] font-semibold px-1.5 py-0.5 rounded border"
+                      className="text-[11px] font-semibold px-1.5 py-0.5 rounded border"
                       style={{ backgroundColor: pri.bg, borderColor: pri.border, color: pri.text }}
                     >
                       {task.priority}
                     </span>
-                    <span className="text-[10px] text-[#555]">{task.days}d</span>
-                    <I n="chevR" s={12} c="text-[#333] group-hover:text-[#666] transition-colors" />
+                    <span className="text-[11px] text-[var(--sb-muted)]">{task.days}d</span>
+                    <I n="chevR" s={12} c="text-[var(--sb-muted-soft)]" />
                   </div>
                 </button>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        )}
       </div>
-
     </div>
   );
 };

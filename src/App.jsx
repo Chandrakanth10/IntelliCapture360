@@ -116,7 +116,13 @@ export default function App() {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    const stored = localStorage.getItem('theme');
+    return stored ? stored === 'dark' : true;
+  });
   const mainRef = useRef(null);
+  const themeTransitionTimerRef = useRef(null);
+  const themeInitializedRef = useRef(false);
   const sidebarOpen = isExpanded || isHovered;
 
   const handleSubmit = (fd) => {
@@ -261,6 +267,10 @@ export default function App() {
     mainRef.current?.scrollTo({ top: 0 });
   };
 
+  const toggleTheme = () => {
+    setIsDark((d) => !d);
+  };
+
   useEffect(() => {
     const onResize = () => {
       if (window.innerWidth >= 1024) {
@@ -296,8 +306,40 @@ export default function App() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [view]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    const hasInitializedTheme = themeInitializedRef.current;
+
+    root.classList.toggle('light', !isDark);
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+    if (!hasInitializedTheme) {
+      themeInitializedRef.current = true;
+      return;
+    }
+
+    if (themeTransitionTimerRef.current) {
+      window.clearTimeout(themeTransitionTimerRef.current);
+    }
+
+    root.classList.remove('theme-switching');
+    void root.offsetHeight;
+    root.classList.add('theme-switching');
+
+    themeTransitionTimerRef.current = window.setTimeout(() => {
+      root.classList.remove('theme-switching');
+      themeTransitionTimerRef.current = null;
+    }, 190);
+
+    return () => {
+      if (themeTransitionTimerRef.current) {
+        window.clearTimeout(themeTransitionTimerRef.current);
+      }
+    };
+  }, [isDark]);
+
   return (
-    <div className="supabase h-screen overflow-hidden" style={{ background: '#111111' }}>
+    <div className="supabase h-screen overflow-hidden" style={{ background: 'var(--sb-bg)' }}>
       <Sidebar
         view={view}
         onNavigate={navigate}
@@ -311,7 +353,10 @@ export default function App() {
       <div
         className={`h-screen flex flex-col transition-all duration-300 ease-in-out ${sidebarOpen ? 'lg:ml-[260px]' : 'lg:ml-[72px]'} ${isMobileOpen ? 'ml-0' : ''}`}
       >
-        <TopNav />
+        <TopNav
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
+        />
 
         <main ref={mainRef} className="flex-1 overflow-y-auto scrollbar-thin">
           <div className="p-4 mx-auto max-w-screen-2xl md:p-6">

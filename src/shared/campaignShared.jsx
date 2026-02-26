@@ -129,6 +129,8 @@ export const I=({n,s=16,c=''})=>{
     globe:<><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></>,
     briefcase:<><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></>,
     sparkle:<><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></>,
+    sun:<><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>,
+    moon:<><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></>,
   };
   return <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={c}>{p[n]}</svg>;
 };
@@ -136,15 +138,34 @@ export const Badge=({children,cls})=><span className={`inline-flex items-center 
 export const FieldErr=({show,msg})=>show?<p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1"><I n="alert" s={11} c="text-rose-500"/>{msg||'Required'}</p>:null;
 
 /* ═══ FORM CARD SECTION ═══ */
-export const Card=({title,desc,children,className='',complete,icon})=>(
-  <div className={`bg-white rounded-lg border border-slate-200 card-focus overflow-hidden ${className}`}>
-    {title&&<div className="px-4 py-3 border-b border-slate-100 flex items-start justify-between">
-      <div className="flex items-start gap-2.5">
-        {icon&&<div className="w-7 h-7 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center flex-shrink-0 mt-0.5"><I n={icon} s={14} c="text-slate-400"/></div>}
-        <div><h3 className="text-[13px] font-semibold text-slate-900 leading-tight">{title}</h3>{desc&&<p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{desc}</p>}</div>
+export const Card = ({ title, desc, children, className = '', complete, icon }) => (
+  <div
+    className={`rounded-xl border card-focus overflow-hidden ${className}`}
+    style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border-soft)', boxShadow: 'var(--sb-shadow-sm)' }}
+  >
+    {title && (
+      <div className="px-4 py-3.5 border-b flex items-start justify-between" style={{ borderColor: 'var(--sb-border-soft)' }}>
+        <div className="flex items-start gap-2.5">
+          {icon && (
+            <div
+              className="w-7 h-7 rounded-md border flex items-center justify-center flex-shrink-0 mt-0.5"
+              style={{ background: 'var(--sb-panel-2)', borderColor: 'var(--sb-border)' }}
+            >
+              <I n={icon} s={14} c="text-[var(--sb-muted)]" />
+            </div>
+          )}
+          <div>
+            <h3 className="text-[13px] font-semibold text-[var(--sb-text-strong)] leading-tight">{title}</h3>
+            {desc && <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5 leading-relaxed">{desc}</p>}
+          </div>
+        </div>
+        {complete && (
+          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'var(--sb-accent-soft)' }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--sb-accent)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="check-anim"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        )}
       </div>
-      {complete&&<div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3ECF8E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="check-anim"><polyline points="20 6 9 17 4 12"/></svg></div>}
-    </div>}
+    )}
     <div className="px-4 py-3.5 space-y-3.5">{children}</div>
   </div>
 );
@@ -154,7 +175,9 @@ export const Tip=({text,children})=>{
   const [show,setShow]=useState(false);
   return <span className="relative inline-flex" onMouseEnter={()=>setShow(true)} onMouseLeave={()=>setShow(false)}>
     {children}
-    {show&&<span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 bg-[#2a2a2a] text-[#ededed] text-[11px] rounded-md shadow-lg whitespace-nowrap z-50 leading-relaxed max-w-[240px] text-center border border-[#333]">{text}<span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#2a2a2a]"/></span>}
+    {show&&<span
+      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2.5 py-1.5 text-[11px] rounded-md whitespace-nowrap z-50 leading-relaxed max-w-[240px] text-center border"
+      style={{ background: 'var(--sb-panel)', color: 'var(--sb-text)', borderColor: 'var(--sb-border)', boxShadow: 'var(--sb-shadow-md)' }}
+    >{text}<span className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent" style={{ borderTopColor: 'var(--sb-panel)' }}/></span>}
   </span>;
 };
-

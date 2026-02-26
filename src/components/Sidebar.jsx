@@ -19,19 +19,19 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
   const showText = isExpanded || isHovered || isMobileOpen;
 
   const itemCls = (active) =>
-    `group relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-md text-[14px] transition-all duration-150 ${
+    `group relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-[13px] transition-all duration-150 border ${
       active
-        ? 'bg-[#252525] text-white'
-        : 'text-[#999] hover:bg-[#1e1e1e] hover:text-[#ededed]'
+        ? 'bg-[var(--sb-accent-soft)] text-[var(--sb-text-strong)] border-[color-mix(in_srgb,var(--sb-accent)_30%,var(--sb-border))] shadow-sm'
+        : 'text-[var(--sb-muted)] border-transparent hover:bg-[var(--sb-panel-2)] hover:text-[var(--sb-text)]'
     } ${!showText ? 'lg:justify-center' : ''}`;
 
   const iconCls = (active) =>
-    active ? 'text-[#3ECF8E]' : 'text-[#666] group-hover:text-[#888]';
+    active ? 'text-[var(--sb-accent)]' : 'text-[var(--sb-muted-soft)] group-hover:text-[var(--sb-muted)]';
 
   const renderGroup = (title, items) => (
     <nav className="mb-5">
       <h2
-        className={`mb-2.5 text-[11px] uppercase tracking-[0.1em] font-medium text-[#555] ${
+        className={`mb-2.5 text-[11px] uppercase tracking-[0.14em] font-semibold text-[var(--sb-muted)] ${
           !showText ? 'lg:text-center' : 'px-2.5'
         }`}
       >
@@ -44,7 +44,7 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
             <li key={item.id}>
               <button type="button" onClick={() => onNavigate(item.id)} className={itemCls(active)}>
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[#3ECF8E] rounded-r-full" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[var(--sb-accent)] rounded-r-full" />
                 )}
                 <span className={iconCls(active)}>
                   <I n={item.icon} s={18} />
@@ -65,38 +65,37 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
         onClick={onCloseMobile}
       />
       <aside
-        className={`fixed mt-16 lg:mt-0 top-0 left-0 h-screen transition-all duration-300 ease-in-out z-50 border-r border-[#2e2e2e] bg-[#171717] ${
+        className={`fixed mt-16 lg:mt-0 top-0 left-0 h-screen flex flex-col transition-all duration-300 ease-in-out z-50 border-r border-[var(--sb-border-soft)] bg-[var(--sb-bg-soft)] ${
           showText ? 'w-[260px]' : 'w-[72px]'
-        } ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
-        style={{ background: '#161616' }}
+        } ${isMobileOpen ? 'translate-x-0 shadow-[var(--sb-shadow-md)]' : '-translate-x-full'} lg:translate-x-0 lg:shadow-none`}
         onMouseEnter={() => { if (!isExpanded) setIsHovered(true); }}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className={`py-5 px-4 flex ${showText ? 'justify-start' : 'lg:justify-center'}`}>
           {showText ? (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#3ECF8E] flex items-center justify-center">
-                <span className="text-[#0a1f15] text-[12px] font-bold tracking-tight">IC</span>
+              <div className="w-10 h-10 rounded-xl bg-[var(--sb-accent)] flex items-center justify-center shadow-sm">
+                <span className="text-[var(--sb-accent-contrast)] text-[12px] font-bold tracking-tight">IC</span>
               </div>
               <div>
-                <p className="text-[15px] font-semibold text-white leading-tight">IntelliCapture</p>
-                <p className="text-[12px] text-[#555]">Campaign Workflow</p>
+                <p className="text-[15px] font-semibold text-[var(--sb-text-strong)] leading-tight">IntelliCapture</p>
+                <p className="text-[12px] text-[var(--sb-muted-soft)]">Campaign Workflow</p>
               </div>
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-xl bg-[#3ECF8E] flex items-center justify-center">
-              <span className="text-[#0a1f15] text-[12px] font-bold tracking-tight">IC</span>
+            <div className="w-10 h-10 rounded-xl bg-[var(--sb-accent)] flex items-center justify-center shadow-sm">
+              <span className="text-[var(--sb-accent-contrast)] text-[12px] font-bold tracking-tight">IC</span>
             </div>
           )}
         </div>
 
-        <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear px-3 pb-6">
+        <div className="flex-1 no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear px-3 pb-6">
           {renderGroup('Overview', overviewNav)}
-          <div className="mx-2.5 mb-5 border-t border-[#2a2a2a]" />
+          <div className="mx-2.5 mb-5 border-t border-[var(--sb-border-soft)]" />
           {renderGroup('Campaigns', campaignNav)}
-          <div className="mx-2.5 mb-5 border-t border-[#2a2a2a]" />
+          <div className="mx-2.5 mb-5 border-t border-[var(--sb-border-soft)]" />
           {renderGroup('Results', resultsNav)}
-          <div className="mx-2.5 mb-5 border-t border-[#2a2a2a]" />
+          <div className="mx-2.5 mb-5 border-t border-[var(--sb-border-soft)]" />
           {renderGroup('Actions', actionsNav)}
         </div>
 
