@@ -365,7 +365,7 @@ export default function App() {
               <Route path="/products" element={<Navigate to="/dashboard" replace />} />
               <Route
                 path="/dashboard"
-                element={<DashboardPage campaigns={campaigns} approvals={approvals} onSelect={(campaign) => setSelected(campaign)} />}
+                element={<DashboardPage campaigns={campaigns} onSelect={(campaign) => setSelected(campaign)} />}
               />
               <Route
                 path="/intake"

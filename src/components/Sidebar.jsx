@@ -1,6 +1,9 @@
 import { I } from '../shared/campaignShared';
 
+const CHILD_VIEWS = { campaign: 'mytasks' };
+
 const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobileOpen, onCloseMobile }) => {
+  const activeView = CHILD_VIEWS[view] || view;
   const overviewNav = [
     { id: 'dashboard', icon: 'grid', label: 'Dashboard' },
     { id: 'mytasks', icon: 'briefcase', label: 'Active Campaigns' },
@@ -19,14 +22,14 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
   const showText = isExpanded || isHovered || isMobileOpen;
 
   const itemCls = (active) =>
-    `group relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-[13px] transition-all duration-150 border ${
+    `group relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-[13px] transition-all duration-150 ${
       active
-        ? 'bg-[var(--sb-accent-soft)] text-[var(--sb-text-strong)] border-[color-mix(in_srgb,var(--sb-accent)_30%,var(--sb-border))] shadow-sm'
-        : 'text-[var(--sb-muted)] border-transparent hover:bg-[var(--sb-panel-2)] hover:text-[var(--sb-text)]'
+        ? 'bg-[var(--sb-accent)] text-[var(--sb-accent-contrast)] shadow-sm'
+        : 'text-[var(--sb-muted)] hover:bg-[var(--sb-panel-2)] hover:text-[var(--sb-text)]'
     } ${!showText ? 'lg:justify-center' : ''}`;
 
   const iconCls = (active) =>
-    active ? 'text-[var(--sb-accent)]' : 'text-[var(--sb-muted-soft)] group-hover:text-[var(--sb-muted)]';
+    active ? 'text-[var(--sb-accent-contrast)]' : 'text-[var(--sb-muted-soft)] group-hover:text-[var(--sb-muted)]';
 
   const renderGroup = (title, items) => (
     <nav className="mb-5">
@@ -39,13 +42,10 @@ const Sidebar = ({ view, onNavigate, isExpanded, isHovered, setIsHovered, isMobi
       </h2>
       <ul className="flex flex-col gap-0.5">
         {items.map((item) => {
-          const active = view === item.id;
+          const active = activeView === item.id;
           return (
             <li key={item.id}>
               <button type="button" onClick={() => onNavigate(item.id)} className={itemCls(active)}>
-                {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 bg-[var(--sb-accent)] rounded-r-full" />
-                )}
                 <span className={iconCls(active)}>
                   <I n={item.icon} s={18} />
                 </span>

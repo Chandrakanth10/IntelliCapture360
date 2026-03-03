@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Card, CURRENT_USER, I, STAGES, STAGE_APPROVALS } from '../shared/campaignShared';
+import { Card, CURRENT_USER, I, STAGES } from '../shared/campaignShared';
 
 const PRI_COLORS = {
   High: { bg: 'rgba(248, 113, 113, 0.12)', border: 'rgba(248, 113, 113, 0.28)', text: '#dc2626' },
@@ -14,7 +14,7 @@ const STAT_ICONS = {
   live: { bg: 'rgba(var(--sb-success-rgb),0.16)', text: 'var(--sb-success-soft-text)', icon: 'flag' },
 };
 
-const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
+const Dashboard = ({ campaigns, onSelect }) => {
   const counts = useMemo(() => {
     const c = {};
     STAGES.forEach((s) => (c[s.key] = 0));
@@ -27,35 +27,17 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
   const pending = counts.intake + counts.review;
   const live = counts.live;
 
-  const pendingTasks = useMemo(() => {
+  const myCampaigns = useMemo(() => {
     const PRI_ORDER = { High: 0, Medium: 1, Low: 2 };
-    const tasks = [];
-    campaigns.forEach((camp) => {
-      const stageItems = STAGE_APPROVALS[camp.stage] || [];
-      const campApprovals = approvals[camp.id] || {};
-      stageItems.forEach((item) => {
-        if (item.assignee === CURRENT_USER.name && !campApprovals[item.key]) {
-          const stg = STAGES.find((s) => s.key === camp.stage);
-          tasks.push({
-            campaignId: camp.id,
-            campaignName: camp.name,
-            approvalKey: item.key,
-            approvalLabel: item.label,
-            stage: stg,
-            priority: camp.pri,
-            days: camp.days,
-          });
-        }
+    return campaigns
+      .filter((c) => c.rep === CURRENT_USER.name)
+      .sort((a, b) => {
+        const pa = PRI_ORDER[a.pri] ?? 9;
+        const pb = PRI_ORDER[b.pri] ?? 9;
+        if (pa !== pb) return pa - pb;
+        return (b.days || 0) - (a.days || 0);
       });
-    });
-    tasks.sort((a, b) => {
-      const pa = PRI_ORDER[a.priority] ?? 9;
-      const pb = PRI_ORDER[b.priority] ?? 9;
-      if (pa !== pb) return pa - pb;
-      return (b.days || 0) - (a.days || 0);
-    });
-    return tasks;
-  }, [campaigns, approvals]);
+  }, [campaigns]);
 
   const stats = [
     { key: 'total', label: 'Total Campaigns', value: total, trend: '+12%', up: true },
@@ -136,68 +118,55 @@ const Dashboard = ({ campaigns, approvals = {}, onSelect }) => {
         className="rounded-xl border overflow-hidden"
         style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border-soft)', boxShadow: 'var(--sb-shadow-sm)' }}
       >
-        <div className="px-4 py-3.5 border-b flex items-center justify-between bg-[var(--sb-panel-2)]" style={{ borderColor: 'var(--sb-border-soft)' }}>
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0"
-              style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border)' }}
-            >
-              <I n="clock" s={13} c="text-[var(--sb-muted)]" />
-            </div>
-            <div>
-              <h3 className="text-[13px] font-semibold text-[var(--sb-text-strong)] leading-tight">My Pending Approvals</h3>
-              <p className="text-[11px] text-[var(--sb-muted)] mt-0.5">{pendingTasks.length} item{pendingTasks.length !== 1 ? 's' : ''} awaiting your action</p>
-            </div>
+        <div className="px-4 py-3.5 border-b flex items-center gap-2.5" style={{ borderColor: 'var(--sb-border-soft)' }}>
+          <div
+            className="w-7 h-7 rounded-md border flex items-center justify-center flex-shrink-0"
+            style={{ background: 'var(--sb-panel-2)', borderColor: 'var(--sb-border)' }}
+          >
+            <I n="briefcase" s={14} c="text-[var(--sb-muted)]" />
           </div>
-          {pendingTasks.length > 0 && (
-            <span
-              className="text-[11px] font-semibold px-2 py-1 rounded-full border text-[var(--sb-muted)]"
-              style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border)' }}
-            >
-              {pendingTasks.length}
-            </span>
-          )}
+          <div>
+            <h3 className="text-[13px] font-semibold text-[var(--sb-text-strong)] leading-tight">My Campaigns</h3>
+            <p className="text-[11px] text-[var(--sb-muted-soft)] mt-0.5 leading-relaxed">{myCampaigns.length} campaign{myCampaigns.length !== 1 ? 's' : ''} assigned to you</p>
+          </div>
         </div>
 
-        {pendingTasks.length === 0 ? (
+        {myCampaigns.length === 0 ? (
           <div className="py-10 text-center">
-            <I n="check" s={24} c="text-[var(--sb-accent)] mx-auto mb-2" />
-            <p className="text-[13px] font-medium text-[var(--sb-text)]">All caught up</p>
-            <p className="text-[11px] text-[var(--sb-muted)] mt-0.5">No pending approvals right now</p>
+            <I n="briefcase" s={24} c="text-[var(--sb-muted-soft)] mx-auto mb-2" />
+            <p className="text-[13px] font-medium text-[var(--sb-text)]">No campaigns assigned</p>
+            <p className="text-[11px] text-[var(--sb-muted)] mt-0.5">Campaigns assigned to you will appear here</p>
           </div>
         ) : (
-          <div className="divide-y divide-[var(--sb-border-soft)]">
-            {pendingTasks.map((task) => {
-              const pri = PRI_COLORS[task.priority] || PRI_COLORS.Medium;
+          <div>
+            {myCampaigns.map((camp, idx) => {
+              const pri = PRI_COLORS[camp.pri] || PRI_COLORS.Medium;
+
               return (
                 <button
-                  key={`${task.campaignId}-${task.approvalKey}`}
-                  onClick={() => {
-                    const camp = campaigns.find((c) => c.id === task.campaignId);
-                    if (camp && onSelect) onSelect(camp);
-                  }}
-                  className="w-full px-4 py-3.5 flex items-center gap-3 transition-colors text-left group hover:bg-[var(--sb-panel-2)]"
+                  key={camp.id}
+                  onClick={() => onSelect && onSelect(camp)}
+                  className="w-full px-4 py-3 flex items-center gap-3 transition-colors text-left group hover:bg-[var(--sb-panel-2)]"
+                  style={{ borderBottom: idx < myCampaigns.length - 1 ? '1px solid var(--sb-border-soft)' : undefined }}
                 >
-                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--sb-accent)] shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[12px] font-medium text-[var(--sb-text)] truncate">{task.approvalLabel}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-[11px] text-[var(--sb-muted)] truncate">{task.campaignName}</span>
-                      <span className="text-[11px] text-[var(--sb-muted-soft)]">&middot;</span>
-                      <span className="text-[11px]" style={{ color: task.stage?.hex || 'var(--sb-muted-soft)' }}>{task.stage?.label}</span>
-                    </div>
-                  </div>
+                  {/* Priority dot */}
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: pri.text }} />
+
+                  {/* Name */}
+                  <span className="text-[12px] font-medium text-[var(--sb-text)] truncate flex-1 min-w-0 group-hover:text-[var(--sb-text-strong)] transition-colors">{camp.name}</span>
+
+                  {/* Right side: priority + due */}
                   <div className="flex items-center gap-2 shrink-0">
                     <span
-                      className="text-[11px] font-semibold px-1.5 py-0.5 rounded border"
+                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded border"
                       style={{ backgroundColor: pri.bg, borderColor: pri.border, color: pri.text }}
                     >
-                      {task.priority}
+                      {camp.pri}
                     </span>
-                    <span className="text-[11px] text-[var(--sb-muted)]">{task.days}d</span>
-                    <I n="chevR" s={12} c="text-[var(--sb-muted-soft)]" />
+                    <span className="text-[11px] text-[var(--sb-muted)] w-12 text-right hidden sm:inline">
+                      {new Date(`${camp.date}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <I n="chevR" s={12} c="text-[var(--sb-muted-soft)] opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 </button>
               );

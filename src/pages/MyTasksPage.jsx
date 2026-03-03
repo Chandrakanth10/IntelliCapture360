@@ -1,91 +1,106 @@
-import { useState } from 'react';
-import { CURRENT_USER, I, STAGES, parseDate } from '../shared/campaignShared';
+import { useMemo, useState } from 'react';
+import { CURRENT_USER, I, STAGES } from '../shared/campaignShared';
 
-const MO = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/* ── data ──────────────────────────────────────────────── */
 
-const PRI = {
-  High: { bg: 'rgba(248, 113, 113, 0.12)', border: 'rgba(248, 113, 113, 0.28)', text: '#dc2626' },
-  Medium: { bg: 'rgba(251, 191, 36, 0.14)', border: 'rgba(251, 191, 36, 0.3)', text: '#d97706' },
-  Low: { bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.28)', text: '#0369a1' },
-};
+const QUEUES = [
+  { key: 'all', label: 'All' },
+  { key: 'action', label: 'Needs Action' },
+  { key: 'progress', label: 'In Progress' },
+  { key: 'monitoring', label: 'Live' },
+];
+
+const SORTS = [
+  { key: 'priority', label: 'Priority' },
+  { key: 'due', label: 'Due Date' },
+  { key: 'roi', label: 'ROI' },
+  { key: 'age', label: 'Stage Age' },
+  { key: 'name', label: 'Name' },
+];
 
 const PRI_RANK = { High: 0, Medium: 1, Low: 2 };
 
-const TABS = [
-  { key: 'action', label: 'Action Required', icon: 'alert', color: '#d97706' },
-  { key: 'progress', label: 'In Progress', icon: 'zap', color: '#16a34a' },
-  { key: 'monitoring', label: 'Monitoring', icon: 'eye', color: '#0284c7' },
-];
+/* ── helpers ───────────────────────────────────────────── */
 
-function categorize(c) {
+function classify(c) {
   if (c.status === 'Pending Info' || c.status === 'New' || c.stage === 'review') return 'action';
   if (c.stage === 'live') return 'monitoring';
   return 'progress';
 }
 
-function parseRoi(s) {
-  const n = parseFloat((s || '').replace(/[^0-9.]/g, ''));
-  const mult = (s || '').includes('M') ? 1000 : 1;
-  return (n || 0) * mult;
+function daysUntil(iso) {
+  if (!iso) return 0;
+  const d = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return 0;
+  const now = new Date();
+  return Math.round((d.getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86400000);
 }
 
-function sortCampaigns(list, sortKey, sortDir) {
-  if (!sortKey) return list;
-  const dir = sortDir === 'asc' ? 1 : -1;
+function formatDue(iso) {
+  if (!iso) return iso;
+  const d = new Date(`${iso}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function roiValue(roi) {
+  const n = parseFloat(String(roi || '').replace(/[^0-9.]/g, ''));
+  return (n || 0) * (String(roi || '').includes('M') ? 1000 : 1);
+}
+
+function sortList(list, key, dir) {
+  const d = dir === 'asc' ? 1 : -1;
   return [...list].sort((a, b) => {
-    if (sortKey === 'priority') return dir * ((PRI_RANK[a.pri] ?? 9) - (PRI_RANK[b.pri] ?? 9));
-    if (sortKey === 'date') return dir * (a.date.localeCompare(b.date));
-    if (sortKey === 'roi') return dir * (parseRoi(a.roi) - parseRoi(b.roi));
-    if (sortKey === 'days') return dir * (a.days - b.days);
-    return 0;
+    if (key === 'priority') return d * ((PRI_RANK[a.pri] ?? 9) - (PRI_RANK[b.pri] ?? 9));
+    if (key === 'due') return d * String(a.date || '').localeCompare(String(b.date || ''));
+    if (key === 'roi') return d * (roiValue(a.roi) - roiValue(b.roi));
+    if (key === 'age') return d * ((a.days || 0) - (b.days || 0));
+    return d * String(a.name || '').localeCompare(String(b.name || ''));
   });
 }
 
-const SortIcon = ({ active, dir }) => (
-  <span className={`inline-flex flex-col gap-[1px] ml-1 ${active ? '' : 'opacity-0 group-hover:opacity-50'}`}>
-    <span
-      className="border-l-[3.5px] border-r-[3.5px] border-b-[4px] border-transparent"
-      style={{ borderBottomColor: active && dir === 'asc' ? 'var(--sb-text)' : 'var(--sb-muted-soft)' }}
-    />
-    <span
-      className="border-l-[3.5px] border-r-[3.5px] border-t-[4px] border-transparent"
-      style={{ borderTopColor: active && dir === 'desc' ? 'var(--sb-text)' : 'var(--sb-muted-soft)' }}
-    />
-  </span>
-);
+function stageMeta(key) {
+  return STAGES.find((s) => s.key === key) || STAGES[0];
+}
 
-const SCOPES = [
-  { key: 'mine', label: 'My Campaigns', icon: 'user' },
-  { key: 'all_camps', label: 'All Campaigns', icon: 'layers' },
-];
 
-const MyTasks = ({ campaigns, onSelect }) => {
+/* ── page ──────────────────────────────────────────────── */
+
+const MyTasksPage = ({ campaigns, onSelect }) => {
   const [scope, setScope] = useState('mine');
-  const [tab, setTab] = useState(null);
-  const [sortKey, setSortKey] = useState(null);
-  const [sortDir, setSortDir] = useState('asc');
+  const [queue, setQueue] = useState('all');
   const [search, setSearch] = useState('');
+  const [sortKey, setSortKey] = useState('priority');
+  const [sortDir, setSortDir] = useState('asc');
 
-  const mine = campaigns.filter((c) => c.rep === CURRENT_USER.name);
+  const mine = useMemo(() => campaigns.filter((c) => c.rep === CURRENT_USER.name), [campaigns]);
   const scoped = scope === 'mine' ? mine : campaigns;
 
-  const searched = search.trim()
-    ? scoped.filter((c) => {
-        const q = search.toLowerCase();
-        return c.name.toLowerCase().includes(q) || c.bu.toLowerCase().includes(q) || c.rep.toLowerCase().includes(q);
-      })
-    : scoped;
+  const q = search.trim().toLowerCase();
+  const searched = useMemo(() => {
+    if (!q) return scoped;
+    return scoped.filter((c) =>
+      c.name.toLowerCase().includes(q)
+      || c.bu.toLowerCase().includes(q)
+      || c.rep.toLowerCase().includes(q)
+      || c.desc.toLowerCase().includes(q)
+    );
+  }, [scoped, q]);
 
-  const filtered = !tab ? searched : searched.filter((c) => categorize(c) === tab);
-  const sorted = sortCampaigns(filtered, sortKey, sortDir);
+  const counts = useMemo(() => {
+    const b = { all: searched.length, action: 0, progress: 0, monitoring: 0 };
+    searched.forEach((c) => { b[classify(c)] += 1; });
+    return b;
+  }, [searched]);
 
-  const counts = {};
-  searched.forEach((c) => {
-    const k = categorize(c);
-    counts[k] = (counts[k] || 0) + 1;
-  });
+  const filtered = useMemo(
+    () => (queue === 'all' ? searched : searched.filter((c) => classify(c) === queue)),
+    [queue, searched]
+  );
 
-  const handleSort = (key) => {
+  const sorted = useMemo(() => sortList(filtered, sortKey, sortDir), [filtered, sortKey, sortDir]);
+
+  const toggleSort = (key) => {
     if (sortKey === key) {
       setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {
@@ -94,182 +109,230 @@ const MyTasks = ({ campaigns, onSelect }) => {
     }
   };
 
-  const colHeader = (label, sortable) => {
-    const isActive = sortKey === sortable;
-    if (!sortable) {
-      return <span className="text-[11px] font-semibold text-[var(--sb-muted-soft)] uppercase tracking-wider">{label}</span>;
-    }
-    return (
-      <button
-        onClick={() => handleSort(sortable)}
-        className="group flex items-center text-[11px] font-semibold uppercase tracking-wider transition-colors"
-        style={{ color: isActive ? 'var(--sb-text)' : 'var(--sb-muted-soft)' }}
-      >
-        {label}
-        <SortIcon active={isActive} dir={sortDir} />
-      </button>
-    );
+  const SortIcon = ({ col }) => {
+    if (sortKey !== col) return null;
+    return <I n={sortDir === 'asc' ? 'trendUp' : 'bar'} s={11} c="inline-block ml-1 opacity-50" />;
   };
 
   return (
-    <div className="anim-fade h-[calc(100vh-148px)] flex flex-col">
-      <div className="mb-4 shrink-0 flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-[22px] font-semibold tracking-tight text-[var(--sb-text-strong)]">Campaigns</h1>
-          <p className="text-[13px] text-[var(--sb-muted)] mt-1">
-            {scope === 'mine' ? `${mine.length} campaigns assigned to ${CURRENT_USER.name}` : `${campaigns.length} total campaigns`}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {sortKey && (
-            <button
-              onClick={() => {
-                setSortKey(null);
-                setSortDir('asc');
-              }}
-              className="text-[11px] transition-colors flex items-center gap-1 text-[var(--sb-muted)] hover:text-[var(--sb-text)]"
-            >
-              <I n="x" s={10} />
-              Clear sort
-            </button>
-          )}
-          <div className="relative w-52">
-            <I n="search" s={12} c="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--sb-muted-soft)]" />
-            <input
-              className="w-full pl-8 pr-8 py-2 border text-[12px] rounded-lg placeholder-[var(--sb-muted-soft)] focus:outline-none transition-colors"
-              style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border)', color: 'var(--sb-text)' }}
-              placeholder="Search campaigns..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            {search && (
-              <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--sb-muted-soft)] hover:text-[var(--sb-text)]">
-                <I n="x" s={10} />
-              </button>
-            )}
+    <div className="anim-fade">
+
+      {/* ── outer card ─────────────────────────────────── */}
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{
+          background: 'var(--sb-panel)',
+          borderColor: 'var(--sb-border-soft)',
+          boxShadow: 'var(--sb-shadow-sm)',
+        }}
+      >
+
+        {/* ── header ───────────────────────────────────── */}
+        <div className="px-6 pt-6 pb-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-[18px] font-semibold text-[var(--sb-text-strong)]">Campaigns</h1>
+              <p className="text-[13px] mt-1 text-[var(--sb-muted)]">
+                {scope === 'mine'
+                  ? `A list of all campaigns assigned to you including stage, priority, and timeline.`
+                  : `All campaigns across the organization including stage, priority, and timeline.`}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {/* scope toggle */}
+              <div
+                className="inline-flex rounded-lg p-0.5"
+                style={{ background: 'var(--sb-panel-2)', border: '1px solid var(--sb-border-soft)' }}
+              >
+                {[{ k: 'mine', l: 'My Tasks' }, { k: 'all_camps', l: 'All' }].map((s) => (
+                  <button
+                    key={s.k}
+                    type="button"
+                    onClick={() => setScope(s.k)}
+                    className="px-3 py-1.5 rounded-md text-[12px] font-medium transition-all"
+                    style={scope === s.k
+                      ? { background: 'var(--sb-accent)', color: 'var(--sb-accent-contrast)', boxShadow: '0 1px 2px rgba(0,0,0,0.15)' }
+                      : { color: 'var(--sb-muted)' }}
+                  >
+                    {s.l}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* filters row */}
+          <div className="mt-4 flex items-center gap-3">
+            {/* queue tabs */}
+            <div className="flex items-center gap-1">
+              {QUEUES.map((item) => {
+                const active = queue === item.key;
+                return (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => setQueue(item.key)}
+                    className="px-3 py-1.5 text-[12px] font-medium rounded-lg transition-all"
+                    style={active
+                      ? { background: 'var(--sb-panel-2)', color: 'var(--sb-text)', border: '1px solid var(--sb-border)' }
+                      : { color: 'var(--sb-muted)', border: '1px solid transparent' }}
+                  >
+                    {item.label}
+                    <span className="ml-1.5 opacity-50">{counts[item.key] ?? 0}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* search - pushed right */}
+            <div className="ml-auto relative w-[240px]">
+              <I n="search" s={13} c="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--sb-muted-soft)]" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search..."
+                className="h-8 w-full rounded-lg pl-8 pr-7 text-[12px] focus:outline-none"
+                style={{ background: 'var(--sb-panel-2)', border: '1px solid var(--sb-border-soft)', color: 'var(--sb-text)' }}
+              />
+              {search && (
+                <button type="button" onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--sb-muted)] hover:text-[var(--sb-text)]">
+                  <I n="x" s={10} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-3 mb-4 shrink-0 flex-wrap">
-        <div className="flex rounded-lg border p-1" style={{ background: 'var(--sb-panel)', borderColor: 'var(--sb-border)' }}>
-          {SCOPES.map((s) => (
-            <button
-              key={s.key}
-              onClick={() => {
-                setScope(s.key);
-                setTab(null);
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium rounded-md transition-colors"
-              style={scope === s.key
-                ? { background: 'var(--sb-panel-2)', color: 'var(--sb-text)', border: '1px solid var(--sb-border-soft)' }
-                : { color: 'var(--sb-muted)' }}
-            >
-              <I n={s.icon} s={11} />
-              {s.label}
-            </button>
-          ))}
+        {/* ── table ────────────────────────────────────── */}
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr style={{ borderTop: '1px solid var(--sb-border-soft)', borderBottom: '1px solid var(--sb-border-soft)', background: 'var(--sb-panel-2)' }}>
+                {[
+                  { key: 'name', label: 'Campaign' },
+                  { key: null, label: 'Status' },
+                  { key: 'priority', label: 'Priority' },
+                  { key: 'due', label: 'Due' },
+                  { key: null, label: '' },
+                ].map((col, i) => (
+                  <th
+                    key={col.label || i}
+                    className="px-5 py-2.5 text-left text-[11px] font-medium uppercase tracking-wider whitespace-nowrap"
+                    style={{ color: 'var(--sb-muted-soft)' }}
+                  >
+                    {col.key ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleSort(col.key)}
+                        className="inline-flex items-center hover:text-[var(--sb-text)] transition-colors"
+                        style={{ color: sortKey === col.key ? 'var(--sb-text)' : undefined }}
+                      >
+                        {col.label}
+                        <SortIcon col={col.key} />
+                      </button>
+                    ) : col.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((campaign, idx) => {
+                const stage = stageMeta(campaign.stage);
+                const dueDays = daysUntil(campaign.date);
+                const overdue = dueDays < 0;
+                const urgent = dueDays >= 0 && dueDays <= 3;
+
+                return (
+                  <tr
+                    key={campaign.id}
+                    onClick={() => onSelect(campaign)}
+                    className="group cursor-pointer transition-colors"
+                    style={{ borderBottom: idx < sorted.length - 1 ? '1px solid var(--sb-border-soft)' : undefined }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--sb-panel-2)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    {/* Campaign */}
+                    <td className="px-5 py-3.5">
+                      <p className="text-[13px] font-medium text-[var(--sb-text-strong)]">{campaign.name}</p>
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-5 py-3.5">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: stage.hex }} />
+                        <span className="text-[12px] font-medium text-[var(--sb-text)]">{stage.label}</span>
+                      </span>
+                    </td>
+
+                    {/* Priority */}
+                    <td className="px-5 py-3.5">
+                      <span
+                        className="text-[12px] font-medium"
+                        style={{
+                          color: campaign.pri === 'High' ? '#ef4444'
+                            : campaign.pri === 'Medium' ? '#f59e0b'
+                            : '#3b82f6',
+                        }}
+                      >
+                        {campaign.pri}
+                      </span>
+                    </td>
+
+                    {/* Due */}
+                    <td className="px-5 py-3.5 whitespace-nowrap">
+                      <span
+                        className="text-[12px] font-medium"
+                        style={{ color: overdue ? '#ef4444' : urgent ? '#f59e0b' : 'var(--sb-text)' }}
+                      >
+                        {formatDue(campaign.date)}
+                      </span>
+                    </td>
+
+                    {/* Action */}
+                    <td className="px-5 py-3.5 text-right">
+                      <span className="text-[12px] font-medium text-[var(--sb-accent)] opacity-0 group-hover:opacity-100 transition-opacity">
+                        View
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
-        <div className="w-px h-5 bg-[var(--sb-border)]" />
+        {/* ── empty state ──────────────────────────────── */}
+        {sorted.length === 0 && (
+          <div className="py-16 text-center">
+            <I n="search" s={20} c="mx-auto text-[var(--sb-muted-soft)]" />
+            <p className="mt-3 text-[13px] font-medium text-[var(--sb-text)]">No campaigns found</p>
+            <p className="mt-1 text-[12px] text-[var(--sb-muted-soft)]">Try adjusting your filters or search</p>
+          </div>
+        )}
 
-        <div className="flex gap-1 flex-wrap">
-          {TABS.filter((t) => (counts[t.key] || 0) > 0).map((t) => {
-            const isActive = tab === t.key;
-            return (
-              <button
-                key={t.key}
-                onClick={() => setTab(isActive ? null : t.key)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-lg transition-colors border"
-                style={isActive
-                  ? { background: 'var(--sb-panel)', color: 'var(--sb-text)', borderColor: 'var(--sb-border)', boxShadow: 'var(--sb-shadow-sm)' }
-                  : { color: 'var(--sb-muted)', borderColor: 'transparent' }}
-              >
-                <I n={t.icon} s={12} />
-                {t.label}
-                <span className="text-[11px]" style={{ color: isActive ? 'var(--sb-muted)' : 'var(--sb-muted-soft)' }}>
-                  {counts[t.key]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div
-        className="flex-1 min-h-0 rounded-xl border overflow-hidden flex flex-col"
-        style={{ background: 'var(--sb-bg-soft)', borderColor: 'var(--sb-border)', boxShadow: 'var(--sb-shadow-sm)' }}
-      >
+        {/* ── footer ───────────────────────────────────── */}
         <div
-        className={`grid gap-3 px-4 py-3 border-b shrink-0 ${scope === 'all_camps' ? 'grid-cols-[1fr_120px_110px_80px_80px_80px_70px]' : 'grid-cols-[1fr_120px_80px_80px_80px_70px]'}`}
-        style={{ background: 'var(--sb-panel-2)', borderColor: 'var(--sb-border-soft)' }}
-      >
-          {colHeader('Campaign', null)}
-          {colHeader('Stage', null)}
-          {scope === 'all_camps' && colHeader('Lead', null)}
-          {colHeader('Priority', 'priority')}
-          {colHeader('Date', 'date')}
-          {colHeader('ROI', 'roi')}
-          <div className="flex justify-end">{colHeader('Days', 'days')}</div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto scrollbar-thin">
-          {sorted.map((c) => {
-            const stg = STAGES.find((s) => s.key === c.stage);
-            const pri = PRI[c.pri] || PRI.Medium;
-            const pd = parseDate(c.date);
-            const cat = categorize(c);
-            const catTab = TABS.find((t) => t.key === cat);
-            return (
-              <div
-                key={c.id}
-                onClick={() => onSelect(c)}
-                className={`grid gap-3 px-4 py-3.5 border-b cursor-pointer transition-colors items-center hover:bg-[var(--sb-panel-2)] ${scope === 'all_camps' ? 'grid-cols-[1fr_120px_110px_80px_80px_80px_70px]' : 'grid-cols-[1fr_120px_80px_80px_80px_70px]'}`}
-                style={{ borderColor: 'var(--sb-border-soft)' }}
-              >
-                <div className="min-w-0 flex items-center gap-2.5">
-                  {!tab && (
-                    <span
-                      className="w-1 h-5 rounded-full shrink-0"
-                      style={{ backgroundColor: catTab?.color || 'var(--sb-muted-soft)' }}
-                      title={catTab?.label}
-                    />
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-medium text-[var(--sb-text)] truncate">{c.name}</p>
-                    <p className="text-[11px] text-[var(--sb-muted)] mt-0.5">{c.bu}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: stg.hex }} />
-                  <span className="text-[11px] text-[var(--sb-muted)] truncate">{stg.label}</span>
-                </div>
-                {scope === 'all_camps' && <span className="text-[11px] text-[var(--sb-muted)] truncate">{c.rep}</span>}
-                <span
-                  className="text-[11px] font-medium px-1.5 py-0.5 rounded border w-fit"
-                  style={{ backgroundColor: pri.bg, borderColor: pri.border, color: pri.text }}
-                >
-                  {c.pri}
-                </span>
-                <span className="text-[11px] text-[var(--sb-muted)]">{MO[pd.m]} {pd.d}</span>
-                <span className="text-[11px] font-semibold text-[var(--sb-success-soft-text)]">{c.roi}</span>
-                <span className="text-[11px] text-[var(--sb-muted)] flex items-center gap-1 justify-end">
-                  <I n="clock" s={10} />
-                  {c.days}d
-                </span>
-              </div>
-            );
-          })}
-          {sorted.length === 0 && (
-            <div className="py-16 text-center">
-              <I n="search" s={20} c="text-[var(--sb-muted-soft)] mx-auto mb-2" />
-              <p className="text-[13px] text-[var(--sb-muted)]">No campaigns match the current filters</p>
-            </div>
-          )}
+          className="px-6 py-3 flex items-center justify-between"
+          style={{ borderTop: '1px solid var(--sb-border-soft)' }}
+        >
+          <p className="text-[11px] text-[var(--sb-muted-soft)]">
+            Showing <span className="font-semibold text-[var(--sb-text)]">{sorted.length}</span> of{' '}
+            <span className="font-semibold text-[var(--sb-text)]">{scoped.length}</span> campaigns
+          </p>
+          <div className="flex items-center gap-2">
+            <select
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value)}
+              className="h-7 rounded-md px-2 text-[11px] focus:outline-none"
+              style={{ background: 'var(--sb-panel-2)', border: '1px solid var(--sb-border-soft)', color: 'var(--sb-muted)' }}
+            >
+              {SORTS.map((s) => <option key={s.key} value={s.key}>Sort: {s.label}</option>)}
+            </select>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default MyTasks;
+export default MyTasksPage;
